@@ -36,5 +36,6 @@ include(
     "gradle-plugin",
     "test-enforce",
     "tests",
-    "common-test"
+    "common-test",
+    "gradle-functional-test",
 )

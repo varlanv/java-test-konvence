@@ -53,36 +53,36 @@ public class TestNameConventionAnnotationProcessor extends AbstractProcessor {
     }
 
     private final Map<String, BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>>> strategy = Map.of(
-        "org.junit.jupiter.api.DisplayName", (roundEnv, annotation) -> {
-            var elements = roundEnv.getElementsAnnotatedWith(annotation);
-            var output = new ArrayList<EnforcementMeta.Item>();
-            for (var element : elements) {
-                var displayNameValue = element.getAnnotation(DisplayName.class).value();
-                var kind = element.getKind();
-                if (kind == ElementKind.METHOD) {
-                    var methodElement = (ExecutableElement) element;
-                    var methodName = methodElement.getSimpleName().toString();
-                    output.add(
-                        new EnforcementMeta.Item(
-                            findTopLevelClassName(element),
-                            displayNameValue,
-                            element.getEnclosingElement().getSimpleName().toString(),
-                            methodName
-                        )
-                    );
-                } else {
-                    output.add(
-                        new EnforcementMeta.Item(
-                            findTopLevelClassName(element),
-                            displayNameValue,
-                            ((TypeElement) element).getQualifiedName().toString(),
-                            ""
-                        )
-                    );
+            "org.junit.jupiter.api.DisplayName", (roundEnv, annotation) -> {
+                var elements = roundEnv.getElementsAnnotatedWith(annotation);
+                var output = new ArrayList<EnforcementMeta.Item>();
+                for (var element : elements) {
+                    var displayNameValue = element.getAnnotation(DisplayName.class).value();
+                    var kind = element.getKind();
+                    if (kind == ElementKind.METHOD) {
+                        var methodElement = (ExecutableElement) element;
+                        var methodName = methodElement.getSimpleName().toString();
+                        output.add(
+                                new EnforcementMeta.Item(
+                                        findTopLevelClassName(element),
+                                        displayNameValue,
+                                        element.getEnclosingElement().getSimpleName().toString(),
+                                        methodName
+                                )
+                        );
+                    } else {
+                        output.add(
+                                new EnforcementMeta.Item(
+                                        findTopLevelClassName(element),
+                                        displayNameValue,
+                                        ((TypeElement) element).getQualifiedName().toString(),
+                                        ""
+                                )
+                        );
+                    }
                 }
+                return output;
             }
-            return output;
-        }
     );
 
     private String findTopLevelClassName(Element start) {
@@ -102,42 +102,37 @@ public class TestNameConventionAnnotationProcessor extends AbstractProcessor {
     @Override
     @SneakyThrows
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        try {
-            var output = new ArrayList<EnforcementMeta.Item>();
-            for (var annotation : annotations) {
-                output.addAll(
+        var output = new ArrayList<EnforcementMeta.Item>();
+        for (var annotation : annotations) {
+            output.addAll(
                     Optional.ofNullable(strategy.get(annotation.getQualifiedName().toString()))
-                        .map(action -> action.apply(roundEnv, annotation))
-                        .orElse(List.of())
-                );
+                            .map(action -> action.apply(roundEnv, annotation))
+                            .orElse(List.of())
+            );
+        }
+        var filer = processingEnv.getFiler();
+        var path = "com/varlanv/testnameconvention/enforcements.xml";
+        var existingResource = Paths.get(filer.getResource(StandardLocation.SOURCE_OUTPUT, "", path).toUri());
+        if (Files.exists(existingResource)) {
+            try (var is = Files.newInputStream(existingResource)) {
+                var existingMeta = new XmlEnforceMeta().items(is);
+                output.addAll(existingMeta);
             }
-            var filer = processingEnv.getFiler();
-            var path = "com/varlanv/testnameconvention/enforcements.xml";
-            var existingResource = Paths.get(filer.getResource(StandardLocation.SOURCE_OUTPUT, "", path).toUri());
-            if (Files.exists(existingResource)) {
-                try (var is = Files.newInputStream(existingResource)) {
-                    var existingMeta = new XmlEnforceMeta().items(is);
-                    output.addAll(existingMeta);
-                }
-                var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(output);
-                var stringWriter = new StringWriter();
-                xmlMemoryEnforceMeta.writeTo(stringWriter);
-                var stringXml = stringWriter.toString();
-                try (var writer = Files.newBufferedWriter(existingResource)) {
-                    writer.write(stringXml);
-                    writer.flush();
-                }
-            } else {
-                Files.createDirectories(existingResource.getParent());
-                Files.createFile(existingResource);
+            var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(output);
+            var stringWriter = new StringWriter();
+            xmlMemoryEnforceMeta.writeTo(stringWriter);
+            var stringXml = stringWriter.toString();
+            try (var writer = Files.newBufferedWriter(existingResource)) {
+                writer.write(stringXml);
+                writer.flush();
+            }
+        } else {
+            Files.createDirectories(existingResource.getParent());
+            Files.createFile(existingResource);
             var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(output);
             try (var writer = Files.newBufferedWriter(existingResource)) {
                 xmlMemoryEnforceMeta.writeTo(writer);
             }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
         }
         return true;
     }
@@ -145,8 +140,8 @@ public class TestNameConventionAnnotationProcessor extends AbstractProcessor {
     @Override
     public Set<String> getSupportedAnnotationTypes() {
         return Set.of(
-            "org.junit.jupiter.api.DisplayName",
-            "org.junit.jupiter.api.Test"
+                "org.junit.jupiter.api.DisplayName",
+                "org.junit.jupiter.api.Test"
         );
     }
 
