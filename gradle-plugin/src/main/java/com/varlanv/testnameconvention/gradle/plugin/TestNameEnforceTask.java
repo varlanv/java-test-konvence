@@ -7,8 +7,12 @@ import org.gradle.api.tasks.TaskAction;
 
 public abstract class TestNameEnforceTask extends DefaultTask {
 
+    public static String name() {
+        return "enforceTestNaming";
+    }
+
     @InputFile
-    public abstract RegularFileProperty getInputFiles();
+    public abstract RegularFileProperty getInputFile();
 
     @TaskAction
     public void enforce() {

@@ -28,16 +28,16 @@ public final class DataTables {
     public static DataTables getDefault() {
         if (Objects.equals(System.getenv("CI"), "true")) {
             return new DataTables(
-                List.of(true),
-                List.of(true),
-                List.of(true),
+                List.of(false),
+                List.of(false),
+                List.of(false),
                 List.of(TestGradleVersions.current()
                 ));
         } else {
             return new DataTables(
-                List.of(true),
-                List.of(true),
-                List.of(true),
+                List.of(false),
+                List.of(false),
+                List.of(false),
                 TestGradleVersions.list());
         }
     }
