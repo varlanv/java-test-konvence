@@ -31,7 +31,10 @@ import org.restlens.gradle.plugin.InternalConventionExtension;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -181,10 +184,7 @@ public class ApplyInternalPluginLogic {
                                                     }
                                                 );
                                                 test.setFailFast(internalEnvironment.isCi());
-                                                var environment = new HashMap<>(test.getEnvironment());
-                                                environment.put("TESTCONTAINERS_REUSE_ENABLE", "true");
-                                                test.setEnvironment(environment);
-                                                var memory = test.getName().equals(JavaPlugin.TEST_TASK_NAME) ? "128m" : "512m";
+                                                var memory = "512m";
                                                 test.setJvmArgs(
                                                     Stream.of(
                                                             test.getJvmArgs(),

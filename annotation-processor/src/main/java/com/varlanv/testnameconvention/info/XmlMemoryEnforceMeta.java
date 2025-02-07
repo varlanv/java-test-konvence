@@ -12,15 +12,20 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.List;
 
 @Value
 public class XmlMemoryEnforceMeta {
 
-    List<EnforcementMeta.Item> entries;
+    Collection<EnforcementMeta.Item> entries;
 
     public void writeTo(Writer writer) {
         write(writer, false);
+    }
+
+    public void indentWriteTo(Writer writer) {
+        write(writer, true);
     }
 
     @SneakyThrows

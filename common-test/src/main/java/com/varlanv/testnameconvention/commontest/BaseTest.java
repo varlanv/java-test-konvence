@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public interface BaseTest {
 
-    String DOCKER_TEST_TAG = "docker-test";
     String SLOW_TEST_TAG = "slow-test";
     String FAST_TEST_TAG = "fast-test";
     String UNIT_TEST_TAG = "unit-test";
