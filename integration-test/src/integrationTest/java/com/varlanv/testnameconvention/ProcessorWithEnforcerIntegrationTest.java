@@ -1,29 +1,36 @@
 package com.varlanv.testnameconvention;
 
-import com.varlanv.testnameconvention.commontest.UnitTest;
+import com.varlanv.testnameconvention.commontest.IntegrationTest;
+import com.varlanv.testnameconvention.info.XmlEnforceMeta;
+import com.varlanv.testnameconvention.proc.TestNameConventionAP;
+import io.toolisticon.cute.Cute;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
-import java.util.List;
+import javax.tools.StandardLocation;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SourceReplacementTrainTest implements UnitTest {
+public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
 
     @Nested
-    class OneClassOneMethod {
+    class OneClassOneMethod implements IntegrationTest {
 
         @Test
         void should_replace_method_name_if_found() {
             spec(
+                "testcases.SomeTest",
                 """
-                    package somePackage;
+                    package testcases;
                     
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
@@ -36,10 +43,8 @@ class SourceReplacementTrainTest implements UnitTest {
                         }
                     }
                     """,
-                "SomeTest",
-                new MethodNameFromDisplayName("Some display name", "someTest"),
                 """
-                    package somePackage;
+                    package testcases;
                     
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
@@ -58,8 +63,9 @@ class SourceReplacementTrainTest implements UnitTest {
         @Test
         void should_replace_class_name_if_found() {
             spec(
+                "testcases.SomeTest",
                 """
-                    package somePackage;
+                    package testcases;
                     
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
@@ -68,15 +74,12 @@ class SourceReplacementTrainTest implements UnitTest {
                     class SomeTest {
                     
                         @Test
-                        @DisplayName("Some display name")
                         void someTest() {
                         }
                     }
                     """,
-                "SomeTest",
-                new ClassNameFromDisplayName("Some class display name", "SomeTest"),
                 """
-                    package somePackage;
+                    package testcases;
                     
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
@@ -85,7 +88,6 @@ class SourceReplacementTrainTest implements UnitTest {
                     class SomeClassDisplayNameTest {
                     
                         @Test
-                        @DisplayName("Some display name")
                         void someTest() {
                         }
                     }
@@ -97,7 +99,7 @@ class SourceReplacementTrainTest implements UnitTest {
         void should_not_change_sources_if_match_not_found() {
             @Language("Java")
             var sources = """
-                package somePackage;
+                package testcases;
                 
                 import org.junit.jupiter.api.DisplayName;
                 import org.junit.jupiter.api.Test;
@@ -106,14 +108,13 @@ class SourceReplacementTrainTest implements UnitTest {
                 
                     @Test
                     @DisplayName("Some display name")
-                    void someTestNameThanShouldNotMatch() {
+                    void some_display_name() {
                     }
                 }
                 """;
             spec(
+                "testcases.SomeTest",
                 sources,
-                "SomeTest",
-                new MethodNameFromDisplayName("Some display name", "someTest"),
                 sources
             );
         }
@@ -129,17 +130,16 @@ class SourceReplacementTrainTest implements UnitTest {
                     Map.entry("a_b_c", "a_b_c"),
                     Map.entry("-a_b_c-", "a_b_c"),
                     Map.entry("a_b_c-", "a_b_c"),
-                    Map.entry("-a_b_c", "a_b_c"),
-                    Map.entry("Some good\n multiline   test\n name, which also has multiple whitespaces and_underscores   ", "some_good_multiline_test_name_which_also_has_multiple_whitespaces_and_underscores")
+                    Map.entry("-a_b_c", "a_b_c")
                 )
                 .map(entry -> DynamicTest.dynamicTest(
-                        "Test method name \"someTest\" should be converted to method name \"%s\"".formatted(entry.getValue()),
+                        "Test method name \"someTest\" should be converted to method name \"%s\" when display name is \"%s\"".formatted(entry.getValue(), entry.getKey()),
                         () -> {
                             var displayName = entry.getKey();
                             var expectedMethodName = entry.getValue();
                             @Language("Java")
                             var sources = """
-                                package somePackage;
+                                package testcases;
                                 
                                 import org.junit.jupiter.api.DisplayName;
                                 import org.junit.jupiter.api.Test;
@@ -153,11 +153,10 @@ class SourceReplacementTrainTest implements UnitTest {
                                 }
                                 """;
                             spec(
+                                "testcases.SomeTest",
                                 sources.formatted(displayName),
-                                "SomeTest",
-                                new MethodNameFromDisplayName(displayName, "someTest"),
                                 """
-                                    package somePackage;
+                                    package testcases;
                                     
                                     import org.junit.jupiter.api.DisplayName;
                                     import org.junit.jupiter.api.Test;
@@ -178,13 +177,14 @@ class SourceReplacementTrainTest implements UnitTest {
     }
 
     @Nested
-    class OneNestedClassOneOuterOneNestedMethod {
+    class OneNestedClassOneOuterOneNestedMethod implements IntegrationTest {
 
         @Test
         void should_replace_method_name_only_for_class_where_method_defined() {
             spec(
+                "testcases.SomeOuterTest",
                 """
-                    package somePackage;
+                    package testcases;
                     
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Nested;
@@ -193,7 +193,7 @@ class SourceReplacementTrainTest implements UnitTest {
                     class SomeOuterTest {
                     
                         @Test
-                        @DisplayName("Some display name")
+                        @DisplayName("Some display name1")
                         void someTest() {
                         }
                     
@@ -201,16 +201,14 @@ class SourceReplacementTrainTest implements UnitTest {
                         class SomeNestedTest {
                     
                             @Test
-                            @DisplayName("Some display name")
+                            @DisplayName("Some display name2")
                             void someTest() {
                             }
                         }
                     }
                     """,
-                "SomeNestedTest",
-                new MethodNameFromDisplayName("Some display name", "someTest"),
                 """
-                    package somePackage;
+                    package testcases;
                     
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Nested;
@@ -219,55 +217,29 @@ class SourceReplacementTrainTest implements UnitTest {
                     class SomeOuterTest {
                     
                         @Test
-                        @DisplayName("Some display name")
-                        void someTest() {
+                        @DisplayName("Some display name1")
+                        void some_display_name1() {
                         }
                     
                         @Nested
                         class SomeNestedTest {
                     
                             @Test
-                            @DisplayName("Some display name")
-                            void some_display_name() {
+                            @DisplayName("Some display name2")
+                            void some_display_name2() {
                             }
                         }
                     }
-                    """);
+                    """
+            );
         }
 
         @Test
         void should_replace_both_method_names_if_requested() {
             spec(
+                "testcases.SomeOuterTest",
                 """
-                    package somePackage;
-                    
-                    import org.junit.jupiter.api.DisplayName;
-                    import org.junit.jupiter.api.Nested;
-                    import org.junit.jupiter.api.Test;
-                    
-                    class SomeOuterTest {
-                    
-                        @Test
-                        @DisplayName("Some display name")
-                        void someTest() {
-                        }
-                    
-                        @Nested
-                        class SomeNestedTest {
-                    
-                            @Test
-                            @DisplayName("Some display name")
-                            void someTest() {
-                            }
-                        }
-                    }
-                    """,
-                List.of(
-                    Map.entry("SomeNestedTest", new MethodNameFromDisplayName("Some display name", "someTest")),
-                    Map.entry("SomeOuterTest", new MethodNameFromDisplayName("Some display name", "someTest"))
-                ),
-                """
-                    package somePackage;
+                    package testcases;
                     
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Nested;
@@ -289,23 +261,58 @@ class SourceReplacementTrainTest implements UnitTest {
                             }
                         }
                     }
-                    """);
+                    """,
+                """
+                    package testcases;
+                    
+                    import org.junit.jupiter.api.DisplayName;
+                    import org.junit.jupiter.api.Nested;
+                    import org.junit.jupiter.api.Test;
+                    
+                    class SomeOuterTest {
+                    
+                        @Test
+                        @DisplayName("Some display name")
+                        void some_display_name() {
+                        }
+                    
+                        @Nested
+                        class SomeNestedTest {
+                    
+                            @Test
+                            @DisplayName("Some display name")
+                            void some_display_name() {
+                            }
+                        }
+                    }
+                    """
+            );
         }
     }
 
-    void spec(@Language("Java") String sourceContent,
-              List<Map.Entry<String, EnforceCandidate>> immediateClassNameWithEnforceCandidate,
+    void spec(String outerClassName,
+              @Language("Java") String sourceContent,
               @Language("Java") String expected) {
+        var resultXml = runAnnotationProcessor(outerClassName, sourceContent);
+        var items = new XmlEnforceMeta().items(new ByteArrayInputStream(resultXml.getBytes(StandardCharsets.UTF_8)));
         var memorySourceFile = new MemorySourceFile("somePath", sourceContent);
         var subject = new SourceReplacementTrain(
             new EnforcementMeta(
-                immediateClassNameWithEnforceCandidate.stream()
-                    .map(entry ->
-                        new EnforcementMeta.Item(
-                            memorySourceFile,
-                            entry.getKey(),
-                            entry.getValue()
-                        )
+                items.stream().map(item -> {
+                            EnforceCandidate candidate;
+                            var classNameParts = item.className().split("\\.");
+                            var className = classNameParts[classNameParts.length - 1];
+                            if (item.methodName().isEmpty()) {
+                                candidate = new ClassNameFromDisplayName(item.displayName(), className);
+                            } else {
+                                candidate = new MethodNameFromDisplayName(item.displayName(), item.methodName());
+                            }
+                            return new EnforcementMeta.Item(
+                                memorySourceFile,
+                                className,
+                                candidate
+                            );
+                        }
                     )
                     .toList()
             )
@@ -318,10 +325,31 @@ class SourceReplacementTrainTest implements UnitTest {
 
     }
 
-    void spec(@Language("Java") String sourceContent,
-              String immediateClassName,
-              EnforceCandidate enforceCandidate,
-              @Language("Java") String expected) {
-        spec(sourceContent, List.of(Map.entry(immediateClassName, enforceCandidate)), expected);
+    String runAnnotationProcessor(String className, @Language("Java") String sources) {
+        return runAnnotationProcessor(Map.of(className, sources));
+    }
+
+    String runAnnotationProcessor(Map<String, String> sources) {
+        var iterator = sources.entrySet().iterator();
+        var first = iterator.next();
+        var cute = Cute
+            .blackBoxTest()
+            .given()
+            .processor(TestNameConventionAP.class)
+            .andSourceFile(first.getKey(), first.getValue());
+        while (iterator.hasNext()) {
+            var next = iterator.next();
+            cute = cute.andSourceFile(next.getKey(), next.getValue());
+        }
+        var resultXml = new AtomicReference<String>();
+        cute.andUseCompilerOptions("-A" + TestNameConventionAP.indentXmlOption + "=false").whenCompiled()
+            .thenExpectThat().compilationSucceeds()
+            .andThat().fileObject(StandardLocation.SOURCE_OUTPUT, TestNameConventionAP.enforcementsXmlPackage, TestNameConventionAP.enforcementsXmlName).exists()
+            .executeTest()
+            .executeCustomAssertions(outcome -> {
+                resultXml.set(outcome.getFileManager().getFileObjects().get(0).getContent());
+            });
+        assertThat(resultXml.get()).isNotBlank();
+        return resultXml.get();
     }
 }

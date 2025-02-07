@@ -38,4 +38,5 @@ include(
     "tests",
     "common-test",
     "gradle-functional-test",
+    "integration-test",
 )

@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 
 public class TestNameConventionAP extends AbstractProcessor {
 
-    static final String enforcementsXmlPackage = "com.varlanv.testnameconvention";
-    static final String enforcementsXmlName = "enforcements.xml";
-    static final String indentXmlOption = "com.varlanv.testnameconvention.indentXml";
+    public static final String enforcementsXmlPackage = "com.varlanv.testnameconvention";
+    public static final String enforcementsXmlName = "enforcements.xml";
+    public static final String indentXmlOption = "com.varlanv.testnameconvention.indentXml";
 
     private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> testAnnotationFn = (roundEnv, annotation) -> {
         var elements = roundEnv.getElementsAnnotatedWith(annotation);
@@ -170,11 +170,11 @@ public class TestNameConventionAP extends AbstractProcessor {
                     writer.write("");
                     writer.flush();
                 } else {
-                    if (processingEnv.getOptions().containsKey(indentXmlOption)) {
-                        xmlMemoryEnforceMeta.indentWriteTo(writer);
-                    } else {
-                        xmlMemoryEnforceMeta.writeTo(writer);
-                    }
+                    Optional.ofNullable(processingEnv.getOptions().get(indentXmlOption))
+                        .filter("true"::equals)
+                        .ifPresentOrElse(
+                            ignore -> xmlMemoryEnforceMeta.indentWriteTo(writer),
+                            () -> xmlMemoryEnforceMeta.writeTo(writer));
                 }
             }
         } else {

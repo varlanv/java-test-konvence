@@ -16,6 +16,7 @@ public class XmlEnforceMeta {
     public List<EnforcementMeta.Item> items(InputStream inputStream) {
         var bas = new ByteArrayInputStream(inputStream.readAllBytes());
         var bytes = bas.readAllBytes();
+
         if (bytes.length == 0) {
             return List.of();
         }
