@@ -186,6 +186,63 @@ class TestNameConventionAPTest implements UnitTest {
         }
     }
 
+    @Nested
+    class SingleClassFileWithThreeTestMethods implements UnitTest {
+
+        @Test
+        void when_display_name_annotation_first_then_should_generate_output() {
+            expectTransformation(
+                "testcases.SomeTest",
+                """
+                    package testcases;
+                    
+                    import org.junit.jupiter.api.Test;
+                    import org.junit.jupiter.api.DisplayName;
+                    
+                    public class SomeTest {
+                    
+                        @Test
+                        @DisplayName("Some cool test name1")
+                        void test1() {
+                        }
+                    
+                        @Test
+                        @DisplayName("Some cool test name2")
+                        void test2() {
+                        }
+                    
+                        @Test
+                        @DisplayName("Some cool test name3")
+                        void test3() {
+                        }
+                    }
+                    """,
+                """
+                    <root>
+                          <entry>
+                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
+                              <displayName>Some cool test name1</displayName>
+                              <className>SomeTest</className>
+                              <methodName>test1</methodName>
+                          </entry>
+                          <entry>
+                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
+                              <displayName>Some cool test name2</displayName>
+                              <className>SomeTest</className>
+                              <methodName>test2</methodName>
+                          </entry>
+                          <entry>
+                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
+                              <displayName>Some cool test name3</displayName>
+                              <className>SomeTest</className>
+                              <methodName>test3</methodName>
+                          </entry>
+                      </root>
+                    """
+            );
+        }
+    }
+
     void expectTransformation(String className, @Language("Java") String sources, @Language("XML") String expectedOutput) {
         expectTransformation(Map.of(className, sources), expectedOutput);
     }
