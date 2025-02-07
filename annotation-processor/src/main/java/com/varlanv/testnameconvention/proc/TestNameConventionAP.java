@@ -15,40 +15,16 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestNameConventionAP extends AbstractProcessor {
 
-    private String toMethodNameFromDisplayName(String displayName) {
-        // 1. Replace non-alphanumeric characters with underscores
-        var methodName = displayName.replaceAll("[^a-zA-Z0-9]+", "_");
+    static final String enforcementsXmlPackage = "com.varlanv.testnameconvention";
+    static final String enforcementsXmlName = "enforcements.xml";
+    static final String indentXmlOption = "com.varlanv.testnameconvention.indentXml";
 
-        // 2. Remove leading and trailing underscores
-        methodName = methodName.replaceAll("^_|_$", "");
-
-        // 3. Convert to lowercase
-        methodName = methodName.toLowerCase();
-
-        // 4. Replace multiple consecutive underscores with a single underscore
-        methodName = methodName.replaceAll("__+", "_");
-
-
-        // 5. Handle empty string cases (if the input string contains only special characters)
-        if (methodName.isEmpty()) {
-            methodName = "default_method_name"; // Or throw an exception, or return null, as you see fit.
-        }
-
-        //6. Remove numbers from the start of the string if any
-        methodName = methodName.replaceAll("^\\d+", "");
-
-        //7. Replace again multiple consecutive underscores with a single underscore after number removal
-        methodName = methodName.replaceAll("__+", "_");
-
-        //8. Remove leading and trailing underscores once more in case numbers were at the start
-        methodName = methodName.replaceAll("^_|_$", "");
-        return methodName;
-    }
-
-    BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> testFn = (roundEnv, annotation) -> {
+    private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> testAnnotationFn = (roundEnv, annotation) -> {
         var elements = roundEnv.getElementsAnnotatedWith(annotation);
         var output = new ArrayList<EnforcementMeta.Item>();
         for (var element : elements) {
@@ -104,52 +80,60 @@ public class TestNameConventionAP extends AbstractProcessor {
         return output;
     };
 
-    Set<String> supportedAnnotations = Set.of(
+    private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> displayNameAnnotationFn = (roundEnv, annotation) -> {
+        var elements = roundEnv.getElementsAnnotatedWith(annotation);
+        var output = new ArrayList<EnforcementMeta.Item>();
+        for (var element : elements) {
+            var displayNameValue = element.getAnnotation(DisplayName.class).value();
+            var kind = element.getKind();
+            if (kind == ElementKind.METHOD) {
+                var methodElement = (ExecutableElement) element;
+                var methodName = methodElement.getSimpleName().toString();
+                output.add(
+                    new EnforcementMeta.Item(
+                        findTopLevelClassName(element),
+                        displayNameValue,
+                        element.getEnclosingElement().getSimpleName().toString(),
+                        methodName
+                    )
+                );
+            } else {
+                output.add(
+                    new EnforcementMeta.Item(
+                        findTopLevelClassName(element),
+                        displayNameValue,
+                        ((TypeElement) element).getQualifiedName().toString(),
+                        ""
+                    )
+                );
+            }
+        }
+        return output;
+    };
+
+    private static final Set<String> supportedTestAnnotations = Set.of(
         "org.junit.jupiter.api.Test",
         "org.junit.jupiter.params.ParameterizedTest",
         "org.junit.jupiter.api.TestFactory",
-        "org.junit.jupiter.api.RepeatedTest",
-        "org.junit.jupiter.api.DisplayName"
+        "org.junit.jupiter.api.RepeatedTest"
     );
 
-    Map<String, BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>>> strategy = Map.of(
-        "org.junit.jupiter.api.Test", testFn,
-        "org.junit.jupiter.params.ParameterizedTest", testFn,
-        "org.junit.jupiter.api.TestFactory", testFn,
-        "org.junit.jupiter.api.RepeatedTest", testFn,
-        "org.junit.jupiter.api.DisplayName", (roundEnv, annotation) -> {
-            var elements = roundEnv.getElementsAnnotatedWith(annotation);
-            var output = new ArrayList<EnforcementMeta.Item>();
-            for (var element : elements) {
-                var displayNameValue = element.getAnnotation(DisplayName.class).value();
-                var kind = element.getKind();
-                if (kind == ElementKind.METHOD) {
-                    var methodElement = (ExecutableElement) element;
-                    var methodName = methodElement.getSimpleName().toString();
-                    output.add(
-                        new EnforcementMeta.Item(
-                            findTopLevelClassName(element),
-                            displayNameValue,
-                            element.getEnclosingElement().getSimpleName().toString(),
-                            methodName
-                        )
-                    );
-                } else {
-                    output.add(
-                        new EnforcementMeta.Item(
-                            findTopLevelClassName(element),
-                            displayNameValue,
-                            ((TypeElement) element).getQualifiedName().toString(),
-                            ""
-                        )
-                    );
-                }
-            }
-            return output;
-        }
-    );
+    private static final Set<String> supportedAnnotations = Stream.of(
+            supportedTestAnnotations,
+            Set.of(
+                "org.junit.jupiter.api.DisplayName"
+            )
+        )
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
 
-    private String findTopLevelClassName(Element start) {
+    private static final Map<String, BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>>> strategy = Stream.concat(
+            supportedTestAnnotations.stream().map(it -> Map.entry(it, testAnnotationFn)),
+            Stream.of(Map.entry("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn))
+        )
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    private static String findTopLevelClassName(Element start) {
         String topLevelClassName;
         var enclosingElement = start;
         while (true) {
@@ -163,9 +147,6 @@ public class TestNameConventionAP extends AbstractProcessor {
         return topLevelClassName;
     }
 
-    static String enforcementsXmlPackage = "com.varlanv.testnameconvention";
-    static String enforcementsXmlName = "enforcements.xml";
-    static String indentXmlOption = "com.varlanv.testnameconvention.indentXml";
     Set<EnforcementMeta.Item> output = new LinkedHashSet<>();
 
     @Override
@@ -175,7 +156,12 @@ public class TestNameConventionAP extends AbstractProcessor {
             var filer = processingEnv.getFiler();
             var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(
                 output.stream()
-                    .sorted(Comparator.comparing(EnforcementMeta.Item::fullEnclosingClassName))
+                    .sorted(
+                        Comparator.comparing(EnforcementMeta.Item::fullEnclosingClassName)
+                            .thenComparing(EnforcementMeta.Item::className)
+                            .thenComparing(EnforcementMeta.Item::displayName)
+                            .thenComparing(EnforcementMeta.Item::methodName)
+                    )
                     .toList()
             );
             var resource = filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);

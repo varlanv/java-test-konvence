@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TestNameConventionAPTest implements UnitTest {
 
@@ -21,6 +22,26 @@ class TestNameConventionAPTest implements UnitTest {
         .blackBoxTest()
         .given()
         .processor(TestNameConventionAP.class);
+
+    @Nested
+    class EmptyOutputFile implements UnitTest {
+
+        @Test
+        void when_doesnt_find_annotation__then_write_empty_file() {
+            expectEmptyTransformation(
+                "testcases.SomeTest",
+                """
+                    package testcases;
+                    
+                    public class SomeTest {
+                    
+                        void test() {
+                        }
+                    }
+                    """
+            );
+        }
+    }
 
     @Nested
     class SingleClassFileWithSingleTestMethod implements UnitTest {
@@ -139,15 +160,15 @@ class TestNameConventionAPTest implements UnitTest {
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test class</displayName>
-                              <className>testcases.SomeTest</className>
-                              <methodName/>
-                          </entry>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
                               <displayName/>
                               <className>SomeTest</className>
                               <methodName>test</methodName>
+                          </entry>
+                          <entry>
+                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
+                              <displayName>Some cool test class</displayName>
+                              <className>testcases.SomeTest</className>
+                              <methodName/>
                           </entry>
                     </root>
                     """
@@ -190,7 +211,7 @@ class TestNameConventionAPTest implements UnitTest {
     class SingleClassFileWithThreeTestMethods implements UnitTest {
 
         @Test
-        void when_display_name_annotation_first_then_should_generate_output() {
+        void should_generate_correct_output_for_three_test_with_display_name() {
             expectTransformation(
                 "testcases.SomeTest",
                 """
@@ -202,17 +223,17 @@ class TestNameConventionAPTest implements UnitTest {
                     public class SomeTest {
                     
                         @Test
-                        @DisplayName("Some cool test name1")
+                        @DisplayName("Some cool test name 1")
                         void test1() {
                         }
                     
                         @Test
-                        @DisplayName("Some cool test name2")
+                        @DisplayName("Some cool test name 2")
                         void test2() {
                         }
                     
                         @Test
-                        @DisplayName("Some cool test name3")
+                        @DisplayName("Some cool test name 3")
                         void test3() {
                         }
                     }
@@ -221,19 +242,19 @@ class TestNameConventionAPTest implements UnitTest {
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name1</displayName>
+                              <displayName>Some cool test name 1</displayName>
                               <className>SomeTest</className>
                               <methodName>test1</methodName>
                           </entry>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name2</displayName>
+                              <displayName>Some cool test name 2</displayName>
                               <className>SomeTest</className>
                               <methodName>test2</methodName>
                           </entry>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name3</displayName>
+                              <displayName>Some cool test name 3</displayName>
                               <className>SomeTest</className>
                               <methodName>test3</methodName>
                           </entry>
@@ -241,6 +262,63 @@ class TestNameConventionAPTest implements UnitTest {
                     """
             );
         }
+
+        @Test
+        void should_generate_correct_output_for_one_test_with_display_name_and_two_without() {
+            expectTransformation(
+                "testcases.SomeTest",
+                """
+                    package testcases;
+                    
+                    import org.junit.jupiter.api.Test;
+                    import org.junit.jupiter.api.DisplayName;
+                    
+                    public class SomeTest {
+                    
+                        @Test
+                        void test1() {
+                        }
+                    
+                        @Test
+                        @DisplayName("Some cool test name 2")
+                        void test2() {
+                        }
+                    
+                        @Test
+                        void test3() {
+                        }
+                    }
+                    """,
+                """
+                    <root>
+                          <entry>
+                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
+                              <displayName/>
+                              <className>SomeTest</className>
+                              <methodName>test1</methodName>
+                          </entry>
+                          <entry>
+                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
+                              <displayName/>
+                              <className>SomeTest</className>
+                              <methodName>test3</methodName>
+                          </entry>
+                          <entry>
+                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
+                              <displayName>Some cool test name 2</displayName>
+                              <className>SomeTest</className>
+                              <methodName>test2</methodName>
+                          </entry>
+                      </root>
+                    """
+            );
+        }
+    }
+
+    void expectEmptyTransformation(String className, @Language("Java") String sources) {
+        assertThatThrownBy(
+            () -> expectTransformation(className, sources, null)
+        ).hasMessageContaining("hasn't been called");
     }
 
     void expectTransformation(String className, @Language("Java") String sources, @Language("XML") String expectedOutput) {
@@ -265,8 +343,12 @@ class TestNameConventionAPTest implements UnitTest {
         return fileObject -> {
             try (var inputStream = fileObject.openInputStream()) {
                 var actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                assertThat(actual).isNotBlank();
-                assertThat(Arrays.stream(actual.split("\n")).map(String::trim).toList()).isEqualTo(Arrays.stream(content.split("\n")).map(String::trim).toList());
+                if (content == null) {
+                    assertThat(actual).isEmpty();
+                } else {
+                    assertThat(actual).isNotBlank();
+                    assertThat(Arrays.stream(actual.split("\n")).map(String::trim).toList()).isEqualTo(Arrays.stream(content.split("\n")).map(String::trim).toList());
+                }
             }
             return true;
         };
