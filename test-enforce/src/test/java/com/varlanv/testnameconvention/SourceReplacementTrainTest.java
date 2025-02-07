@@ -56,6 +56,44 @@ class SourceReplacementTrainTest implements UnitTest {
         }
 
         @Test
+        void should_replace_class_name_if_found() {
+            spec(
+                """
+                    package somePackage;
+                    
+                    import org.junit.jupiter.api.DisplayName;
+                    import org.junit.jupiter.api.Test;
+                    
+                    @DisplayName("Some class display name")
+                    class SomeTest {
+                    
+                        @Test
+                        @DisplayName("Some display name")
+                        void someTest() {
+                        }
+                    }
+                    """,
+                "SomeTest",
+                new ClassNameFromDisplayName("Some class display name", "SomeTest"),
+                """
+                    package somePackage;
+                    
+                    import org.junit.jupiter.api.DisplayName;
+                    import org.junit.jupiter.api.Test;
+                    
+                    @DisplayName("Some class display name")
+                    class SomeClassDisplayNameTest {
+                    
+                        @Test
+                        @DisplayName("Some display name")
+                        void someTest() {
+                        }
+                    }
+                    """
+            );
+        }
+
+        @Test
         void should_not_change_sources_if_match_not_found() {
             @Language("Java")
             var sources = """

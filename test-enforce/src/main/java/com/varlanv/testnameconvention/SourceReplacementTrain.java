@@ -25,40 +25,15 @@ public class SourceReplacementTrain {
     private Stream<SourceReplacementRule> rules() {
         return enforcementMeta.items().stream()
             .map(item -> {
+                if (!item.candidate().isForReplacement()) {
+                    return new NoopSourceReplacementRule(item.sourceFile());
+                }
                 if (item.candidate().kind() == EnforceCandidate.Kind.METHOD) {
-                    if (item.candidate().isForReplacement()) {
-                        var newName = item.candidate().newName();
-                        var originalName = item.candidate().originalName();
-                        return new ActionSourceReplacementRule(
-                            item.sourceFile(),
-                            lines -> {
-                                var matchedLineIndexes = new ArrayList<Integer>(2);
-                                for (int lineIdx = 0, linesSize = lines.size(); lineIdx < linesSize; lineIdx++) {
-                                    var line = lines.get(lineIdx);
-                                    if (line.contains("void " + originalName + "(")) {
-                                        matchedLineIndexes.add(lineIdx);
-                                    }
-                                }
-                                if (matchedLineIndexes.isEmpty()) {
-                                    return lines;
-                                }
-                                var result = new ArrayList<>(lines);
-                                if (matchedLineIndexes.size() == 1) {
-                                    int idx = matchedLineIndexes.get(0);
-                                    var line = lines.get(idx);
-                                    result.set(idx, line.replace(originalName, newName));
-                                } else {
-                                    findIndexOfClosestClassDistance(item, lines, matchedLineIndexes).ifPresent(lineIndex -> {
-                                        var line = lines.get(lineIndex);
-                                        result.set(lineIndex, line.replace(originalName, newName));
-                                    });
-                                }
-                                return Collections.unmodifiableList(result);
-                            });
-                    }
+                    return methodReplacementRule(item);
+                } else {
+                    return classReplacementRule(item);
                 }
 
-                return new NoopSourceReplacementRule(item.sourceFile());
             })
             .filter(Predicate.not(SourceReplacementRule::isNoop))
             .collect(
@@ -82,6 +57,70 @@ public class SourceReplacementTrain {
                         })
                 )
             );
+    }
+
+    private SourceReplacementRule methodReplacementRule(EnforcementMeta.Item item) {
+        var candidate = item.candidate();
+        var newName = candidate.newName();
+        var originalName = candidate.originalName();
+        return new ActionSourceReplacementRule(
+            item.sourceFile(),
+            lines -> {
+                var matchedLineIndexes = new ArrayList<Integer>(2);
+                for (int lineIdx = 0, linesSize = lines.size(); lineIdx < linesSize; lineIdx++) {
+                    var line = lines.get(lineIdx);
+                    if (line.contains("void " + originalName + "(")) {
+                        matchedLineIndexes.add(lineIdx);
+                    }
+                }
+                if (matchedLineIndexes.isEmpty()) {
+                    return lines;
+                }
+                var result = new ArrayList<>(lines);
+                if (matchedLineIndexes.size() == 1) {
+                    int idx = matchedLineIndexes.get(0);
+                    var line = lines.get(idx);
+                    result.set(idx, line.replace(originalName, newName));
+                } else {
+                    findIndexOfClosestClassDistance(item, lines, matchedLineIndexes).ifPresent(lineIndex -> {
+                        var line = lines.get(lineIndex);
+                        result.set(lineIndex, line.replace(originalName, newName));
+                    });
+                }
+                return Collections.unmodifiableList(result);
+            });
+    }
+
+    private SourceReplacementRule classReplacementRule(EnforcementMeta.Item item) {
+        var candidate = new TestClassNameWithEnding(item.candidate());
+        var newName = candidate.newName();
+        var originalName = candidate.originalName();
+        return new ActionSourceReplacementRule(
+            item.sourceFile(),
+            lines -> {
+                var matchedLineIndexes = new ArrayList<Integer>(2);
+                for (int lineIdx = 0, linesSize = lines.size(); lineIdx < linesSize; lineIdx++) {
+                    var line = lines.get(lineIdx);
+                    if (line.contains("class " + originalName + " {")) {
+                        matchedLineIndexes.add(lineIdx);
+                    }
+                }
+                if (matchedLineIndexes.isEmpty()) {
+                    return lines;
+                }
+                var result = new ArrayList<>(lines);
+                if (matchedLineIndexes.size() == 1) {
+                    int idx = matchedLineIndexes.get(0);
+                    var line = lines.get(idx);
+                    result.set(idx, line.replace(originalName, newName));
+                } else {
+                    findIndexOfClosestClassDistance(item, lines, matchedLineIndexes).ifPresent(lineIndex -> {
+                        var line = lines.get(lineIndex);
+                        result.set(lineIndex, line.replace(originalName, newName));
+                    });
+                }
+                return Collections.unmodifiableList(result);
+            });
     }
 
     private Optional<Integer> findIndexOfClosestClassDistance(EnforcementMeta.Item item,
