@@ -149,33 +149,52 @@ class SourceReplacementTrainTest implements UnitTest {
                     package somePackage;
                     
                     import org.junit.jupiter.api.DisplayName;
+                    import org.junit.jupiter.api.Nested;
                     import org.junit.jupiter.api.Test;
                     
-                    class SomeTest {
+                    class SomeOuterTest {
                     
                         @Test
                         @DisplayName("Some display name")
                         void someTest() {
                         }
+                    
+                        @Nested
+                        class SomeNestedTest {
+                    
+                            @Test
+                            @DisplayName("Some display name")
+                            void someTest() {
+                            }
+                        }
                     }
                     """,
-                "SomeTest",
+                "SomeNestedTest",
                 new MethodNameFromDisplayName("Some display name", "someTest"),
                 """
                     package somePackage;
                     
                     import org.junit.jupiter.api.DisplayName;
+                    import org.junit.jupiter.api.Nested;
                     import org.junit.jupiter.api.Test;
                     
-                    class SomeTest {
+                    class SomeOuterTest {
                     
                         @Test
                         @DisplayName("Some display name")
-                        void some_display_name() {
+                        void someTest() {
+                        }
+                    
+                        @Nested
+                        class SomeNestedTest {
+                    
+                            @Test
+                            @DisplayName("Some display name")
+                            void some_display_name() {
+                            }
                         }
                     }
-                    """
-            );
+                    """);
         }
     }
 

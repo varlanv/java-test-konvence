@@ -2,9 +2,7 @@ package com.varlanv.testnameconvention;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,17 +32,28 @@ public class SourceReplacementTrain {
                         return new ActionSourceReplacementRule(
                             item.sourceFile(),
                             lines -> {
-                                List<String> result = null;
+                                var matchedLineIndexes = new ArrayList<Integer>(2);
                                 for (int lineIdx = 0, linesSize = lines.size(); lineIdx < linesSize; lineIdx++) {
                                     var line = lines.get(lineIdx);
                                     if (line.contains("void " + originalName + "(")) {
-                                        if (result == null) {
-                                            result = new ArrayList<>(lines);
-                                        }
-                                        result.set(lineIdx, line.replace(originalName, newName));
+                                        matchedLineIndexes.add(lineIdx);
                                     }
                                 }
-                                return result != null ? result : Collections.unmodifiableList(lines);
+                                if (matchedLineIndexes.isEmpty()) {
+                                    return lines;
+                                }
+                                var result = new ArrayList<>(lines);
+                                if (matchedLineIndexes.size() == 1) {
+                                    int idx = matchedLineIndexes.get(0);
+                                    var line = lines.get(idx);
+                                    result.set(idx, line.replace(originalName, newName));
+                                } else {
+                                    findIndexOfClosestClassDistance(item, lines, matchedLineIndexes).ifPresent(lineIndex -> {
+                                        var line = lines.get(lineIndex);
+                                        result.set(lineIndex, line.replace(originalName, newName));
+                                    });
+                                }
+                                return Collections.unmodifiableList(result);
                             });
                     }
                 }
@@ -73,5 +82,25 @@ public class SourceReplacementTrain {
                         })
                 )
             );
+    }
+
+    private Optional<Integer> findIndexOfClosestClassDistance(EnforcementMeta.Item item,
+                                                              List<String> lines,
+                                                              ArrayList<Integer> matchedLineIndexes) {
+        var lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
+        var targetClassChunk = "class " + item.immediateClassName() + " {";
+        for (var matchedLineIndex : matchedLineIndexes) {
+            var distance = 0;
+            for (int idx = matchedLineIndex; idx >= 0; idx--) {
+                var line = lines.get(idx);
+                if (line.contains(targetClassChunk)) {
+                    lineIndexToOuterClassDistance.put(matchedLineIndex, distance);
+                    break;
+                }
+                distance++;
+            }
+        }
+        return Optional.ofNullable(lineIndexToOuterClassDistance.firstEntry())
+            .map(Map.Entry::getKey);
     }
 }
