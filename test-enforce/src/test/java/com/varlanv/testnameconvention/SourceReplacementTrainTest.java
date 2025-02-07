@@ -196,22 +196,80 @@ class SourceReplacementTrainTest implements UnitTest {
                     }
                     """);
         }
+
+        @Test
+        void should_replace_both_method_names_if_requested() {
+            spec(
+                """
+                    package somePackage;
+                    
+                    import org.junit.jupiter.api.DisplayName;
+                    import org.junit.jupiter.api.Nested;
+                    import org.junit.jupiter.api.Test;
+                    
+                    class SomeOuterTest {
+                    
+                        @Test
+                        @DisplayName("Some display name")
+                        void someTest() {
+                        }
+                    
+                        @Nested
+                        class SomeNestedTest {
+                    
+                            @Test
+                            @DisplayName("Some display name")
+                            void someTest() {
+                            }
+                        }
+                    }
+                    """,
+                List.of(
+                    Map.entry("SomeNestedTest", new MethodNameFromDisplayName("Some display name", "someTest")),
+                    Map.entry("SomeOuterTest", new MethodNameFromDisplayName("Some display name", "someTest"))
+                ),
+                """
+                    package somePackage;
+                    
+                    import org.junit.jupiter.api.DisplayName;
+                    import org.junit.jupiter.api.Nested;
+                    import org.junit.jupiter.api.Test;
+                    
+                    class SomeOuterTest {
+                    
+                        @Test
+                        @DisplayName("Some display name")
+                        void some_display_name() {
+                        }
+                    
+                        @Nested
+                        class SomeNestedTest {
+                    
+                            @Test
+                            @DisplayName("Some display name")
+                            void some_display_name() {
+                            }
+                        }
+                    }
+                    """);
+        }
     }
 
     void spec(@Language("Java") String sourceContent,
-              String immediateClassName,
-              EnforceCandidate enforceCandidate,
+              List<Map.Entry<String, EnforceCandidate>> immediateClassNameWithEnforceCandidate,
               @Language("Java") String expected) {
         var memorySourceFile = new MemorySourceFile("somePath", sourceContent);
         var subject = new SourceReplacementTrain(
             new EnforcementMeta(
-                List.of(
-                    new EnforcementMeta.Item(
-                        memorySourceFile,
-                        immediateClassName,
-                        enforceCandidate
+                immediateClassNameWithEnforceCandidate.stream()
+                    .map(entry ->
+                        new EnforcementMeta.Item(
+                            memorySourceFile,
+                            entry.getKey(),
+                            entry.getValue()
+                        )
                     )
-                )
+                    .toList()
             )
         );
         subject.run();
@@ -219,5 +277,13 @@ class SourceReplacementTrainTest implements UnitTest {
             .map(line -> line + System.lineSeparator())
             .collect(Collectors.joining());
         assertThat(actual).isEqualTo(expected);
+
+    }
+
+    void spec(@Language("Java") String sourceContent,
+              String immediateClassName,
+              EnforceCandidate enforceCandidate,
+              @Language("Java") String expected) {
+        spec(sourceContent, List.of(Map.entry(immediateClassName, enforceCandidate)), expected);
     }
 }
