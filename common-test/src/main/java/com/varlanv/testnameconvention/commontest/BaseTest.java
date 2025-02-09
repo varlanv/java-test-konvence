@@ -9,7 +9,6 @@ import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,9 +73,9 @@ public interface BaseTest {
     }
 
     @SneakyThrows
-    default File newTempDir() {
-        var dir = Files.createTempDirectory("huskitjunit-").toFile();
-        dir.deleteOnExit();
+    default Path newTempDir() {
+        var dir = Files.createTempDirectory("huskitjunit-");
+        dir.toFile().deleteOnExit();
         return dir;
     }
 
@@ -105,7 +104,7 @@ public interface BaseTest {
         }
     }
 
-    default void runAndDeleteFile(@NonNull File file, ThrowingRunnable runnable) {
+    default void runAndDeleteFile(@NonNull Path file, ThrowingRunnable runnable) {
         Exception originalException = null;
         try {
             runnable.run();
@@ -113,7 +112,7 @@ public interface BaseTest {
             originalException = e;
         } finally {
             try {
-                FileDeleteStrategy.FORCE.delete(file);
+                FileDeleteStrategy.FORCE.delete(file.toFile());
                 if (originalException != null) {
                     rethrow(originalException);
                 }

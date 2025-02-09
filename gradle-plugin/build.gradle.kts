@@ -11,3 +11,8 @@ gradlePlugin {
         }
     }
 }
+
+dependencies {
+    implementation(projects.annotationProcessor)
+    implementation(projects.testEnforce)
+}

@@ -1,4 +1,4 @@
 @NotNullByDefault
-package com.varlanv.testnameconvention.gradle.plugin;
+package com.varlanv.testkonvence.gradle.plugin;
 
 import org.jetbrains.annotations.NotNullByDefault;

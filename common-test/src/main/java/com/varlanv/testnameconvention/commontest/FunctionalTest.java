@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
@@ -38,18 +39,17 @@ public interface FunctionalTest extends BaseTest {
     default void runFunctionalFixture(ThrowingConsumer<FunctionalFixture> fixtureConsumer) {
         var rootTestProjectDir = newTempDir();
         runAndDeleteFile(rootTestProjectDir, () -> {
-            var subjectProjectDir = new File(rootTestProjectDir, "test-subject-project");
-            subjectProjectDir.mkdir();
-            var settingsFile = new File(subjectProjectDir, "settings.gradle");
-            var rootBuildFile = new File(subjectProjectDir, "build.gradle");
-            var propertiesFile = new File(subjectProjectDir, "gradle.properties");
+            var subjectProjectDir = Files.createDirectory(rootTestProjectDir.resolve("test-subject-project"));
+            var settingsFile = subjectProjectDir.resolve("settings.gradle");
+            var rootBuildFile = subjectProjectDir.resolve("build.gradle");
+            var propertiesFile = subjectProjectDir.resolve("gradle.properties");
             fixtureConsumer.accept(
                 new FunctionalFixture(
-                    rootTestProjectDir.toPath(),
-                    subjectProjectDir.toPath(),
-                    settingsFile.toPath(),
-                    rootBuildFile.toPath(),
-                    propertiesFile.toPath()
+                    rootTestProjectDir,
+                    subjectProjectDir,
+                    settingsFile,
+                    rootBuildFile,
+                    propertiesFile
                 )
             );
         });

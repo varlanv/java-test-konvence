@@ -12,7 +12,6 @@ import org.junit.jupiter.api.TestFactory;
 
 import javax.tools.StandardLocation;
 import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -294,7 +293,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
               @Language("Java") String sourceContent,
               @Language("Java") String expected) {
         var resultXml = runAnnotationProcessor(outerClassName, sourceContent);
-        var items = new XmlEnforceMeta().items(new ByteArrayInputStream(resultXml.getBytes(StandardCharsets.UTF_8)));
+        var items = new XmlEnforceMeta().items(new ByteArrayInputStream(resultXml));
         var memorySourceFile = new MemorySourceFile("somePath", sourceContent);
         var subject = new SourceReplacementTrain(
             new EnforcementMeta(
@@ -322,14 +321,13 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
             .map(line -> line + System.lineSeparator())
             .collect(Collectors.joining());
         assertThat(actual).isEqualTo(expected);
-
     }
 
-    String runAnnotationProcessor(String className, @Language("Java") String sources) {
+    byte[] runAnnotationProcessor(String className, @Language("Java") String sources) {
         return runAnnotationProcessor(Map.of(className, sources));
     }
 
-    String runAnnotationProcessor(Map<String, String> sources) {
+    byte[] runAnnotationProcessor(Map<String, String> sources) {
         var iterator = sources.entrySet().iterator();
         var first = iterator.next();
         var cute = Cute
@@ -341,15 +339,18 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
             var next = iterator.next();
             cute = cute.andSourceFile(next.getKey(), next.getValue());
         }
-        var resultXml = new AtomicReference<String>();
+        var resultXml = new AtomicReference<byte[]>();
         cute.andUseCompilerOptions("-A" + TestNameConventionAP.indentXmlOption + "=false").whenCompiled()
             .thenExpectThat().compilationSucceeds()
             .andThat().fileObject(StandardLocation.SOURCE_OUTPUT, TestNameConventionAP.enforcementsXmlPackage, TestNameConventionAP.enforcementsXmlName).exists()
             .executeTest()
             .executeCustomAssertions(outcome -> {
-                resultXml.set(outcome.getFileManager().getFileObjects().get(0).getContent());
+                var fileManager = outcome.getFileManager();
+                var fileObjects = fileManager.getFileObjects();
+                assertThat(fileObjects).hasSize(1);
+                resultXml.set(fileObjects.get(0).getContentAsByteArray());
             });
-        assertThat(resultXml.get()).isNotBlank();
+        assertThat(resultXml.get()).isNotEmpty();
         return resultXml.get();
     }
 }

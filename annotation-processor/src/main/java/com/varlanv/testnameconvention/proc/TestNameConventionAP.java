@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 public class TestNameConventionAP extends AbstractProcessor {
 
     public static final String enforcementsXmlPackage = "com.varlanv.testnameconvention";
-    public static final String enforcementsXmlName = "enforcements.xml";
+    public static final String enforcementsXmlName = "testkonvence_enforcements.xml";
     public static final String indentXmlOption = "com.varlanv.testnameconvention.indentXml";
 
     private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> testAnnotationFn = (roundEnv, annotation) -> {

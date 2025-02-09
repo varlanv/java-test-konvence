@@ -1,4 +1,4 @@
-package com.varlanv.testnameconvention.gradle.plugin;
+package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testnameconvention.commontest.DataTable;
 import com.varlanv.testnameconvention.commontest.FunctionalTest;
@@ -26,6 +26,7 @@ public class TestNameConventionPluginFunctionalTest implements FunctionalTest {
                     }
                     
                     repositories {
+                        mavenLocal()
                         mavenCentral()
                     }
                     
@@ -37,7 +38,8 @@ public class TestNameConventionPluginFunctionalTest implements FunctionalTest {
                     test {
                         useJUnitPlatform()
                     }
-                    """);
+                    """
+                );
                 var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java").resolve("somepackage"));
                 var someTestClass = Files.createFile(javaDir.resolve("SomeTest.java"));
                 Files.writeString(someTestClass, """
@@ -51,11 +53,13 @@ public class TestNameConventionPluginFunctionalTest implements FunctionalTest {
                             System.out.println("someMethodTest");
                         }
                     }
-                    
-                    """);
-                Files.writeString(fixture.settingsFile(), """
-                    rootProject.name = "functional-test"
-                    """);
+                    """
+                );
+                Files.writeString(
+                    fixture.settingsFile(), """
+                        rootProject.name = "functional-test"
+                        """
+                );
 
                 var result = build(fixture.runner());
 

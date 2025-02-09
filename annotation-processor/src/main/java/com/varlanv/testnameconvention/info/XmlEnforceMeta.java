@@ -6,11 +6,20 @@ import lombok.Value;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 @Value
 public class XmlEnforceMeta {
+
+    @SneakyThrows
+    public List<EnforcementMeta.Item> items(Path path) {
+        return items(
+            Files.newInputStream(path)
+        );
+    }
 
     @SneakyThrows
     public List<EnforcementMeta.Item> items(InputStream inputStream) {
