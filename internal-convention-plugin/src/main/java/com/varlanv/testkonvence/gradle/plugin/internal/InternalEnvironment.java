@@ -2,6 +2,9 @@ package com.varlanv.testkonvence.gradle.plugin.internal;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Simple utility for running different configuration base on local/CI/functional-test environments
+ */
 @RequiredArgsConstructor
 public class InternalEnvironment {
 
