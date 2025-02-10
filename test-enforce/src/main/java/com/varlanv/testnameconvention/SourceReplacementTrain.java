@@ -1,7 +1,10 @@
 package com.varlanv.testnameconvention;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -13,12 +16,25 @@ public class SourceReplacementTrain {
 
     EnforcementMeta enforcementMeta;
 
+    @SneakyThrows
+    private String resolveLineSeparator(Path path, List<String> lines) {
+        if (lines.isEmpty()) {
+            return "";
+        }
+        var content = Files.readString(path);
+        if (content.startsWith(lines.get(0) + "\r\n")) {
+            return "\r\n";
+        } else {
+            return "\n";
+        }
+    }
+
     public void run() {
         rules().forEach(rule -> {
             var target = rule.target();
             var originalLines = target.lines();
             var newLines = rule.apply(originalLines);
-            target.save(newLines);
+            target.save(newLines, resolveLineSeparator(target.path(), originalLines));
         });
     }
 

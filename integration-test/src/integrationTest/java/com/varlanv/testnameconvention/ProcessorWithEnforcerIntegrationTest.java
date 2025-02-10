@@ -1,7 +1,6 @@
 package com.varlanv.testnameconvention;
 
 import com.varlanv.testnameconvention.commontest.IntegrationTest;
-import com.varlanv.testnameconvention.info.XmlEnforceMeta;
 import com.varlanv.testnameconvention.proc.TestNameConventionAP;
 import io.toolisticon.cute.Cute;
 import org.intellij.lang.annotations.Language;
@@ -11,10 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import javax.tools.StandardLocation;
-import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +61,84 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                         }
                     }
                     """
+            );
+        }
+
+        @Test
+        void should_preserve_crlf_line_separator_when_replacing_method_name() {
+            @Language("Java")
+            var sourceContent = ""
+                + "package testcases;\r\n"
+                + "\r\n"
+                + "import org.junit.jupiter.api.DisplayName;\r\n"
+                + "import org.junit.jupiter.api.Test;\r\n"
+                + "\r\n"
+                + "class SomeTest {\r\n"
+                + "\r\n"
+                + "    @Test\r\n"
+                + "    @DisplayName(\"Some display name\")\r\n"
+                + "    void someTest() {\r\n"
+                + "    }\r\n"
+                + "}\r\n";
+
+            var expected = ""
+                + "package testcases;\r\n"
+                + "\r\n"
+                + "import org.junit.jupiter.api.DisplayName;\r\n"
+                + "import org.junit.jupiter.api.Test;\r\n"
+                + "\r\n"
+                + "class SomeTest {\r\n"
+                + "\r\n"
+                + "    @Test\r\n"
+                + "    @DisplayName(\"Some display name\")\r\n"
+                + "    void some_display_name() {\r\n"
+                + "    }\r\n"
+                + "}\r\n";
+
+            spec(
+                "testcases.SomeTest",
+                sourceContent,
+                expected
+            );
+
+
+        }
+
+        @Test
+        void should_preserve_lf_line_separator_when_replacing_method_name() {
+            @Language("Java")
+            var sourceContent = ""
+                + "package testcases;\n"
+                + "\n"
+                + "import org.junit.jupiter.api.DisplayName;\n"
+                + "import org.junit.jupiter.api.Test;\n"
+                + "\n"
+                + "class SomeTest {\n"
+                + "\n"
+                + "    @Test\r\n"
+                + "    @DisplayName(\"Some display name\")\n"
+                + "    void someTest() {\n"
+                + "    }\n"
+                + "}\n";
+
+            var expected = ""
+                + "package testcases;\n"
+                + "\n"
+                + "import org.junit.jupiter.api.DisplayName;\n"
+                + "import org.junit.jupiter.api.Test;\n"
+                + "\n"
+                + "class SomeTest {\n"
+                + "\n"
+                + "    @Test\n"
+                + "    @DisplayName(\"Some display name\")\n"
+                + "    void some_display_name() {\n"
+                + "    }\n"
+                + "}\n";
+
+            spec(
+                "testcases.SomeTest",
+                sourceContent,
+                expected
             );
         }
 
@@ -293,34 +376,31 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
               @Language("Java") String sourceContent,
               @Language("Java") String expected) {
         var resultXml = runAnnotationProcessor(outerClassName, sourceContent);
-        var items = new XmlEnforceMeta().items(new ByteArrayInputStream(resultXml));
-        var memorySourceFile = new MemorySourceFile("somePath", sourceContent);
-        var subject = new SourceReplacementTrain(
-            new EnforcementMeta(
-                items.stream().map(item -> {
-                            EnforceCandidate candidate;
-                            var classNameParts = item.className().split("\\.");
-                            var className = classNameParts[classNameParts.length - 1];
-                            if (item.methodName().isEmpty()) {
-                                candidate = new ClassNameFromDisplayName(item.displayName(), className);
-                            } else {
-                                candidate = new MethodNameFromDisplayName(item.displayName(), item.methodName());
-                            }
-                            return new EnforcementMeta.Item(
-                                memorySourceFile,
-                                className,
-                                candidate
-                            );
-                        }
-                    )
-                    .toList()
-            )
-        );
-        subject.run();
-        var actual = memorySourceFile.lines().stream()
-            .map(line -> line + System.lineSeparator())
-            .collect(Collectors.joining());
-        assertThat(actual).isEqualTo(expected);
+        useTempDir(sourceRoot -> {
+            var outerClassNameParts = outerClassName.split("\\.");
+            var currentPackage = sourceRoot;
+            var sourcesFile = new AtomicReference<Path>();
+            for (var i = 0; i < outerClassNameParts.length; i++) {
+                var isLast = i == outerClassNameParts.length - 1;
+                if (isLast) {
+                    sourcesFile.set(Files.writeString(currentPackage.resolve(outerClassNameParts[i]), sourceContent, StandardOpenOption.CREATE_NEW));
+                } else {
+                    currentPackage = Files.createDirectory(currentPackage.resolve(outerClassNameParts[i]));
+                }
+            }
+            assertThat(sourcesFile).isNotNull();
+            useTempFile(resultXmlPath -> {
+                Files.write(resultXmlPath, resultXml);
+                new Train(
+                    resultXmlPath,
+                    sourceRoot,
+                    List.of(sourcesFile.get())
+                ).run();
+
+                var actual = Files.readString(sourcesFile.get());
+                assertThat(actual).isEqualTo(expected);
+            });
+        });
     }
 
     byte[] runAnnotationProcessor(String className, @Language("Java") String sources) {

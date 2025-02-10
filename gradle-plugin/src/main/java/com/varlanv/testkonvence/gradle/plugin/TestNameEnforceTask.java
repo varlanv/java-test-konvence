@@ -1,13 +1,14 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import com.varlanv.testnameconvention.*;
-import com.varlanv.testnameconvention.info.XmlEnforceMeta;
+import com.varlanv.testnameconvention.Train;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
+
+import java.io.File;
 
 public abstract class TestNameEnforceTask extends DefaultTask {
 
@@ -26,35 +27,15 @@ public abstract class TestNameEnforceTask extends DefaultTask {
 
     @TaskAction
     public void enforce() {
-        var enforceFiles = getEnforceFiles().getFiles();
-        var sourcesRoot = getSourcesRoot().getAsFile().get().getAbsolutePath();
-        var sourceFileTree = getCompileClasspath().getAsFileTree();
-        enforceFiles.forEach(enforceFile -> {
-            var items = new XmlEnforceMeta().items(enforceFile.toPath());
-            var subject = new SourceReplacementTrain(
-                new EnforcementMeta(
-                    items.stream().map(item -> {
-                                var sourceFilePath = item.fullEnclosingClassName().replace(".", "/");
-                                var sourceFile = sourceFileTree.filter(f -> f.getAbsolutePath().equals(sourcesRoot + sourceFilePath)).getSingleFile();
-                                EnforceCandidate candidate;
-                                var classNameParts = item.className().split("\\.");
-                                var className = classNameParts[classNameParts.length - 1];
-                                if (item.methodName().isEmpty()) {
-                                    candidate = new ClassNameFromDisplayName(item.displayName(), className);
-                                } else {
-                                    candidate = new MethodNameFromDisplayName(item.displayName(), item.methodName());
-                                }
-                                return new EnforcementMeta.Item(
-                                    new EnforcedSourceFile(sourceFile.getAbsolutePath()),
-                                    className,
-                                    candidate
-                                );
-                            }
-                        )
-                        .toList()
-                )
-            );
-            subject.run();
-        });
+        var sourcesRoot = getSourcesRoot().getAsFile().get().toPath();
+        var sourceFiles = getCompileClasspath().getFiles();
+
+        for (var enforceFile : getEnforceFiles()) {
+            new Train(
+                enforceFile.toPath(),
+                sourcesRoot,
+                sourceFiles.stream().map(File::toPath).toList()
+            ).run();
+        }
     }
 }

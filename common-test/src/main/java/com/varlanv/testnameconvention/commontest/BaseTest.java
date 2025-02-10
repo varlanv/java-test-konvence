@@ -3,6 +3,7 @@ package com.varlanv.testnameconvention.commontest;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileDeleteStrategy;
+import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.function.ThrowingSupplier;
@@ -82,6 +83,17 @@ public interface BaseTest {
     @SneakyThrows
     default Path newTempFile() {
         return Files.createTempFile("huskitjunit-", ".tmp");
+    }
+
+    @SneakyThrows
+    default void useTempDir(ThrowingConsumer<Path> action) {
+        var dir = newTempDir();
+        try {
+            action.accept(dir);
+        } finally {
+            FileUtils.forceDelete(dir.toFile());
+        }
+
     }
 
     @SneakyThrows

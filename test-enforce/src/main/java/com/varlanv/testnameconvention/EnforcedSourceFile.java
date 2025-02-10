@@ -5,24 +5,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
 public class EnforcedSourceFile implements SourceFile {
 
-    String path;
+    Path path;
 
     @Override
     @SneakyThrows
     public List<String> lines() {
-        return Files.readAllLines(Paths.get(path));
+        return Files.readAllLines(path);
     }
 
     @Override
     @SneakyThrows
-    public void save(List<String> lines) {
-        Files.write(Paths.get(path), lines);
+    public void save(List<String> lines, String separator) {
+        Files.writeString(path, lines.stream().map(it -> it + separator).collect(Collectors.joining()), StandardOpenOption.TRUNCATE_EXISTING);
     }
 }
