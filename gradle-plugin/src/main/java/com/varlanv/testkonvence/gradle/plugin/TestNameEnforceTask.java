@@ -1,6 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import com.varlanv.testnameconvention.Train;
+import com.varlanv.testkonvence.Train;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;

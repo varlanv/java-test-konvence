@@ -5,9 +5,9 @@ plugins {
 
 gradlePlugin {
     plugins {
-        create("testNameConventionGradlePlugin") {
-            id = "com.varlanv.testnameconvention-gradle-plugin"
-            implementationClass = "com.varlanv.testnameconvention.gradle.plugin.TestNameConventionPlugin"
+        create("testKonvenceGradlePlugin") {
+            id = "com.varlanv.testkonvence-gradle-plugin"
+            implementationClass = "com.varlanv.testkonvence.gradle.plugin.TestKonvencePlugin"
         }
     }
 }
