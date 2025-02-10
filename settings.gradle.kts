@@ -15,7 +15,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention")
 }
 
-rootProject.name = "java-test-konvence"
+rootProject.name = "test-konvence"
 
 val isCi = providers.environmentVariable("CI").getOrNull()?.let { it != "false" } ?: false
 
@@ -35,7 +35,6 @@ include(
     "annotation-processor",
     "gradle-plugin",
     "test-enforce",
-    "tests",
     "common-test",
     "gradle-functional-test",
     "integration-test",
