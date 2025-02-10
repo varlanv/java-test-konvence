@@ -10,6 +10,7 @@ checkstyleTool = "10.18.1"
 pmdTool = "7.5.0"
 apacheCommons = "3.17.0"
 apacheCommonsIo = "2.17.0"
+cuteToolisticon = "1.7.0"
 
 [libraries]
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
@@ -20,6 +21,7 @@ junit-platform-engine = { group = "org.junit.platform", name = "junit-platform-e
 jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrains-annotations" }
 apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", version.ref = "apacheCommons" }
 apache-commons-io = { group = "commons-io", name = "commons-io", version.ref = "apacheCommonsIo" }
+toolisticon-cute = { group = "io.toolisticon.cute", name = "cute", version.ref = "cuteToolisticon" }
 
 [plugins]
 internalConvention = { id = "com.varlanv.testkonvence.gradle.internal-gradle-convention-plugin" }
