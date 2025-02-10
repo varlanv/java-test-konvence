@@ -15,7 +15,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention")
 }
 
-rootProject.name = "test-name-convention"
+rootProject.name = "java-test-konvence"
 
 val isCi = providers.environmentVariable("CI").getOrNull()?.let { it != "false" } ?: false
 
