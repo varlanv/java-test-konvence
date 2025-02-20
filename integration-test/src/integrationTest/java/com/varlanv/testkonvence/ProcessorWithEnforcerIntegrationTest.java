@@ -233,7 +233,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                             spec(
                                 "testcases.SomeTest",
                                 sources.formatted(displayName),
-                                """
+                                java("""
                                     package testcases;
                                     
                                     import org.junit.jupiter.api.DisplayName;
@@ -246,7 +246,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                                         void %s() {
                                         }
                                     }
-                                    """.formatted(displayName, expectedMethodName)
+                                    """).formatted(displayName, expectedMethodName)
                             );
                         }
                     )

@@ -32,6 +32,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 includeBuild("internal-convention-plugin")
 
 include(
+    "constants",
     "annotation-processor",
     "gradle-plugin",
     "test-enforce",

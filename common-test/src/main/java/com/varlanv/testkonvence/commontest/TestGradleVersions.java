@@ -1,33 +1,34 @@
 package com.varlanv.testkonvence.commontest;
 
-import lombok.experimental.UtilityClass;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@UtilityClass
-public final class TestGradleVersions {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class TestGradleVersions {
 
-    List<String> list() {
+    static List<String> list() {
         return List.of(
-            current()
-//                latest7(),
-//                latest6()
+            current(),
+            latest7()
+//            latest6()
         );
     }
 
-    String current() {
+    static String current() {
         return latest8();
     }
 
-    String latest7() {
+    static String latest7() {
         return "7.6.1";
     }
 
-    String latest8() {
+    static String latest8() {
         return "8.12.1";
     }
 
-    String latest6() {
+    static String latest6() {
         return "6.9.4";
     }
 }

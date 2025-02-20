@@ -25,7 +25,7 @@ public class Train {
         val subject = new SourceReplacementTrain(
             new EnforcementMeta(
                 items.stream().map(item -> {
-                        val sourceFile = Paths.get(sourcesRootPath + File.separator + item.fullEnclosingClassName().replace(".", File.separator));
+                        val sourceFile = Paths.get(sourcesRootPath + File.separator + item.fullEnclosingClassName().replace(".", File.separator) + ".java");
                         if (Files.exists(sourceFile) && Files.isRegularFile(sourceFile)) {
                             EnforceCandidate candidate;
                             val classNameParts = item.className().split("\\.");

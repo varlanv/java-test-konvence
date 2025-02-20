@@ -23,12 +23,12 @@ class SourceReplacementTrainTest implements UnitTest {
             spec(
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
-
+                    
                     class SomeTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void someTest() {
@@ -39,12 +39,12 @@ class SourceReplacementTrainTest implements UnitTest {
                 new MethodNameFromDisplayName("Some display name", "someTest"),
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
-
+                    
                     class SomeTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void some_display_name() {
@@ -59,13 +59,13 @@ class SourceReplacementTrainTest implements UnitTest {
             spec(
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
-
+                    
                     @DisplayName("Some class display name")
                     class SomeTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void someTest() {
@@ -76,13 +76,13 @@ class SourceReplacementTrainTest implements UnitTest {
                 new ClassNameFromDisplayName("Some class display name", "SomeTest"),
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Test;
-
+                    
                     @DisplayName("Some class display name")
                     class SomeClassDisplayNameTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void someTest() {
@@ -97,12 +97,12 @@ class SourceReplacementTrainTest implements UnitTest {
             @Language("Java")
             var sources = """
                 package somePackage;
-
+                
                 import org.junit.jupiter.api.DisplayName;
                 import org.junit.jupiter.api.Test;
-
+                
                 class SomeTest {
-
+                
                     @Test
                     @DisplayName("Some display name")
                     void someTestNameThanShouldNotMatch() {
@@ -139,12 +139,12 @@ class SourceReplacementTrainTest implements UnitTest {
                             @Language("Java")
                             var sources = """
                                 package somePackage;
-
+                                
                                 import org.junit.jupiter.api.DisplayName;
                                 import org.junit.jupiter.api.Test;
-
+                                
                                 class SomeTest {
-
+                                
                                     @Test
                                     @DisplayName("%s")
                                     void someTest() {
@@ -155,20 +155,20 @@ class SourceReplacementTrainTest implements UnitTest {
                                 sources.formatted(displayName),
                                 "SomeTest",
                                 new MethodNameFromDisplayName(displayName, "someTest"),
-                                """
+                                java("""
                                     package somePackage;
-
+                                    
                                     import org.junit.jupiter.api.DisplayName;
                                     import org.junit.jupiter.api.Test;
-
+                                    
                                     class SomeTest {
-
+                                    
                                         @Test
                                         @DisplayName("%s")
                                         void %s() {
                                         }
                                     }
-                                    """.formatted(displayName, expectedMethodName)
+                                    """).formatted(displayName, expectedMethodName)
                             );
                         }
                     )
@@ -184,21 +184,21 @@ class SourceReplacementTrainTest implements UnitTest {
             spec(
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Nested;
                     import org.junit.jupiter.api.Test;
-
+                    
                     class SomeOuterTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void someTest() {
                         }
-
+                    
                         @Nested
                         class SomeNestedTest {
-
+                    
                             @Test
                             @DisplayName("Some display name")
                             void someTest() {
@@ -210,21 +210,21 @@ class SourceReplacementTrainTest implements UnitTest {
                 new MethodNameFromDisplayName("Some display name", "someTest"),
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Nested;
                     import org.junit.jupiter.api.Test;
-
+                    
                     class SomeOuterTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void someTest() {
                         }
-
+                    
                         @Nested
                         class SomeNestedTest {
-
+                    
                             @Test
                             @DisplayName("Some display name")
                             void some_display_name() {
@@ -239,21 +239,21 @@ class SourceReplacementTrainTest implements UnitTest {
             spec(
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Nested;
                     import org.junit.jupiter.api.Test;
-
+                    
                     class SomeOuterTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void someTest() {
                         }
-
+                    
                         @Nested
                         class SomeNestedTest {
-
+                    
                             @Test
                             @DisplayName("Some display name")
                             void someTest() {
@@ -267,21 +267,21 @@ class SourceReplacementTrainTest implements UnitTest {
                 ),
                 """
                     package somePackage;
-
+                    
                     import org.junit.jupiter.api.DisplayName;
                     import org.junit.jupiter.api.Nested;
                     import org.junit.jupiter.api.Test;
-
+                    
                     class SomeOuterTest {
-
+                    
                         @Test
                         @DisplayName("Some display name")
                         void some_display_name() {
                         }
-
+                    
                         @Nested
                         class SomeNestedTest {
-
+                    
                             @Test
                             @DisplayName("Some display name")
                             void some_display_name() {

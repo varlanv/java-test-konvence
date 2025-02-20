@@ -1,25 +1,27 @@
 package com.varlanv.testkonvence.commontest;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-final class TestUtils {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class TestUtils {
 
-    private static final AtomicReference<File> huskitProjectRoot = new AtomicReference<>();
+    private static final AtomicReference<Path> projectRoot = new AtomicReference<>();
 
-    static File huskitProjectRoot() {
-        return huskitProjectRoot.get();
+    public static Path projectRoot() {
+        return projectRoot.get();
     }
 
-    static void setHuskitProjectRoot(Supplier<File> fileSupplier) {
-        if (huskitProjectRoot.get() == null) {
+    public static void setProjectRoot(Supplier<Path> fileSupplier) {
+        if (projectRoot.get() == null) {
             synchronized (TestUtils.class) {
-                huskitProjectRoot.set(fileSupplier.get());
+                projectRoot.set(fileSupplier.get());
             }
         }
     }
 }
+
