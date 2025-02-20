@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @RequiredArgsConstructor
 public final class TestClassNameWithEnding implements EnforceCandidate {
@@ -19,7 +20,7 @@ public final class TestClassNameWithEnding implements EnforceCandidate {
 
     @Override
     public String newName() {
-        var newName = delegate.newName();
+        val newName = delegate.newName();
         if (newName.length() < 4) {
             return newName + "Test";
         } else {

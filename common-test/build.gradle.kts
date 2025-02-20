@@ -3,6 +3,10 @@ plugins {
     alias(libs.plugins.internalConvention)
 }
 
+internalConvention {
+    internalModule = true
+}
+
 dependencies {
     implementation(libs.junit.platform.engine)
     implementation(libs.junit.platform.launcher)

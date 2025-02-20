@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence.gradle.plugin;
+package com.varlanv.gradle.plugin;
 
 import org.gradle.api.provider.Property;
 
@@ -9,4 +9,6 @@ public interface InternalConventionExtension {
     }
 
     Property<String> getIntegrationTestName();
+
+    Property<Boolean> getInternalModule();
 }

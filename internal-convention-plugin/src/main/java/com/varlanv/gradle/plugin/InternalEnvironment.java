@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence.gradle.plugin.internal;
+package com.varlanv.gradle.plugin;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.Train;
+import lombok.val;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
@@ -9,6 +10,7 @@ import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
+import java.util.stream.Collectors;
 
 public abstract class TestNameEnforceTask extends DefaultTask {
 
@@ -27,14 +29,14 @@ public abstract class TestNameEnforceTask extends DefaultTask {
 
     @TaskAction
     public void enforce() {
-        var sourcesRoot = getSourcesRoot().getAsFile().get().toPath();
-        var sourceFiles = getCompileClasspath().getFiles();
+        val sourcesRoot = getSourcesRoot().getAsFile().get().toPath();
+        val sourceFiles = getCompileClasspath().getFiles();
 
-        for (var enforceFile : getEnforceFiles()) {
+        for (val enforceFile : getEnforceFiles()) {
             new Train(
                 enforceFile.toPath(),
                 sourcesRoot,
-                sourceFiles.stream().map(File::toPath).toList()
+                sourceFiles.stream().map(File::toPath).collect(Collectors.toList())
             ).run();
         }
     }

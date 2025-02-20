@@ -3,6 +3,9 @@ package com.varlanv.testkonvence.proc;
 import com.varlanv.testkonvence.info.EnforcementMeta;
 import com.varlanv.testkonvence.info.XmlMemoryEnforceMeta;
 import lombok.SneakyThrows;
+import lombok.Value;
+import lombok.val;
+import lombok.var;
 import org.junit.jupiter.api.DisplayName;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -25,15 +28,15 @@ public class TestKonvenceAP extends AbstractProcessor {
     public static final String indentXmlOption = "com.varlanv.testkonvence.indentXml";
 
     private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> testAnnotationFn = (roundEnv, annotation) -> {
-        var elements = roundEnv.getElementsAnnotatedWith(annotation);
-        var output = new ArrayList<EnforcementMeta.Item>();
-        for (var element : elements) {
-            var displayNameAn = element.getAnnotation(DisplayName.class);
-            var kind = element.getKind();
+        val elements = roundEnv.getElementsAnnotatedWith(annotation);
+        val output = new ArrayList<EnforcementMeta.Item>();
+        for (val element : elements) {
+            val displayNameAn = element.getAnnotation(DisplayName.class);
+            val kind = element.getKind();
             if (displayNameAn == null) {
                 if (kind == ElementKind.METHOD) {
-                    var methodElement = (ExecutableElement) element;
-                    var methodName = methodElement.getSimpleName().toString();
+                    val methodElement = (ExecutableElement) element;
+                    val methodName = methodElement.getSimpleName().toString();
                     output.add(
                         new EnforcementMeta.Item(
                             findTopLevelClassName(element),
@@ -53,10 +56,10 @@ public class TestKonvenceAP extends AbstractProcessor {
                     );
                 }
             } else {
-                var displayNameVal = displayNameAn.value();
+                val displayNameVal = displayNameAn.value();
                 if (kind == ElementKind.METHOD) {
-                    var methodElement = (ExecutableElement) element;
-                    var methodName = methodElement.getSimpleName().toString();
+                    val methodElement = (ExecutableElement) element;
+                    val methodName = methodElement.getSimpleName().toString();
                     output.add(
                         new EnforcementMeta.Item(
                             findTopLevelClassName(element),
@@ -81,14 +84,14 @@ public class TestKonvenceAP extends AbstractProcessor {
     };
 
     private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> displayNameAnnotationFn = (roundEnv, annotation) -> {
-        var elements = roundEnv.getElementsAnnotatedWith(annotation);
-        var output = new ArrayList<EnforcementMeta.Item>();
-        for (var element : elements) {
-            var displayNameValue = element.getAnnotation(DisplayName.class).value();
-            var kind = element.getKind();
+        val elements = roundEnv.getElementsAnnotatedWith(annotation);
+        val output = new ArrayList<EnforcementMeta.Item>();
+        for (val element : elements) {
+            val displayNameValue = element.getAnnotation(DisplayName.class).value();
+            val kind = element.getKind();
             if (kind == ElementKind.METHOD) {
-                var methodElement = (ExecutableElement) element;
-                var methodName = methodElement.getSimpleName().toString();
+                val methodElement = (ExecutableElement) element;
+                val methodName = methodElement.getSimpleName().toString();
                 output.add(
                     new EnforcementMeta.Item(
                         findTopLevelClassName(element),
@@ -111,33 +114,41 @@ public class TestKonvenceAP extends AbstractProcessor {
         return output;
     };
 
-    private static final Set<String> supportedTestAnnotations = Set.of(
-        "org.junit.jupiter.api.Test",
-        "org.junit.jupiter.params.ParameterizedTest",
-        "org.junit.jupiter.api.TestFactory",
-        "org.junit.jupiter.api.RepeatedTest"
+    private static final Set<String> supportedTestAnnotations = new HashSet<>(
+        Arrays.asList(
+            "org.junit.jupiter.api.Test",
+            "org.junit.jupiter.params.ParameterizedTest",
+            "org.junit.jupiter.api.TestFactory",
+            "org.junit.jupiter.api.RepeatedTest"
+        )
     );
 
     private static final Set<String> supportedAnnotations = Stream.of(
             supportedTestAnnotations,
-            Set.of(
+            Collections.singleton(
                 "org.junit.jupiter.api.DisplayName"
             )
         )
         .flatMap(Set::stream)
         .collect(Collectors.toSet());
 
+    @Value
+    private static class Pair<T1, T2> {
+        T1 left;
+        T2 right;
+    }
+
     private static final Map<String, BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>>> strategy = Stream.concat(
-            supportedTestAnnotations.stream().map(it -> Map.entry(it, testAnnotationFn)),
-            Stream.of(Map.entry("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn))
+            supportedTestAnnotations.stream().map(it -> new Pair<>(it, testAnnotationFn)),
+            Stream.of(new Pair<>("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn))
         )
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        .collect(Collectors.toMap(Pair::left, Pair::right));
 
     private static String findTopLevelClassName(Element start) {
         String topLevelClassName;
         var enclosingElement = start;
         while (true) {
-            var nestedEnclElement = enclosingElement.getEnclosingElement();
+            val nestedEnclElement = enclosingElement.getEnclosingElement();
             if (nestedEnclElement.getKind() == ElementKind.PACKAGE) {
                 topLevelClassName = ((TypeElement) enclosingElement).getQualifiedName().toString();
                 break;
@@ -153,8 +164,8 @@ public class TestKonvenceAP extends AbstractProcessor {
     @SneakyThrows
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (roundEnv.processingOver()) {
-            var filer = processingEnv.getFiler();
-            var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(
+            val filer = processingEnv.getFiler();
+            val xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(
                 output.stream()
                     .sorted(
                         Comparator.comparing(EnforcementMeta.Item::fullEnclosingClassName)
@@ -162,27 +173,27 @@ public class TestKonvenceAP extends AbstractProcessor {
                             .thenComparing(EnforcementMeta.Item::displayName)
                             .thenComparing(EnforcementMeta.Item::methodName)
                     )
-                    .toList()
-            );
-            var resource = filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
-            try (var writer = resource.openWriter()) {
+                    .collect(Collectors.toList()));
+            val resource = filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
+            try (val writer = resource.openWriter()) {
                 if (output.isEmpty()) {
                     writer.write("");
                     writer.flush();
                 } else {
-                    Optional.ofNullable(processingEnv.getOptions().get(indentXmlOption))
-                        .filter("true"::equals)
-                        .ifPresentOrElse(
-                            ignore -> xmlMemoryEnforceMeta.indentWriteTo(writer),
-                            () -> xmlMemoryEnforceMeta.writeTo(writer));
+                    val xmlOption = processingEnv.getOptions().get(indentXmlOption);
+                    if ("true".equals(xmlOption)) {
+                        xmlMemoryEnforceMeta.indentWriteTo(writer);
+                    } else {
+                        xmlMemoryEnforceMeta.writeTo(writer);
+                    }
                 }
             }
         } else {
-            for (var annotation : annotations) {
+            for (val annotation : annotations) {
                 output.addAll(
                     Optional.ofNullable(strategy.get(annotation.getQualifiedName().toString()))
                         .map(action -> action.apply(roundEnv, annotation))
-                        .orElse(List.of())
+                        .orElse(Collections.emptyList())
                 );
             }
         }
@@ -201,6 +212,6 @@ public class TestKonvenceAP extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedOptions() {
-        return Set.of(indentXmlOption);
+        return Collections.singleton(indentXmlOption);
     }
 }

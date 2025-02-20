@@ -2,12 +2,14 @@ package com.varlanv.testkonvence;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.val;
+import lombok.var;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,7 +23,7 @@ public class SourceReplacementTrain {
         if (lines.isEmpty()) {
             return "";
         }
-        var content = Files.readString(path);
+        val content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
         if (content.startsWith(lines.get(0) + "\r\n")) {
             return "\r\n";
         } else {
@@ -31,9 +33,9 @@ public class SourceReplacementTrain {
 
     public void run() {
         rules().forEach(rule -> {
-            var target = rule.target();
-            var originalLines = target.lines();
-            var newLines = rule.apply(originalLines);
+            val target = rule.target();
+            val originalLines = target.lines();
+            val newLines = rule.apply(originalLines);
             target.save(newLines, resolveLineSeparator(target.path(), originalLines));
         });
     }
@@ -51,7 +53,7 @@ public class SourceReplacementTrain {
                 }
 
             })
-            .filter(Predicate.not(SourceReplacementRule::isNoop))
+            .filter(sourceReplacementRule -> !sourceReplacementRule.isNoop())
             .collect(
                 Collectors.collectingAndThen(
                     Collectors.groupingBy(rule -> rule.target().path()),
@@ -62,8 +64,8 @@ public class SourceReplacementTrain {
                             }
                             Function<List<String>, List<String>> mergedReplacementAction = lines -> {
                                 List<String> resultLines = lines;
-                                for (var rules : map.values()) {
-                                    for (var rule : rules) {
+                                for (val rules : map.values()) {
+                                    for (val rule : rules) {
                                         resultLines = rule.apply(resultLines);
                                     }
                                 }
@@ -76,15 +78,15 @@ public class SourceReplacementTrain {
     }
 
     private SourceReplacementRule methodReplacementRule(EnforcementMeta.Item item) {
-        var candidate = item.candidate();
-        var newName = candidate.newName();
-        var originalName = candidate.originalName();
+        val candidate = item.candidate();
+        val newName = candidate.newName();
+        val originalName = candidate.originalName();
         return new ActionSourceReplacementRule(
             item.sourceFile(),
             lines -> {
-                var matchedLineIndexes = new ArrayList<Integer>(2);
+                val matchedLineIndexes = new ArrayList<Integer>(2);
                 for (int lineIdx = 0, linesSize = lines.size(); lineIdx < linesSize; lineIdx++) {
-                    var line = lines.get(lineIdx);
+                    val line = lines.get(lineIdx);
                     if (line.contains("void " + originalName + "(")) {
                         matchedLineIndexes.add(lineIdx);
                     }
@@ -92,14 +94,14 @@ public class SourceReplacementTrain {
                 if (matchedLineIndexes.isEmpty()) {
                     return lines;
                 }
-                var result = new ArrayList<>(lines);
+                val result = new ArrayList<>(lines);
                 if (matchedLineIndexes.size() == 1) {
                     int idx = matchedLineIndexes.get(0);
-                    var line = lines.get(idx);
+                    val line = lines.get(idx);
                     result.set(idx, line.replace(originalName, newName));
                 } else {
                     findIndexOfClosestClassDistance(item, lines, matchedLineIndexes).ifPresent(lineIndex -> {
-                        var line = lines.get(lineIndex);
+                        val line = lines.get(lineIndex);
                         result.set(lineIndex, line.replace(originalName, newName));
                     });
                 }
@@ -108,15 +110,15 @@ public class SourceReplacementTrain {
     }
 
     private SourceReplacementRule classReplacementRule(EnforcementMeta.Item item) {
-        var candidate = new TestClassNameWithEnding(item.candidate());
-        var newName = candidate.newName();
-        var originalName = candidate.originalName();
+        val candidate = new TestClassNameWithEnding(item.candidate());
+        val newName = candidate.newName();
+        val originalName = candidate.originalName();
         return new ActionSourceReplacementRule(
             item.sourceFile(),
             lines -> {
-                var matchedLineIndexes = new ArrayList<Integer>(2);
+                val matchedLineIndexes = new ArrayList<Integer>(2);
                 for (int lineIdx = 0, linesSize = lines.size(); lineIdx < linesSize; lineIdx++) {
-                    var line = lines.get(lineIdx);
+                    val line = lines.get(lineIdx);
                     if (line.contains("class " + originalName + " {")) {
                         matchedLineIndexes.add(lineIdx);
                     }
@@ -124,14 +126,14 @@ public class SourceReplacementTrain {
                 if (matchedLineIndexes.isEmpty()) {
                     return lines;
                 }
-                var result = new ArrayList<>(lines);
+                val result = new ArrayList<>(lines);
                 if (matchedLineIndexes.size() == 1) {
                     int idx = matchedLineIndexes.get(0);
-                    var line = lines.get(idx);
+                    val line = lines.get(idx);
                     result.set(idx, line.replace(originalName, newName));
                 } else {
                     findIndexOfClosestClassDistance(item, lines, matchedLineIndexes).ifPresent(lineIndex -> {
-                        var line = lines.get(lineIndex);
+                        val line = lines.get(lineIndex);
                         result.set(lineIndex, line.replace(originalName, newName));
                     });
                 }
@@ -142,12 +144,12 @@ public class SourceReplacementTrain {
     private Optional<Integer> findIndexOfClosestClassDistance(EnforcementMeta.Item item,
                                                               List<String> lines,
                                                               ArrayList<Integer> matchedLineIndexes) {
-        var lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
-        var targetClassChunk = "class " + item.immediateClassName() + " {";
-        for (var matchedLineIndex : matchedLineIndexes) {
+        val lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
+        val targetClassChunk = "class " + item.immediateClassName() + " {";
+        for (val matchedLineIndex : matchedLineIndexes) {
             var distance = 0;
             for (int idx = matchedLineIndex; idx >= 0; idx--) {
-                var line = lines.get(idx);
+                val line = lines.get(idx);
                 if (line.contains(targetClassChunk)) {
                     lineIndexToOuterClassDistance.put(matchedLineIndex, distance);
                     break;

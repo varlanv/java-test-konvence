@@ -1,14 +1,17 @@
 package com.varlanv.testkonvence;
 
 import lombok.Value;
+import lombok.val;
+import lombok.var;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
 @Value
 public class MethodNameFromDisplayName implements EnforceCandidate {
 
-    private static final List<Function<String, String>> methodNameChain = List.of(
+    private static final List<Function<String, String>> methodNameChain = Arrays.asList(
         // 1. Replace non-alphanumeric characters with underscores
         in -> in.replaceAll("[^a-zA-Z0-9]+", "_"),
         // 2. Remove leading and trailing underscores
@@ -36,14 +39,14 @@ public class MethodNameFromDisplayName implements EnforceCandidate {
     @Override
     public String newName() {
         var result = displayName;
-        for (var transformation : methodNameChain) {
+        for (val transformation : methodNameChain) {
             if (result.isEmpty()) {
                 return result;
             }
             result = transformation.apply(result);
 
         }
-        if (result.isBlank()) {
+        if (result.isEmpty()) {
             return "";
         }
         return result;

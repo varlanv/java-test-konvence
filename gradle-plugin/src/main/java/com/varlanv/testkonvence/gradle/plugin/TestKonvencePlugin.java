@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
@@ -12,14 +13,14 @@ public class TestKonvencePlugin implements Plugin<Project> {
     public void apply(Project project) {
         project.getPlugins().withId("java", javaPlugin -> {
             project.getLogger().lifecycle("Hello World!");
-            var dependencies = project.getDependencies();
-            var extensions = project.getExtensions();
-            var javaExtension = extensions.getByType(JavaPluginExtension.class);
-            var javaSourceSets = javaExtension.getSourceSets();
-            var mainSourceSet = javaSourceSets.getByName("main");
-            var compileClasspath = mainSourceSet.getCompileClasspath();
-            var tasks = project.getTasks();
-            var enforceTaskProvider = tasks.register(
+            val dependencies = project.getDependencies();
+            val extensions = project.getExtensions();
+            val javaExtension = extensions.getByType(JavaPluginExtension.class);
+            val javaSourceSets = javaExtension.getSourceSets();
+            val mainSourceSet = javaSourceSets.getByName("main");
+            val compileClasspath = mainSourceSet.getCompileClasspath();
+            val tasks = project.getTasks();
+            val enforceTaskProvider = tasks.register(
                 TestNameEnforceTask.name(),
                 TestNameEnforceTask.class,
                 enforceTask -> {

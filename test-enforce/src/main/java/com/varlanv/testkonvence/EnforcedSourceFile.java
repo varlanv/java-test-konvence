@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -25,6 +26,10 @@ public class EnforcedSourceFile implements SourceFile {
     @Override
     @SneakyThrows
     public void save(List<String> lines, String separator) {
-        Files.writeString(path, lines.stream().map(it -> it + separator).collect(Collectors.joining()), StandardOpenOption.TRUNCATE_EXISTING);
+        Files.write(
+            path,
+            lines.stream().map(it -> it + separator).collect(Collectors.joining()).getBytes(StandardCharsets.UTF_8),
+            StandardOpenOption.TRUNCATE_EXISTING
+        );
     }
 }

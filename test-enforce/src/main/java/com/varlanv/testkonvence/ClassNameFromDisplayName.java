@@ -1,6 +1,8 @@
 package com.varlanv.testkonvence;
 
 import lombok.Value;
+import lombok.val;
+import lombok.var;
 
 @Value
 public class ClassNameFromDisplayName implements EnforceCandidate {
@@ -10,15 +12,15 @@ public class ClassNameFromDisplayName implements EnforceCandidate {
 
     @Override
     public String newName() {
-        if (displayName.isBlank()) {
+        if (displayName.isEmpty()) {
             return "";
         }
 
-        StringBuilder className = new StringBuilder();
+        val className = new StringBuilder();
         var capitalizeNext = true;
         var hasLetter = false;
 
-        for (var ch : displayName.toCharArray()) {
+        for (val ch : displayName.toCharArray()) {
             if (Character.isLetter(ch) && ch < 128) {
                 hasLetter = true;
                 if (capitalizeNext) {

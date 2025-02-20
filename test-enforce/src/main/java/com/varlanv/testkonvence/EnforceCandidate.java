@@ -1,5 +1,7 @@
 package com.varlanv.testkonvence;
 
+import lombok.val;
+
 public interface EnforceCandidate {
 
     String displayName();
@@ -9,7 +11,7 @@ public interface EnforceCandidate {
     String newName();
 
     default Boolean isForReplacement() {
-        var newName = newName();
+        val newName = newName();
         if (newName.isEmpty()) {
             return false;
         } else {
