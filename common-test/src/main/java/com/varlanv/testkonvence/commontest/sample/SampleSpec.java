@@ -85,5 +85,9 @@ public class SampleSpec {
             extraAssertions.add(extraAssertion);
             return this;
         }
+
+        public SampleSpec and() {
+            return toSpec();
+        }
     }
 }

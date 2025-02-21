@@ -1,7 +1,7 @@
 package com.varlanv.testkonvence.commontest;
 
-public record DataTable(boolean isCi,
-                        boolean configurationCache,
+public record DataTable(Boolean isCi,
+                        Boolean configurationCache,
                         Boolean buildCache,
                         String gradleVersion) {
 }

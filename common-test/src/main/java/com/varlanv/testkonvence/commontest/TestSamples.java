@@ -291,6 +291,71 @@ public class TestSamples {
                                     """.formatted(entry.getKey(), entry.getValue()))
                         )
                     )
+            )
+            .describe(
+                "Should replace method name only in one source when there are two source file and one has method name for replacement",
+                spec -> spec
+                    .withClass("testcases.SomeFirstTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeFirstTest {
+                        
+                            @Test
+                            @DisplayName("Some test")
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeFirstTest {
+                        
+                            @Test
+                            @DisplayName("Some test")
+                            void some_test() {
+                            }
+                        }
+                        """
+                    )
+                    .and()
+                    .withClass("testcases.SomeSecondTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeSecondTest {
+                        
+                            @Test
+                            @DisplayName("Some test name")
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeSecondTest {
+                        
+                            @Test
+                            @DisplayName("Some test name")
+                            void some_test_name() {
+                            }
+                        }
+                        """
+                    )
             );
     }
 }
