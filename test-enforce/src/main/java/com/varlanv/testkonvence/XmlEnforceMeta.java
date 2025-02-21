@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence.info;
+package com.varlanv.testkonvence;
 
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -20,7 +20,7 @@ import java.util.List;
 public class XmlEnforceMeta {
 
     @SneakyThrows
-    public List<EnforcementMeta.Item> items(Path path) {
+    public List<APEnforcementMeta.Item> items(Path path) {
         return items(
             Files.newInputStream(path)
         );
@@ -39,7 +39,7 @@ public class XmlEnforceMeta {
     }
 
     @SneakyThrows
-    public List<EnforcementMeta.Item> items(InputStream inputStream) {
+    public List<APEnforcementMeta.Item> items(InputStream inputStream) {
         val bas = new ByteArrayInputStream(readAllBytes(inputStream));
         val bytes = readAllBytes(bas);
 
@@ -54,12 +54,12 @@ public class XmlEnforceMeta {
         }
         val entries = root.getChildNodes();
         val entriesLen = entries.getLength();
-        val entriesList = new ArrayList<EnforcementMeta.Item>(entriesLen);
+        val entriesList = new ArrayList<APEnforcementMeta.Item>(entriesLen);
         for (var entryIdx = 0; entryIdx < entriesLen; entryIdx++) {
             val entryNode = entries.item(entryIdx);
             val fields = entryNode.getChildNodes();
             entriesList.add(
-                new EnforcementMeta.Item(
+                new APEnforcementMeta.Item(
                     fields.item(0).getTextContent(),
                     fields.item(1).getTextContent(),
                     fields.item(2).getTextContent(),

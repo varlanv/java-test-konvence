@@ -39,7 +39,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
                                 groovy("""
                                     plugins {
                                         id("java")
-                                        id("com.varlanv.testkonvence-gradle-plugin")
+                                        id("com.varlanv.test-konvence")
                                     }
                                     
                                     repositories {

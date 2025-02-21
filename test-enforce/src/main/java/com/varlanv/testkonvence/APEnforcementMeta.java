@@ -1,11 +1,11 @@
-package com.varlanv.testkonvence.info;
+package com.varlanv.testkonvence;
 
 import lombok.Value;
 
 import java.util.List;
 
 @Value
-public class EnforcementMeta {
+public class APEnforcementMeta {
 
     List<Item> items;
 

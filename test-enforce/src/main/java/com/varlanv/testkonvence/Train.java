@@ -1,6 +1,5 @@
 package com.varlanv.testkonvence;
 
-import com.varlanv.testkonvence.info.XmlEnforceMeta;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 

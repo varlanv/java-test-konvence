@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.annotationProcessor)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.platform.launcher)
 }

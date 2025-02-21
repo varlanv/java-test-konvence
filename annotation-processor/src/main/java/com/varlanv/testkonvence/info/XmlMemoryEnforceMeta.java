@@ -18,7 +18,7 @@ import java.util.Collection;
 @Value
 public class XmlMemoryEnforceMeta {
 
-    Collection<EnforcementMeta.Item> entries;
+    Collection<APEnforcementMeta.Item> entries;
 
     public void writeTo(Writer writer) {
         write(writer, false);

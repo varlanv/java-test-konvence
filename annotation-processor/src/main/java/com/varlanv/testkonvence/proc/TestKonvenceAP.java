@@ -1,20 +1,23 @@
 package com.varlanv.testkonvence.proc;
 
-import com.varlanv.testkonvence.info.EnforcementMeta;
+import com.varlanv.testkonvence.info.APEnforcementMeta;
 import com.varlanv.testkonvence.info.XmlMemoryEnforceMeta;
 import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.experimental.NonFinal;
 import lombok.val;
 import lombok.var;
 import org.junit.jupiter.api.DisplayName;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Types;
 import javax.tools.StandardLocation;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -27,9 +30,9 @@ public class TestKonvenceAP extends AbstractProcessor {
     public static final String enforcementsXmlName = "testkonvence_enforcements.xml";
     public static final String indentXmlOption = "com.varlanv.testkonvence.indentXml";
 
-    private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> testAnnotationFn = (roundEnv, annotation) -> {
+    private static final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> testAnnotationFn = (roundEnv, annotation) -> {
         val elements = roundEnv.getElementsAnnotatedWith(annotation);
-        val output = new ArrayList<EnforcementMeta.Item>();
+        val output = new ArrayList<APEnforcementMeta.Item>();
         for (val element : elements) {
             val displayNameAn = element.getAnnotation(DisplayName.class);
             val kind = element.getKind();
@@ -38,7 +41,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                     val methodElement = (ExecutableElement) element;
                     val methodName = methodElement.getSimpleName().toString();
                     output.add(
-                        new EnforcementMeta.Item(
+                        new APEnforcementMeta.Item(
                             findTopLevelClassName(element),
                             "",
                             element.getEnclosingElement().getSimpleName().toString(),
@@ -47,7 +50,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                     );
                 } else {
                     output.add(
-                        new EnforcementMeta.Item(
+                        new APEnforcementMeta.Item(
                             findTopLevelClassName(element),
                             "",
                             ((TypeElement) element).getQualifiedName().toString(),
@@ -61,7 +64,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                     val methodElement = (ExecutableElement) element;
                     val methodName = methodElement.getSimpleName().toString();
                     output.add(
-                        new EnforcementMeta.Item(
+                        new APEnforcementMeta.Item(
                             findTopLevelClassName(element),
                             displayNameVal,
                             element.getEnclosingElement().getSimpleName().toString(),
@@ -70,7 +73,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                     );
                 } else {
                     output.add(
-                        new EnforcementMeta.Item(
+                        new APEnforcementMeta.Item(
                             findTopLevelClassName(element),
                             displayNameVal,
                             ((TypeElement) element).getQualifiedName().toString(),
@@ -83,9 +86,9 @@ public class TestKonvenceAP extends AbstractProcessor {
         return output;
     };
 
-    private static final BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>> displayNameAnnotationFn = (roundEnv, annotation) -> {
+    private static final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> displayNameAnnotationFn = (roundEnv, annotation) -> {
         val elements = roundEnv.getElementsAnnotatedWith(annotation);
-        val output = new ArrayList<EnforcementMeta.Item>();
+        val output = new ArrayList<APEnforcementMeta.Item>();
         for (val element : elements) {
             val displayNameValue = element.getAnnotation(DisplayName.class).value();
             val kind = element.getKind();
@@ -93,7 +96,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                 val methodElement = (ExecutableElement) element;
                 val methodName = methodElement.getSimpleName().toString();
                 output.add(
-                    new EnforcementMeta.Item(
+                    new APEnforcementMeta.Item(
                         findTopLevelClassName(element),
                         displayNameValue,
                         element.getEnclosingElement().getSimpleName().toString(),
@@ -102,7 +105,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                 );
             } else {
                 output.add(
-                    new EnforcementMeta.Item(
+                    new APEnforcementMeta.Item(
                         findTopLevelClassName(element),
                         displayNameValue,
                         ((TypeElement) element).getQualifiedName().toString(),
@@ -138,7 +141,7 @@ public class TestKonvenceAP extends AbstractProcessor {
         T2 right;
     }
 
-    private static final Map<String, BiFunction<RoundEnvironment, TypeElement, List<EnforcementMeta.Item>>> strategy = Stream.concat(
+    private static final Map<String, BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>>> strategy = Stream.concat(
             supportedTestAnnotations.stream().map(it -> new Pair<>(it, testAnnotationFn)),
             Stream.of(new Pair<>("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn))
         )
@@ -158,7 +161,7 @@ public class TestKonvenceAP extends AbstractProcessor {
         return topLevelClassName;
     }
 
-    Set<EnforcementMeta.Item> output = new LinkedHashSet<>();
+    Set<APEnforcementMeta.Item> output = new LinkedHashSet<>();
 
     @Override
     @SneakyThrows
@@ -168,10 +171,10 @@ public class TestKonvenceAP extends AbstractProcessor {
             val xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(
                 output.stream()
                     .sorted(
-                        Comparator.comparing(EnforcementMeta.Item::fullEnclosingClassName)
-                            .thenComparing(EnforcementMeta.Item::className)
-                            .thenComparing(EnforcementMeta.Item::displayName)
-                            .thenComparing(EnforcementMeta.Item::methodName)
+                        Comparator.comparing(APEnforcementMeta.Item::fullEnclosingClassName)
+                            .thenComparing(APEnforcementMeta.Item::className)
+                            .thenComparing(APEnforcementMeta.Item::displayName)
+                            .thenComparing(APEnforcementMeta.Item::methodName)
                     )
                     .collect(Collectors.toList()));
             val resource = filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
