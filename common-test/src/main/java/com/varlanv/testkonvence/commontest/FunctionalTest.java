@@ -1,10 +1,7 @@
 package com.varlanv.testkonvence.commontest;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.util.GradleVersion;
@@ -15,12 +12,10 @@ import org.junit.jupiter.params.provider.Arguments;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +26,7 @@ public interface FunctionalTest extends BaseTest {
     Set<String> IGNORED_FILES_FOR_COPY = Set.of(".git", ".gradle", ".idea", "build", "out", "target");
 
     default Path projectRoot() {
-        return TestUtils.projectRoot();
+        return Objects.requireNonNull(TestUtils.projectRoot());
     }
 
     @BeforeAll

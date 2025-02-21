@@ -2,6 +2,7 @@ package com.varlanv.testkonvence.commontest;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
@@ -10,8 +11,10 @@ import java.util.function.Supplier;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUtils {
 
-    private static final AtomicReference<Path> projectRoot = new AtomicReference<>();
 
+    private static final AtomicReference<@Nullable Path> projectRoot = new AtomicReference<>();
+
+    @Nullable
     public static Path projectRoot() {
         return projectRoot.get();
     }

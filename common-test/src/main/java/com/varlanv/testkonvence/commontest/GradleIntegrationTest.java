@@ -17,6 +17,7 @@ import org.gradle.api.services.BuildServiceParameters;
 import org.gradle.api.services.BuildServiceRegistration;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -139,7 +140,8 @@ public interface GradleIntegrationTest extends IntegrationTest {
     class TaskProviderAssertions<SELF extends Task> {
 
         TaskProvider<SELF> subject;
-        private @NonFinal TaskAssertions<SELF> taskAssertions;
+        private @NonFinal
+        @Nullable TaskAssertions<SELF> taskAssertions;
 
         public TaskProviderAssertions<SELF> dependsOn(TaskProvider<? extends Task> taskProvider) {
             getTaskAssertions().dependsOn(taskProvider);
@@ -212,7 +214,7 @@ public interface GradleIntegrationTest extends IntegrationTest {
         public ProjectAssertions hasOnlyOneService(String name) {
             var buildServices = new ArrayList<>(project.getGradle().getSharedServices().getRegistrations());
             assertThat(buildServices).hasSize(1);
-            assertThat(buildServices.get(0).getName()).isEqualTo(name);
+            assertThat(buildServices.getFirst().getName()).isEqualTo(name);
             return this;
         }
 

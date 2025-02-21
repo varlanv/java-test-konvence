@@ -34,6 +34,8 @@ public class TestKonvencePlugin implements Plugin<Project> {
             val pluginDirPathProvider = buildDirectory.map(dir -> dir.getAsFile().toPath().resolve("tmp").resolve("testkonvenceplugin").toAbsolutePath());
             new ConfigureOnBeforeCompileTestStart(pluginDirPathProvider).setupAnnotationProcessorJar();
 
+            javaSourceSets.configureEach(javaSourceSet -> {
+            });
             tasks.withType(Test.class).configureEach(test -> {
                 val testTaskName = test.getName();
                 Optional.ofNullable(tasks.findByName("compile" + capitalize(testTaskName) + "Java"))
