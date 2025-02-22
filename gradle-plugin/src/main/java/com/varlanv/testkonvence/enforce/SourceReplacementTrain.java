@@ -3,7 +3,6 @@ package com.varlanv.testkonvence.enforce;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.var;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -96,7 +95,7 @@ public class SourceReplacementTrain {
                 }
                 val result = new ArrayList<>(lines);
                 if (matchedLineIndexes.size() == 1) {
-                    int idx = matchedLineIndexes.get(0);
+                    val idx = matchedLineIndexes.get(0);
                     val line = lines.get(idx);
                     result.set(idx, line.replace(originalName, newName));
                 } else {
@@ -147,7 +146,7 @@ public class SourceReplacementTrain {
         val lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
         val targetClassChunk = "class " + item.immediateClassName() + " {";
         for (val matchedLineIndex : matchedLineIndexes) {
-            var distance = 0;
+            int distance = 0;
             for (int idx = matchedLineIndex; idx >= 0; idx--) {
                 val line = lines.get(idx);
                 if (line.contains(targetClassChunk)) {

@@ -12,7 +12,9 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.VariantVersionMappingStrategy;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
+import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.jvm.toolchain.JvmVendorSpec;
 import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin;
 import org.gradle.plugins.ide.idea.IdeaPlugin;
@@ -96,21 +98,26 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     plugin -> {
                         var java = (JavaPluginExtension) extensions.getByName("java");
                         java.withSourcesJar();
-                        if (internalEnvironment.isCi()) {
-                            java.setSourceCompatibility(JavaLanguageVersion.of(javaVersion));
-                            java.setTargetCompatibility(JavaLanguageVersion.of(javaVersion));
-                        } else {
-                            java.toolchain((spec -> {
-                                spec.getLanguageVersion().set(JavaLanguageVersion.of(internalConventionExtension.getInternalModule().get() ? internalJavaVersion : jdkVersion));
-                                spec.getVendor().set(jvmVendor);
-                            }));
-                        }
-                        tasks.named("compileJava", JavaCompile.class).configure(javaCompile -> {
+                        var isInternalModule = internalConventionExtension.getInternalModule().get();
+                        java.toolchain((spec -> {
+                            spec.getLanguageVersion().set(JavaLanguageVersion.of(isInternalModule ? internalJavaVersion : jdkVersion));
+                            spec.getVendor().set(jvmVendor);
+                        }));
+                        var mainSourceSet = java.getSourceSets().getByName("main");
+
+                        tasks.named(mainSourceSet.getCompileJavaTaskName(), JavaCompile.class).configure(javaCompile -> {
                             var compileOpts = javaCompile.getOptions();
-                            if (!internalConventionExtension.getInternalModule().get()) {
+                            if (!isInternalModule) {
                                 compileOpts.getRelease().set(javaVersion);
                             }
                             compileOpts.getCompilerArgs().add("-Xlint:-options");
+                        });
+                        tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
+                            var javaToolchains = (JavaToolchainService) extensions.getByName("javaToolchains");
+                            javadoc.getJavadocTool().set(javaToolchains.javadocToolFor(toolchainSpec -> {
+                                toolchainSpec.getLanguageVersion().set(JavaLanguageVersion.of(javaVersion));
+                                toolchainSpec.getVendor().set(jvmVendor);
+                            }));
                         });
 
                         // -------------------- Add common dependencies start --------------------

@@ -1,8 +1,6 @@
 package com.varlanv.testkonvence.enforce;
 
 import lombok.Value;
-import lombok.val;
-import lombok.var;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,18 +36,16 @@ public class MethodNameFromDisplayName implements EnforceCandidate {
 
     @Override
     public String newName() {
-        var result = displayName;
-        for (val transformation : methodNameChain) {
-            if (result.isEmpty()) {
-                return result;
-            }
-            result = transformation.apply(result);
-
-        }
-        if (result.isEmpty()) {
-            return "";
-        }
-        return result;
+        return methodNameChain.stream().reduce(
+            displayName,
+            (result, transformation) -> {
+                if (result.isEmpty()) {
+                    return result;
+                }
+                return transformation.apply(result);
+            },
+            (a, b) -> b
+        );
     }
 
     @Override
