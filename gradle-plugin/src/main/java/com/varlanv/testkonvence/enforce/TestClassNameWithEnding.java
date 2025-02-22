@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence;
+package com.varlanv.testkonvence.enforce;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;

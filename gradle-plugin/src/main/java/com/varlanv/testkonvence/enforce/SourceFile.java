@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence;
+package com.varlanv.testkonvence.enforce;
 
 import java.nio.file.Path;
 import java.util.List;

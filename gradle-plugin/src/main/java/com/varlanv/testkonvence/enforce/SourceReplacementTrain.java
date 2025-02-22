@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence;
+package com.varlanv.testkonvence.enforce;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -143,7 +143,7 @@ public class SourceReplacementTrain {
 
     private Optional<Integer> findIndexOfClosestClassDistance(EnforcementMeta.Item item,
                                                               List<String> lines,
-                                                              ArrayList<Integer> matchedLineIndexes) {
+                                                              List<Integer> matchedLineIndexes) {
         val lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
         val targetClassChunk = "class " + item.immediateClassName() + " {";
         for (val matchedLineIndex : matchedLineIndexes) {

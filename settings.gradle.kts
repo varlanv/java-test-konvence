@@ -35,8 +35,6 @@ include(
     "constants",
     "annotation-processor",
     "gradle-plugin",
-    "test-enforce",
     "common-test",
     "gradle-functional-test",
-    "integration-test",
 )

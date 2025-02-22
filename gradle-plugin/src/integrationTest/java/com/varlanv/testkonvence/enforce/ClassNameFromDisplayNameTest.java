@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence;
+package com.varlanv.testkonvence.enforce;
 
 import com.varlanv.testkonvence.commontest.UnitTest;
 import org.junit.jupiter.api.DynamicTest;
@@ -21,7 +21,8 @@ class ClassNameFromDisplayNameTest implements UnitTest {
                 Map.entry("_123_", ""),
                 Map.entry("___", ""),
                 Map.entry("Some good fixture name", "SomeGoodFixtureName"),
-                Map.entry("Some good fixture name, which has comas, dots., question? marks, and exclamation marks!", "SomeGoodFixtureNameWhichHasComasDotsQuestionMarksAndExclamationMarks"),
+                Map.entry("Some good fixture name, which has comas, dots., question? marks, and exclamation marks!",
+                    "SomeGoodFixtureNameWhichHasComasDotsQuestionMarksAndExclamationMarks"),
                 Map.entry("Some123good456fixture789name0", "Some123good456fixture789name0"),
                 Map.entry("Слава Україні", ""),
                 Map.entry("qwe", "Qwe"),
@@ -31,7 +32,8 @@ class ClassNameFromDisplayNameTest implements UnitTest {
                 Map.entry("-a_b_c-", "ABC"),
                 Map.entry("a_b_c-", "ABC"),
                 Map.entry("-a_b_c", "ABC"),
-                Map.entry("Some good\n multiline   fixture\n name, which also has multiple whitespaces and_underscores   ", "SomeGoodMultilineFixtureNameWhichAlsoHasMultipleWhitespacesAndUnderscores")
+                Map.entry("Some good\n multiline   fixture\n name, which also has multiple whitespaces and_underscores   ",
+                    "SomeGoodMultilineFixtureNameWhichAlsoHasMultipleWhitespacesAndUnderscores")
             )
             .map(entry -> DynamicTest.dynamicTest(
                     "Display name \"%s\" should be converted to class name \"%s\"".formatted(entry.getKey(), entry.getValue()),

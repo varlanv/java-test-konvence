@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence;
+package com.varlanv.testkonvence.enforce;
 
 import lombok.val;
 
@@ -12,11 +12,7 @@ public interface EnforceCandidate {
 
     default Boolean isForReplacement() {
         val newName = newName();
-        if (newName.isEmpty()) {
-            return false;
-        } else {
-            return !originalName().equals(newName);
-        }
+        return !newName.isEmpty() && !originalName().equals(newName);
     }
 
     Kind kind();

@@ -8,7 +8,6 @@ internalConvention {
 }
 
 dependencies {
-    implementation(projects.testEnforce)
     implementation(projects.gradlePlugin)
     implementation(projects.annotationProcessor)
     testImplementation(libs.apache.commons.lang)

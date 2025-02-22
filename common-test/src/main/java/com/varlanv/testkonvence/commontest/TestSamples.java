@@ -1,13 +1,16 @@
 package com.varlanv.testkonvence.commontest;
 
 import com.varlanv.testkonvence.commontest.sample.Samples;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestSamples {
 
-    public static Samples samples() {
+    public static Samples testSamples() {
         return Samples.samples()
             .describe(
                 "Should replace method name if found",
@@ -248,7 +251,8 @@ public class TestSamples {
             .describeMany(
                 Stream.of(
                         Map.entry("Some good test name", "some_good_test_name"),
-                        Map.entry("Some good test name, which has comas, dots., question? marks, and exclamation marks!", "some_good_test_name_which_has_comas_dots_question_marks_and_exclamation_marks"),
+                        Map.entry("Some good test name, which has comas, dots., question? marks, and exclamation marks!",
+                            "some_good_test_name_which_has_comas_dots_question_marks_and_exclamation_marks"),
                         Map.entry("Some123good456test789name0", "some123good456test789name0"),
                         Map.entry("___abc___", "abc"),
                         Map.entry("a_b_c_", "a_b_c"),
@@ -258,7 +262,8 @@ public class TestSamples {
                         Map.entry("-a_b_c", "a_b_c")
                     )
                     .map(entry -> Map.entry(
-                            "Test method name \"someTest\" should be converted to method name \"%s\" when display name is \"%s\"".formatted(entry.getKey(), entry.getValue()),
+                            "Test method name \"someTest\" should be converted to method name \"%s\" when display name is \"%s\""
+                                .formatted(entry.getKey(), entry.getValue()),
                             spec -> spec
                                 .withClass("testcases.SomeTest")
                                 .withJavaSources("""

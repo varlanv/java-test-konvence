@@ -20,7 +20,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
     @TestFactory
     Stream<DynamicTest> fromSamples() {
-        return TestSamples.samples().stream()
+        return TestSamples.testSamples().stream()
             .map(sample -> DynamicTest.dynamicTest(sample.description(), () -> {
                 sample.consume(consumableSample -> {
                     runGradleRunnerFixture(
@@ -72,16 +72,6 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
                                 var modifiedSourceFileContent = Files.readString(sourceFile);
                                 assertThat(modifiedSourceFileContent).isEqualTo(sampleSourceFile.expectedTransformation());
                             }
-
-//                            System.out.println(
-//                                FileUtils.listFilesAndDirs(
-//                                        fixture.subjectProjectDir().toFile(),
-//                                        TrueFileFilter.INSTANCE,
-//                                        TrueFileFilter.INSTANCE
-//                                    ).stream()
-//                                    .map(it -> it.getAbsolutePath() + System.lineSeparator())
-//                                    .collect(Collectors.joining())
-//                            );
                         }
                     );
                 });

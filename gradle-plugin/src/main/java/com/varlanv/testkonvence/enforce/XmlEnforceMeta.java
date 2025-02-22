@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence;
+package com.varlanv.testkonvence.enforce;
 
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -24,18 +24,6 @@ public class XmlEnforceMeta {
         return items(
             Files.newInputStream(path)
         );
-    }
-
-    @SneakyThrows
-    private byte[] readAllBytes(InputStream is) {
-        try (val bis = new BufferedInputStream(is)) {
-            val out = new ByteArrayOutputStream();
-            int i;
-            while ((i = bis.read()) != -1) {
-                out.write(i);
-            }
-            return out.toByteArray();
-        }
     }
 
     @SneakyThrows
@@ -68,5 +56,17 @@ public class XmlEnforceMeta {
             );
         }
         return entriesList;
+    }
+
+    @SneakyThrows
+    private byte[] readAllBytes(InputStream is) {
+        try (val bis = new BufferedInputStream(is)) {
+            val out = new ByteArrayOutputStream();
+            int i;
+            while ((i = bis.read()) != -1) {
+                out.write(i);
+            }
+            return out.toByteArray();
+        }
     }
 }

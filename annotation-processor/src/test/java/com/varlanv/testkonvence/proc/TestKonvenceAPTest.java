@@ -335,7 +335,11 @@ class TestKonvenceAPTest implements UnitTest {
         }
         cute.andUseCompilerOptions("-A" + TestKonvenceAP.indentXmlOption + "=true").whenCompiled()
             .thenExpectThat().compilationSucceeds()
-            .andThat().fileObject(StandardLocation.SOURCE_OUTPUT, TestKonvenceAP.enforcementsXmlPackage, TestKonvenceAP.enforcementsXmlName).matches(contentMatcher(expectedOutput))
+            .andThat().fileObject(
+                StandardLocation.SOURCE_OUTPUT,
+                TestKonvenceAP.enforcementsXmlPackage,
+                TestKonvenceAP.enforcementsXmlName
+            ).matches(contentMatcher(expectedOutput))
             .executeTest();
     }
 
@@ -347,7 +351,9 @@ class TestKonvenceAPTest implements UnitTest {
                     assertThat(actual).isEmpty();
                 } else {
                     assertThat(actual).isNotBlank();
-                    assertThat(Arrays.stream(actual.split("\n")).map(String::trim).toList()).isEqualTo(Arrays.stream(content.split("\n")).map(String::trim).toList());
+                    assertThat(
+                        Arrays.stream(actual.split("\n")).map(String::trim).toList()
+                    ).isEqualTo(Arrays.stream(content.split("\n")).map(String::trim).toList());
                 }
             }
             return true;

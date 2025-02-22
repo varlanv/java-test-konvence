@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence;
+package com.varlanv.testkonvence.enforce;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -24,7 +24,9 @@ public class Train {
         val subject = new SourceReplacementTrain(
             new EnforcementMeta(
                 items.stream().map(item -> {
-                        val sourceFile = Paths.get(sourcesRootPath + File.separator + item.fullEnclosingClassName().replace(".", File.separator) + ".java");
+                        val sourceFile = Paths.get(
+                            sourcesRootPath + File.separator + item.fullEnclosingClassName().replace(".", File.separator) + ".java"
+                        );
                         if (Files.exists(sourceFile) && Files.isRegularFile(sourceFile)) {
                             EnforceCandidate candidate;
                             val classNameParts = item.className().split("\\.");

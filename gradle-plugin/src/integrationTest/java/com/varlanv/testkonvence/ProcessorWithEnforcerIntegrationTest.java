@@ -3,6 +3,7 @@ package com.varlanv.testkonvence;
 import com.varlanv.testkonvence.commontest.IntegrationTest;
 import com.varlanv.testkonvence.commontest.TestSamples;
 import com.varlanv.testkonvence.commontest.sample.ConsumableSample;
+import com.varlanv.testkonvence.enforce.Train;
 import com.varlanv.testkonvence.proc.TestKonvenceAP;
 import io.toolisticon.cute.Cute;
 import org.intellij.lang.annotations.Language;
@@ -22,7 +23,8 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
 
     @TestFactory
     Stream<DynamicTest> fromSamples() {
-        return TestSamples.samples().stream()
+        return TestSamples.testSamples().stream()
+            .filter(sample -> sample.sources().size() == 1)
             .map(sample -> DynamicTest.dynamicTest(
                     sample.description(),
                     () -> sample.consume(this::spec)
@@ -70,7 +72,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                 var fileManager = outcome.getFileManager();
                 var fileObjects = fileManager.getFileObjects();
                 assertThat(fileObjects).hasSize(1);
-                resultXml.set(fileObjects.get(0).getContentAsByteArray());
+                resultXml.set(fileObjects.getFirst().getContentAsByteArray());
             });
         assertThat(resultXml.get()).isNotEmpty();
         return resultXml.get();

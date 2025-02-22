@@ -9,8 +9,6 @@ import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.api.tasks.testing.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,31 +18,19 @@ import java.nio.file.StandardCopyOption;
 class ConfigureOnBeforeCompileTestStart implements Action<Task> {
 
     private static final Logger log = Logging.getLogger(ConfigureOnBeforeCompileTestStart.class);
-    Provider<Path> pluginDirPathProvider;
+    Provider<Path> annotationProcessorTargetPathProvider;
 
     @Override
-    public void execute(Task task) {
-        if (!(task instanceof JavaCompile)) {
-            throw new IllegalArgumentException(
-                String.format(
-                    "Task must be of type '[%s], but received: [%s]'. This is likely caused by a bug in the plugin [%s].",
-                    Test.class.getName(), task.getClass().getName(), Constants.PLUGIN_NAME
-                )
-            );
-        }
-        setupAnnotationProcessorJar();
-    }
-
     @SneakyThrows
-    public void setupAnnotationProcessorJar() {
-        val pluginDir = Files.createDirectories(pluginDirPathProvider.get());
-        val targetJarPath = pluginDir.resolve(Constants.PROCESSOR_JAR);
-        if (Files.notExists(targetJarPath)) {
+    public void execute(Task task) {
+        val targetPath = annotationProcessorTargetPathProvider.get();
+        if (Files.notExists(targetPath)) {
+            Files.createDirectories(targetPath.getParent());
             try (val in = ConfigureOnBeforeCompileTestStart.class.getResourceAsStream(Constants.PROCESSOR_JAR_RESOURCE)) {
                 if (in == null) {
                     log.error("Unable to find processor jar file [{}]", Constants.PROCESSOR_JAR);
                 } else {
-                    Files.copy(in, targetJarPath, StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
                 }
             }
         }

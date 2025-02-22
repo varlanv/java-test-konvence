@@ -2,6 +2,9 @@ package com.varlanv.testkonvence.commontest;
 
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.util.GradleVersion;
@@ -16,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,8 +105,8 @@ public interface FunctionalTest extends BaseTest {
         System.err.println();
         System.err.printf("%s STARTING GRADLE FUNCTIONAL TEST BUILD FOR SPEC %s. "
             + "LOGS BELOW ARE COMMING FROM GRADLE BUILD UNDER TEST %s%n", mark, getClass().getSimpleName(), mark);
-        System.err.printf("Gradle build args: %s%n", String.join("", runner.getArguments()));
-        System.err.printf("Java version - %s%n", System.getProperty("java.version"));
+        System.err.printf("Gradle build args: [%s]%n", String.join(" ", runner.getArguments()));
+        System.err.printf("Java version - [%s]%n", System.getProperty("java.version"));
         System.err.println();
         System.err.println(lineStart);
         System.err.println();
@@ -202,6 +206,18 @@ public interface FunctionalTest extends BaseTest {
             }
             return findDir(predicate, parentFile);
         }
+    }
+
+    default void printFileTree(Path path) {
+        System.out.println(
+            FileUtils.listFiles(
+                    path.toFile(),
+                    TrueFileFilter.INSTANCE,
+                    new NotFileFilter(new NameFileFilter(".gradle"))
+                ).stream()
+                .map(it -> it.getAbsolutePath() + System.lineSeparator())
+                .collect(Collectors.joining())
+        );
     }
 
     default Stream<Arguments> defaultDataTables() {
