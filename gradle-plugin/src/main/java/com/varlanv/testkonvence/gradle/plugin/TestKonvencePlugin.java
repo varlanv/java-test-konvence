@@ -24,6 +24,11 @@ public class TestKonvencePlugin implements Plugin<Project> {
             val buildDirectory = layout.getBuildDirectory();
             val dependencies = project.getDependencies();
             val testing = (TestingExtension) extensions.getByName("testing");
+            val testKonvenceExtension = (TestKonvenceExtensionInternal) extensions.create(
+                TestKonvenceExtension.class,
+                TestKonvenceExtension.EXTENSION_NAME,
+                TestKonvenceExtensionInternal.class
+            );
             dependencies.add(JavaPlugin.TEST_ANNOTATION_PROCESSOR_CONFIGURATION_NAME, "org.junit.jupiter:junit-jupiter-api:5.11.3");
             val annotationProcessorTargetPathProvider = buildDirectory.map(dir ->
                 dir.getAsFile().toPath().resolve("tmp").resolve("testkonvenceplugin").resolve(Constants.PROCESSOR_JAR)
@@ -56,52 +61,55 @@ public class TestKonvencePlugin implements Plugin<Project> {
                         enforceTask.getDryWithFailing().set(true);
                     });
             });
-            testing.getSuites().configureEach(suite -> {
-                if (suite instanceof JvmTestSuite) {
-                    val jvmSuite = (JvmTestSuite) suite;
-                    jvmSuite.sources(testSourceSet -> {
-                        tasks.named(taskName -> taskName.equals(testSourceSet.getCompileJavaTaskName())).configureEach(unsafeCompileTestJava -> {
-                            val compileTestJava = (JavaCompile) unsafeCompileTestJava;
-                            compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
-                            compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
-                            val options = compileTestJava.getOptions();
-                            val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
-                            val annotationProcessorClasspath = Optional.ofNullable(options.getAnnotationProcessorPath())
-                                .map(f -> f.plus(processorJar))
-                                .orElse(processorJar);
-                            options.setAnnotationProcessorPath(annotationProcessorClasspath);
-                        });
-                        jvmSuite.getTargets().configureEach(target -> {
-                            val testTask = target.getTestTask();
-                            val enforceTaskProvider = tasks.register(
-                                TestNameEnforceTask.name(testTask.getName()),
-                                TestNameEnforceTask.class,
-                                enforceTask -> {
-                                    enforceTask.getDryWithFailing().convention(false);
-                                    enforceTask.getSourcesRootProp().setFrom(objects.fileCollection().from(
-                                        project.provider(
-                                            () -> testSourceSet.getJava().getSrcDirs().iterator().next()
-                                        )
-                                    ));
-                                    val enforceFilesCollection = objects.fileCollection();
-                                    enforceFilesCollection.setFrom(
-                                        buildDirectory.map(buildDir -> buildDir
-                                            .getAsFileTree()
-                                            .matching(pattern ->
-                                                pattern.include("generated/sources/annotationProcessor/**/testkonvence_enforcements.xml")
+            project.afterEvaluate(ignore -> {
+                testing.getSuites().configureEach(suite -> {
+                    if (suite instanceof JvmTestSuite) {
+                        val jvmSuite = (JvmTestSuite) suite;
+                        jvmSuite.sources(testSourceSet -> {
+                            tasks.named(taskName -> taskName.equals(testSourceSet.getCompileJavaTaskName())).configureEach(unsafeCompileTestJava -> {
+                                val compileTestJava = (JavaCompile) unsafeCompileTestJava;
+                                compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
+                                compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
+                                val options = compileTestJava.getOptions();
+                                val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
+                                val annotationProcessorClasspath = Optional.ofNullable(options.getAnnotationProcessorPath())
+                                    .map(f -> f.plus(processorJar))
+                                    .orElse(processorJar);
+                                options.setAnnotationProcessorPath(annotationProcessorClasspath);
+                            });
+                            jvmSuite.getTargets().configureEach(target -> {
+                                val testTask = target.getTestTask();
+                                val enforceTaskProvider = tasks.register(
+                                    TestNameEnforceTask.name(testTask.getName()),
+                                    TestNameEnforceTask.class,
+                                    enforceTask -> {
+                                        enforceTask.getDryWithFailing().convention(false);
+                                        enforceTask.getSourcesRootProp().setFrom(objects.fileCollection().from(
+                                            project.provider(
+                                                () -> testSourceSet.getJava().getSrcDirs().iterator().next()
                                             )
-                                        )
-                                    );
-                                    enforceTask.getCompileClasspath().setFrom(testSourceSet.getCompileClasspath());
-                                    enforceTask.getEnforceFiles().setFrom(enforceFilesCollection);
-//                                    enforceTask.getEnforceFilesCollection().setFrom(enforceFilesCollection);
-                                });
-                            testTask.configure(test -> {
-                                test.finalizedBy(enforceTaskProvider);
+                                        ));
+                                        val enforceFilesCollection = objects.fileCollection();
+                                        enforceFilesCollection.setFrom(
+                                            buildDirectory.map(buildDir -> buildDir
+                                                .getAsFileTree()
+                                                .matching(pattern ->
+                                                    pattern.include("generated/sources/annotationProcessor/**/testkonvence_enforcements.xml")
+                                                )
+                                            )
+                                        );
+                                        enforceTask.getCompileClasspath().setFrom(testSourceSet.getCompileClasspath());
+                                        enforceTask.getEnforceFiles().setFrom(enforceFilesCollection);
+                                    });
+                                if (testKonvenceExtension.getApplyAutomaticallyAfterTestTask().get()) {
+                                    testTask.configure(test -> {
+                                        test.finalizedBy(enforceTaskProvider);
+                                    });
+                                }
                             });
                         });
-                    });
-                }
+                    }
+                });
             });
         });
     }

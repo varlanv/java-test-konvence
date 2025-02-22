@@ -1,11 +1,12 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.commontest.*;
-import com.varlanv.testkonvence.commontest.sample.Sample;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Files;
 import java.util.List;
@@ -83,10 +84,11 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
             }));
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
     @DisplayName("If requesting dry enforce with failing and there is enforcement fail, then should fail build")
-    void should_fail_when_dry_enforce_with_failing_and_there_is_enforcement_fail() {
-        Sample sample = TestSamples.testSamples().stream()
+    void should_fail_when_dry_enforce_with_failing_and_there_is_enforcement_fail(Boolean applyAutomaticallyAfterTestTask) {
+        var sample = TestSamples.testSamples().stream()
             .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
             .findFirst()
             .orElseThrow();
@@ -102,7 +104,31 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                     Files.writeString(
                         fixture.rootBuildFile(),
-                        defaultBuildGradleConfig
+                        groovy("""
+                            plugins {
+                                id("java")
+                                id("com.varlanv.test-konvence")
+                            }
+                            
+                            repositories {
+                                mavenLocal()
+                                mavenCentral()
+                            }
+                            
+                            testKonvence {
+                                applyAutomaticallyAfterTestTask(%s)
+                            }
+                            
+                            dependencies {
+                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+                            }
+                            
+                            test {
+                                useJUnitPlatform()
+                            }
+                            """.formatted(applyAutomaticallyAfterTestTask)
+                        )
                     );
                     var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
                     var sampleSourceFile = consumableSample.sourceFile();
@@ -114,6 +140,68 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                     var buildResult = build(fixture.runner(), GradleRunner::buildAndFail);
                     assertThat(buildResult.getOutput()).contains("found test name mismatch in");
+
+                    var newSourceFileContent = Files.readString(sourceFile);
+                    assertThat(newSourceFileContent).isEqualTo(contentBefore);
+                }
+            );
+        });
+    }
+
+    @Test
+    @DisplayName("If set property 'applyAutomaticallyAfterTestTask' to false, then should not apply enforce after test task")
+    void should_not_apply_enforce_when_applyAutomaticallyAfterTestTask_set_to_false() {
+        var sample = TestSamples.testSamples().stream()
+            .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
+            .findFirst()
+            .orElseThrow();
+        sample.consume(consumableSample -> {
+            runGradleRunnerFixture(
+                new DataTable(false, false, false, TestGradleVersions.current()),
+                List.of("test"),
+                (fixture) -> {
+                    Files.writeString(
+                        fixture.settingsFile(),
+                        defaultSettingsGradleConfig
+                    );
+
+                    Files.writeString(
+                        fixture.rootBuildFile(),
+                        groovy("""
+                            plugins {
+                                id("java")
+                                id("com.varlanv.test-konvence")
+                            }
+                            
+                            repositories {
+                                mavenLocal()
+                                mavenCentral()
+                            }
+                            
+                            testKonvence {
+                                applyAutomaticallyAfterTestTask(false)
+                            }
+                            
+                            dependencies {
+                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+                            }
+                            
+                            test {
+                                useJUnitPlatform()
+                            }
+                            """
+                        )
+                    );
+                    var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
+                    var sampleSourceFile = consumableSample.sourceFile();
+                    var contentBefore = sampleSourceFile.content();
+                    var relativeSourceFilePath = consumableSample.dir().relativize(sampleSourceFile.path());
+                    var sourceFile = javaDir.resolve(relativeSourceFilePath);
+                    Files.createDirectories(sourceFile.getParent());
+                    Files.move(sampleSourceFile.path(), sourceFile);
+
+                    build(fixture.runner(), GradleRunner::build);
 
                     var newSourceFileContent = Files.readString(sourceFile);
                     assertThat(newSourceFileContent).isEqualTo(contentBefore);
