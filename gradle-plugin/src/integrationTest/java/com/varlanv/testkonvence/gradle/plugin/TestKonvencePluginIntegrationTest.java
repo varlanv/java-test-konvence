@@ -1,9 +1,18 @@
-package com.varlanv.testkonvence.gradle.plugin;
-
-import com.varlanv.testkonvence.commontest.GradleIntegrationTest;
-
-public class TestKonvencePluginIntegrationTest implements GradleIntegrationTest {
-
+//package com.varlanv.testkonvence.gradle.plugin;
+//
+//import com.varlanv.testkonvence.commontest.GradleIntegrationTest;
+//import org.apache.commons.io.FileUtils;
+//import org.apache.commons.io.filefilter.TrueFileFilter;
+//import org.gradle.api.plugins.JavaPlugin;
+//import org.gradle.api.tasks.compile.JavaCompile;
+//import org.junit.jupiter.api.Test;
+//
+//import java.nio.file.Files;
+//import java.nio.file.StandardOpenOption;
+//import java.util.stream.Collectors;
+//
+//public class TestKonvencePluginIntegrationTest implements GradleIntegrationTest {
+//
 //    @Test
 //    void asd() {
 //        runProjectFixture(fixture -> {
@@ -56,21 +65,21 @@ public class TestKonvencePluginIntegrationTest implements GradleIntegrationTest 
 //            project.getPlugins().apply(JavaPlugin.class);
 //            project.getPlugins().apply(TestKonvencePlugin.class);
 //            evaluateProject(project);
-//            var testTask = project.getTasks().named("test", org.gradle.api.tasks.testing.Test.class).get();
-////            List<Action<? super Task>> actions = testTask.getActions();
-////            var enforceTask = (TestNameEnforceAction) project.getTasks().getByName(TestNameEnforceAction.name());
-//            var javaCompileTask = project.getTasks().named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class).get();
-////
-//            System.out.println(
-//                FileUtils.listFilesAndDirs(
-//                        fixture.projectDir().toFile(),
-//                        TrueFileFilter.INSTANCE,
-//                        TrueFileFilter.INSTANCE
-//                    ).stream()
-//                    .map(it -> it.getAbsolutePath() + System.lineSeparator())
-//                    .collect(Collectors.joining())
-//            );
-//            testTask.executeTests();
+////            var testTask = project.getTasks().named("test", org.gradle.api.tasks.testing.Test.class).get();
+//////            List<Action<? super Task>> actions = testTask.getActions();
+//////            var enforceTask = (TestNameEnforceAction) project.getTasks().getByName(TestNameEnforceAction.name());
+////            var javaCompileTask = project.getTasks().named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class).get();
+//////
+////            System.out.println(
+////                FileUtils.listFilesAndDirs(
+////                        fixture.projectDir().toFile(),
+////                        TrueFileFilter.INSTANCE,
+////                        TrueFileFilter.INSTANCE
+////                    ).stream()
+////                    .map(it -> it.getAbsolutePath() + System.lineSeparator())
+////                    .collect(Collectors.joining())
+////            );
+////            testTask.executeTests();
 ////            System.out.println(javaCompile.getClasspath().getFiles());
 ////            System.out.println(enforceTask.getCompileClasspath().getFiles());
 ////            System.out.println("Java sources root -> " + enforceTask.getSourcesRoot().getAsFile().get().getPath());
@@ -81,4 +90,4 @@ public class TestKonvencePluginIntegrationTest implements GradleIntegrationTest 
 ////            enforceTask.enforce();
 //        });
 //    }
-}
+//}

@@ -87,7 +87,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     @DisplayName("If requesting dry enforce with failing and there is enforcement fail, then should fail build")
-    void should_fail_when_dry_enforce_with_failing_and_there_is_enforcement_fail(Boolean applyAutomaticallyAfterTestTask) {
+    void should_fail_when_dry_enforce_with_failing_and_there_is_enforcement_fail_then_fail_build(Boolean applyAutomaticallyAfterTestTask) {
         var sample = TestSamples.testSamples().stream()
             .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
             .findFirst()
@@ -205,6 +205,68 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                     var newSourceFileContent = Files.readString(sourceFile);
                     assertThat(newSourceFileContent).isEqualTo(contentBefore);
+                }
+            );
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @DisplayName("'testKonvenceEnforceAll' task should replace method names if found")
+    void testKonvenceEnforceAll_should_replace_method_names_if_found(Boolean applyAutomaticallyAfterTestTask) {
+        var sample = TestSamples.testSamples().stream()
+            .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
+            .findFirst()
+            .orElseThrow();
+        sample.consume(consumableSample -> {
+            runGradleRunnerFixture(
+                new DataTable(false, false, false, TestGradleVersions.current()),
+                List.of("testKonvenceEnforceAll"),
+                (fixture) -> {
+                    Files.writeString(
+                        fixture.settingsFile(),
+                        defaultSettingsGradleConfig
+                    );
+
+                    Files.writeString(
+                        fixture.rootBuildFile(),
+                        groovy("""
+                            plugins {
+                                id("java")
+                                id("com.varlanv.test-konvence")
+                            }
+                            
+                            repositories {
+                                mavenLocal()
+                                mavenCentral()
+                            }
+                            
+                            testKonvence {
+                                applyAutomaticallyAfterTestTask(%s)
+                            }
+                            
+                            dependencies {
+                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+                            }
+                            
+                            test {
+                                useJUnitPlatform()
+                            }
+                            """.formatted(applyAutomaticallyAfterTestTask)
+                        )
+                    );
+                    var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
+                    var sampleSourceFile = consumableSample.sourceFile();
+                    var relativeSourceFilePath = consumableSample.dir().relativize(sampleSourceFile.path());
+                    var sourceFile = javaDir.resolve(relativeSourceFilePath);
+                    Files.createDirectories(sourceFile.getParent());
+                    Files.move(sampleSourceFile.path(), sourceFile);
+
+                    build(fixture.runner(), GradleRunner::build);
+
+                    var newSourceFileContent = Files.readString(sourceFile);
+                    assertThat(newSourceFileContent).isEqualTo(sampleSourceFile.expectedTransformation());
                 }
             );
         });

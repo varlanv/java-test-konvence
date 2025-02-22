@@ -113,7 +113,8 @@ public class TestKonvenceAP extends AbstractProcessor {
             "org.junit.jupiter.api.Test",
             "org.junit.jupiter.params.ParameterizedTest",
             "org.junit.jupiter.api.TestFactory",
-            "org.junit.jupiter.api.RepeatedTest"
+            "org.junit.jupiter.api.RepeatedTest",
+            "org.junit.jupiter.api.DynamicTest"
         )
     );
 

@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.enforce.Train;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.gradle.api.Action;
@@ -8,21 +9,21 @@ import org.gradle.api.Task;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
-import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.stream.Collectors;
 
+@Getter
 @RequiredArgsConstructor
 public class TestNameEnforceAction implements Action<Task> {
 
     private static final Logger log = Logging.getLogger(TestNameEnforceAction.class);
-
     ConfigurableFileCollection sourcesRootProp;
     ConfigurableFileCollection compileClasspath;
     ConfigurableFileCollection enforceFiles;
-    Property<Boolean> dryWithFailingProperty;
+    Provider<Boolean> dryWithFailingProperty;
 
     @Override
     public void execute(Task task) {

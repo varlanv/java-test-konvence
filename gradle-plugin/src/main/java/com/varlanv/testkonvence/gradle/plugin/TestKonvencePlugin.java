@@ -4,12 +4,13 @@ import com.varlanv.testkonvence.Constants;
 import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.jvm.JvmTestSuite;
+import org.gradle.api.plugins.jvm.JvmTestSuiteTarget;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.testing.base.TestingExtension;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
 public class TestKonvencePlugin implements Plugin<Project> {
@@ -19,6 +20,7 @@ public class TestKonvencePlugin implements Plugin<Project> {
         project.getPlugins().withId("java", javaPlugin -> {
             val extensions = project.getExtensions();
             val objects = project.getObjects();
+            val providers = project.getProviders();
             val tasks = project.getTasks();
             val layout = project.getLayout();
             val buildDirectory = layout.getBuildDirectory();
@@ -39,75 +41,101 @@ public class TestKonvencePlugin implements Plugin<Project> {
                 }
             );
             val testKonvenceTaskGroup = "test konvence";
-            tasks.register("testKonvenceEnforceAll").configure(testKonvenceEnforceAll -> {
-                testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
-                testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
-                testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
-                tasks.named(taskName -> taskName.contains("KonvenceEnforce") && !taskName.endsWith("All"))
-                    .forEach(testKonvenceEnforceAll::finalizedBy);
-            });
-            tasks.register("testKonvenceDryEnforceWithFailing").configure(testKonvenceEnforceAll -> {
-                testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
-                testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
-                testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
-                tasks.named(taskName -> taskName.contains("KonvenceEnforce") && !taskName.endsWith("All"))
-                    .stream()
-                    .filter(TestNameEnforceTask.class::isInstance)
-                    .map(TestNameEnforceTask.class::cast)
-                    .forEach(enforceTask -> {
-                        testKonvenceEnforceAll.finalizedBy(enforceTask);
-                        enforceTask.getDryWithFailing().set(true);
-                    });
-            });
-            project.afterEvaluate(ignore -> {
-                testing.getSuites().configureEach(suite -> {
-                    if (suite instanceof JvmTestSuite) {
-                        val jvmSuite = (JvmTestSuite) suite;
-                        jvmSuite.sources(testSourceSet -> {
-                            tasks.named(taskName -> taskName.equals(testSourceSet.getCompileJavaTaskName())).configureEach(unsafeCompileTestJava -> {
-                                val compileTestJava = (JavaCompile) unsafeCompileTestJava;
-                                compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
-                                compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
-                                val options = compileTestJava.getOptions();
-                                val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
-                                val annotationProcessorClasspath = Optional.ofNullable(options.getAnnotationProcessorPath())
-                                    .map(f -> f.plus(processorJar))
-                                    .orElse(processorJar);
-                                options.setAnnotationProcessorPath(annotationProcessorClasspath);
-                            });
-                            jvmSuite.getTargets().configureEach(target -> {
-                                val testTask = target.getTestTask();
+            val testKonvenceEnforceAllTaskName = "testKonvenceEnforceAll";
+            val testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
+
+            project.afterEvaluate(p -> {
+                val testNameEnforceActions = testing.getSuites().stream()
+                    .filter(JvmTestSuite.class::isInstance)
+                    .map(JvmTestSuite.class::cast)
+                    .flatMap(jvmSuite -> {
+                        val testSourceSet = jvmSuite.getSources();
+                        // configure compile task to use annotation processor
+                        tasks.named(testSourceSet.getCompileJavaTaskName(), JavaCompile.class).configure(compileTestJava -> {
+                            compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
+                            compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
+                            val options = compileTestJava.getOptions();
+                            val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
+                            val annotationProcessorClasspath = Optional.ofNullable(options.getAnnotationProcessorPath())
+                                .map(f -> f.plus(processorJar))
+                                .orElse(processorJar);
+                            options.setAnnotationProcessorPath(annotationProcessorClasspath);
+                        });
+                        return jvmSuite.getTargets().stream()
+                            .map(JvmTestSuiteTarget::getTestTask)
+                            .map(testTask -> {
+                                val enforceFilesCollection = objects.fileCollection();
+                                enforceFilesCollection.setFrom(
+                                    buildDirectory.map(buildDir -> buildDir
+                                        .getAsFileTree()
+                                        .matching(pattern ->
+                                            pattern.include("generated/sources/annotationProcessor/**/testkonvence_enforcements.xml")
+                                        )
+                                    )
+                                );
+                                val compileClasspath = objects.fileCollection();
+                                compileClasspath.setFrom(testSourceSet.getCompileClasspath());
+                                val testNameEnforceAction = new TestNameEnforceAction(
+                                    objects.fileCollection().from(
+                                        project.provider(
+                                            () -> testSourceSet.getJava().getSrcDirs().iterator().next()
+                                        )
+                                    ),
+                                    compileClasspath,
+                                    enforceFilesCollection,
+                                    testKonvenceExtension.getApplyAutomaticallyAfterTestTask()
+                                );
                                 val enforceTaskProvider = tasks.register(
                                     TestNameEnforceTask.name(testTask.getName()),
                                     TestNameEnforceTask.class,
                                     enforceTask -> {
-                                        enforceTask.getDryWithFailing().convention(false);
-                                        enforceTask.getSourcesRootProp().setFrom(objects.fileCollection().from(
-                                            project.provider(
-                                                () -> testSourceSet.getJava().getSrcDirs().iterator().next()
-                                            )
-                                        ));
-                                        val enforceFilesCollection = objects.fileCollection();
-                                        enforceFilesCollection.setFrom(
-                                            buildDirectory.map(buildDir -> buildDir
-                                                .getAsFileTree()
-                                                .matching(pattern ->
-                                                    pattern.include("generated/sources/annotationProcessor/**/testkonvence_enforcements.xml")
-                                                )
-                                            )
-                                        );
-                                        enforceTask.getCompileClasspath().setFrom(testSourceSet.getCompileClasspath());
-                                        enforceTask.getEnforceFiles().setFrom(enforceFilesCollection);
-                                    });
+                                        enforceTask.getSourcesRootProp().setFrom(testNameEnforceAction.sourcesRootProp());
+                                        enforceTask.getCompileClasspath().setFrom(testNameEnforceAction.compileClasspath());
+                                        enforceTask.getEnforceFiles().setFrom(testNameEnforceAction.enforceFiles());
+                                    }
+                                );
                                 if (testKonvenceExtension.getApplyAutomaticallyAfterTestTask().get()) {
                                     testTask.configure(test -> {
                                         test.finalizedBy(enforceTaskProvider);
                                     });
                                 }
+                                return testNameEnforceAction;
                             });
-                        });
-                    }
-                });
+                    })
+                    .collect(Collectors.toList());
+
+                tasks.register(
+                    testKonvenceEnforceAllTaskName,
+                    testKonvenceEnforceAll -> {
+                        testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
+                        testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
+                        testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
+                        testNameEnforceActions.forEach(action ->
+                            testKonvenceEnforceAll.doLast(
+                                new TestNameEnforceAction(
+                                    action.sourcesRootProp(),
+                                    action.compileClasspath(),
+                                    action.enforceFiles(),
+                                    providers.provider(() -> false)
+                                )
+                            ));
+                    });
+                tasks.register(
+                    testKonvenceDryEnforceWithFailingTaskName,
+                    testKonvenceEnforceAll -> {
+                        testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
+                        testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
+                        testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
+                        testNameEnforceActions.forEach(action ->
+                            testKonvenceEnforceAll.doLast(
+                                new TestNameEnforceAction(
+                                    action.sourcesRootProp(),
+                                    action.compileClasspath(),
+                                    action.enforceFiles(),
+                                    providers.provider(() -> true)
+                                )
+                            ));
+                    });
             });
         });
     }
