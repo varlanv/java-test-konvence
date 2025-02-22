@@ -22,14 +22,12 @@ public class TestKonvencePlugin implements Plugin<Project> {
             val tasks = project.getTasks();
             val layout = project.getLayout();
             val buildDirectory = layout.getBuildDirectory();
-            val dependencies = project.getDependencies();
             val testing = (TestingExtension) extensions.getByName("testing");
             val testKonvenceExtension = (TestKonvenceExtensionInternal) extensions.create(
                 TestKonvenceExtension.class,
                 TestKonvenceExtension.EXTENSION_NAME,
                 TestKonvenceExtensionInternal.class
             );
-            dependencies.add(JavaPlugin.TEST_ANNOTATION_PROCESSOR_CONFIGURATION_NAME, "org.junit.jupiter:junit-jupiter-api:5.11.3");
             val annotationProcessorTargetPathProvider = buildDirectory.map(dir ->
                 dir.getAsFile().toPath().resolve("tmp").resolve("testkonvenceplugin").resolve(Constants.PROCESSOR_JAR)
             );
