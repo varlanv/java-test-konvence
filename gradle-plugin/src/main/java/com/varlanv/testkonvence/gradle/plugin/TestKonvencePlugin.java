@@ -17,7 +17,6 @@ public class TestKonvencePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getPlugins().withId("java", javaPlugin -> {
-            val log = project.getLogger();
             val extensions = project.getExtensions();
             val objects = project.getObjects();
             val tasks = project.getTasks();
@@ -36,54 +35,53 @@ public class TestKonvencePlugin implements Plugin<Project> {
                     task.getOutputs().file(annotationProcessorTargetPathProvider);
                 }
             );
+            tasks.register("testKonvenceEnforceAll").configure(testKonvenceEnforceAll -> {
+                testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
+                testKonvenceEnforceAll.setGroup("test konvence");
+                testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
+                tasks.named(taskName -> taskName.contains("KonvenceEnforce") && !taskName.endsWith("All"))
+                    .forEach(testKonvenceEnforceAll::finalizedBy);
+            });
             testing.getSuites().configureEach(suite -> {
                 if (suite instanceof JvmTestSuite) {
                     val jvmSuite = (JvmTestSuite) suite;
                     jvmSuite.sources(testSourceSet -> {
-                        val compileTestJava = (JavaCompile) tasks.findByName(testSourceSet.getCompileJavaTaskName());
-                        if (compileTestJava == null) {
-                            log.error("Did not find compile java task for test source set [{}]", testSourceSet.getName());
-                            return;
-                        }
-                        compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
-                        compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
-                        val enforceFilesCollection = objects.fileCollection();
-                        enforceFilesCollection.setFrom(
-                            buildDirectory.map(buildDir -> buildDir
-                                .getAsFileTree()
-                                .matching(pattern -> pattern.include("generated/sources/annotationProcessor/**/testkonvence_enforcements.xml"))
-                            )
-                        );
-                        val options = compileTestJava.getOptions();
-                        val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
-                        val annotationProcessorClasspath = Optional.ofNullable(options.getAnnotationProcessorPath())
-                            .map(f -> f.plus(processorJar))
-                            .orElse(processorJar);
-                        options.setAnnotationProcessorPath(annotationProcessorClasspath);
-                        val sourcesRootProp = objects.fileCollection().from(
-                            project.provider(
-                                () -> testSourceSet.getJava().getSrcDirs().iterator().next()
-                            )
-                        );
-                        val compileClasspathCollection = objects.fileCollection();
-                        compileClasspathCollection.setFrom(testSourceSet.getCompileClasspath());
+                        tasks.named(taskName -> taskName.equals(testSourceSet.getCompileJavaTaskName())).configureEach(unsafeCompileTestJava -> {
+                            val compileTestJava = (JavaCompile) unsafeCompileTestJava;
+                            compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
+                            compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
+                            val options = compileTestJava.getOptions();
+                            val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
+                            val annotationProcessorClasspath = Optional.ofNullable(options.getAnnotationProcessorPath())
+                                .map(f -> f.plus(processorJar))
+                                .orElse(processorJar);
+                            options.setAnnotationProcessorPath(annotationProcessorClasspath);
+                        });
                         jvmSuite.getTargets().configureEach(target -> {
-                            val enforceTaskProvider = tasks.register(testSourceSet.getName() + "KonvenceEnforce", enforceTask -> {
-                                enforceTask.doLast(
-                                    new TestNameEnforceAction(
-                                        sourcesRootProp,
-                                        compileClasspathCollection,
-                                        enforceFilesCollection
-                                    )
-                                );
-                                val inputs = enforceTask.getInputs();
-                                inputs.files(sourcesRootProp);
-                                inputs.files(compileClasspathCollection);
-                                inputs.files(enforceFilesCollection);
-                                // todo configure output
-//                                val outputs = enforceTask.getOutputs();
-                            });
-                            target.getTestTask().configure(test -> {
+                            val testTask = target.getTestTask();
+                            val enforceTaskProvider = tasks.register(
+                                TestNameEnforceTask.name(testTask.getName()),
+                                TestNameEnforceTask.class,
+                                enforceTask -> {
+                                    enforceTask.getSourcesRootProp().setFrom(objects.fileCollection().from(
+                                        project.provider(
+                                            () -> testSourceSet.getJava().getSrcDirs().iterator().next()
+                                        )
+                                    ));
+                                    val enforceFilesCollection = objects.fileCollection();
+                                    enforceFilesCollection.setFrom(
+                                        buildDirectory.map(buildDir -> buildDir
+                                            .getAsFileTree()
+                                            .matching(pattern ->
+                                                pattern.include("generated/sources/annotationProcessor/**/testkonvence_enforcements.xml")
+                                            )
+                                        )
+                                    );
+                                    enforceTask.getCompileClasspath().setFrom(testSourceSet.getCompileClasspath());
+                                    enforceTask.getEnforceFiles().setFrom(enforceFilesCollection);
+//                                    enforceTask.getEnforceFilesCollection().setFrom(enforceFilesCollection);
+                                });
+                            testTask.configure(test -> {
                                 test.finalizedBy(enforceTaskProvider);
                             });
                         });

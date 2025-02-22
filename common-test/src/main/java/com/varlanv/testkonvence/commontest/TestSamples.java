@@ -46,6 +46,131 @@ public class TestSamples {
                         """
                     ))
             .describe(
+                "Should replace only one method name if there is two methods, one is for replacement, and one method name is subset of other",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name 1")
+                            void someTest() {
+                            }
+                        
+                            @Test
+                            @DisplayName("Some display name 2")
+                            void someTestTwo() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name 1")
+                            void some_display_name_1() {
+                            }
+                        
+                            @Test
+                            @DisplayName("Some display name 2")
+                            void some_display_name_2() {
+                            }
+                        }
+                        """))
+            .describe(
+                "Should replace only one method name if there is two methods, one is for replacement, and one method name is subset of other - reversed method order",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name 2")
+                            void someTestTwo() {
+                            }
+                        
+                            @Test
+                            @DisplayName("Some display name 1")
+                            void someTest() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name 2")
+                            void some_display_name_2() {
+                            }
+                        
+                            @Test
+                            @DisplayName("Some display name 1")
+                            void some_display_name_1() {
+                            }
+                        }
+                        """))
+            .describe(
+                "Should replace method name if found and method name not indented",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void
+                            someTest
+                            (
+                            )
+                            {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void
+                            some_display_name
+                            (
+                            )
+                            {
+                            }
+                        }
+                        """
+                    ))
+            .describe(
                 "Should preserver CRLF line separator when replacing method name",
                 spec -> spec
                     .withClass("testcases.SomeTest")
