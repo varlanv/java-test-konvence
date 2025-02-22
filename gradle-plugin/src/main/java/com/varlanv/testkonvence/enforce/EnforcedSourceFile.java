@@ -25,6 +25,18 @@ public class EnforcedSourceFile implements SourceFile {
 
     @Override
     @SneakyThrows
+    public String text() {
+        return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+    }
+
+    @Override
+    @SneakyThrows
+    public void save(String text) {
+        Files.write(path, text.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    @Override
+    @SneakyThrows
     public void save(List<String> lines, String separator) {
         Files.write(
             path,

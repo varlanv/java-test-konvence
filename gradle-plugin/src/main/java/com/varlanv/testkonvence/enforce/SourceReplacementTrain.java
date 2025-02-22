@@ -1,12 +1,9 @@
 package com.varlanv.testkonvence.enforce;
 
+import com.varlanv.testkonvence.Constants;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.val;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -15,27 +12,29 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class SourceReplacementTrain {
 
+    Boolean dryWithFailing;
     EnforcementMeta enforcementMeta;
-
-    @SneakyThrows
-    private String resolveLineSeparator(Path path, List<String> lines) {
-        if (lines.isEmpty()) {
-            return "";
-        }
-        val content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-        if (content.startsWith(lines.get(0) + "\r\n")) {
-            return "\r\n";
-        } else {
-            return "\n";
-        }
-    }
 
     public void run() {
         rules().forEach(rule -> {
             val target = rule.target();
-            val originalLines = target.lines();
+            val originalText = target.text();
+            val lineSeparator = LineSeparator.forFile(target.path(), originalText).separator();
+            val originalLines = Arrays.asList(originalText.split(lineSeparator));
             val newLines = rule.apply(originalLines);
-            target.save(newLines, resolveLineSeparator(target.path(), originalLines));
+            val modifiedText = newLines.stream().map(line -> line + lineSeparator).collect(Collectors.joining());
+            if (!originalText.equals(modifiedText)) {
+                if (dryWithFailing) {
+                    throw new IllegalStateException(
+                        String.format(
+                            "[%s] - found test name mismatch in file [%s]",
+                            Constants.PLUGIN_NAME, rule.target().path().toAbsolutePath()
+                        )
+                    );
+                } else {
+                    target.save(modifiedText);
+                }
+            }
         });
     }
 
@@ -50,7 +49,6 @@ public class SourceReplacementTrain {
                 } else {
                     return new NoopSourceReplacementRule(item.sourceFile());
                 }
-
             })
             .filter(sourceReplacementRule -> !sourceReplacementRule.isNoop())
             .collect(

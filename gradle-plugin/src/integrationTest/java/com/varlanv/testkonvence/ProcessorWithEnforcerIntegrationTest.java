@@ -39,7 +39,8 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
             new Train(
                 resultXmlPath,
                 sample.dir(),
-                List.of()
+                List.of(),
+                false
             ).run();
 
             var actual = sample.sourceFile().content();

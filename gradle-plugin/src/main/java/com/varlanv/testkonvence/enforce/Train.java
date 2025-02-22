@@ -17,11 +17,13 @@ public class Train {
     Path resultXml;
     Path sourcesRoot;
     Collection<Path> sources;
+    Boolean dryWithFailing;
 
     public void run() {
         val items = new XmlEnforceMeta().items(resultXml);
         val sourcesRootPath = sourcesRoot.toAbsolutePath().toString();
         val subject = new SourceReplacementTrain(
+            dryWithFailing,
             new EnforcementMeta(
                 items.stream().map(item -> {
                         val sourceFile = Paths.get(

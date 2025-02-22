@@ -96,7 +96,8 @@ public interface FunctionalTest extends BaseTest {
         });
     }
 
-    default BuildResult build(GradleRunner runner) {
+    @SneakyThrows
+    default BuildResult build(GradleRunner runner, ThrowingFunction<GradleRunner, BuildResult> runFn) {
         var lineStart = "*".repeat(215);
         var lineEnd = "*".repeat(161);
         var mark = "*".repeat(40);
@@ -111,7 +112,7 @@ public interface FunctionalTest extends BaseTest {
         System.err.println(lineStart);
         System.err.println();
         try {
-            return runner.build();
+            return runFn.apply(runner);
         } finally {
             System.err.println();
             System.err.println(lineEnd);

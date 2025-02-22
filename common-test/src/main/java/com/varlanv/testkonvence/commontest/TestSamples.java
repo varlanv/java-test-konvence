@@ -213,7 +213,7 @@ public class TestSamples {
                         + "\n"
                         + "class SomeTest {\n"
                         + "\n"
-                        + "    @Test\r\n"
+                        + "    @Test\n"
                         + "    @DisplayName(\"Some display name\")\n"
                         + "    void someTest() {\n"
                         + "    }\n"

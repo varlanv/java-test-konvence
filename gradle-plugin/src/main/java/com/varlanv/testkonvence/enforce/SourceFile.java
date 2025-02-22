@@ -9,5 +9,9 @@ public interface SourceFile {
 
     List<String> lines();
 
+    String text();
+
+    void save(String text);
+
     void save(List<String> lines, String separator);
 }

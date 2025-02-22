@@ -35,12 +35,26 @@ public class TestKonvencePlugin implements Plugin<Project> {
                     task.getOutputs().file(annotationProcessorTargetPathProvider);
                 }
             );
+            val testKonvenceTaskGroup = "test konvence";
             tasks.register("testKonvenceEnforceAll").configure(testKonvenceEnforceAll -> {
                 testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
-                testKonvenceEnforceAll.setGroup("test konvence");
+                testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
                 testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
                 tasks.named(taskName -> taskName.contains("KonvenceEnforce") && !taskName.endsWith("All"))
                     .forEach(testKonvenceEnforceAll::finalizedBy);
+            });
+            tasks.register("testKonvenceDryEnforceWithFailing").configure(testKonvenceEnforceAll -> {
+                testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
+                testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
+                testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
+                tasks.named(taskName -> taskName.contains("KonvenceEnforce") && !taskName.endsWith("All"))
+                    .stream()
+                    .filter(TestNameEnforceTask.class::isInstance)
+                    .map(TestNameEnforceTask.class::cast)
+                    .forEach(enforceTask -> {
+                        testKonvenceEnforceAll.finalizedBy(enforceTask);
+                        enforceTask.getDryWithFailing().set(true);
+                    });
             });
             testing.getSuites().configureEach(suite -> {
                 if (suite instanceof JvmTestSuite) {
@@ -63,6 +77,7 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                 TestNameEnforceTask.name(testTask.getName()),
                                 TestNameEnforceTask.class,
                                 enforceTask -> {
+                                    enforceTask.getDryWithFailing().convention(false);
                                     enforceTask.getSourcesRootProp().setFrom(objects.fileCollection().from(
                                         project.provider(
                                             () -> testSourceSet.getJava().getSrcDirs().iterator().next()
