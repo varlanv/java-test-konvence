@@ -8,6 +8,7 @@ import lombok.val;
 
 import java.util.*;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class SourceReplacementTrain {
@@ -48,38 +49,42 @@ public class SourceReplacementTrain {
 
     private Transformations transformations() {
         return enforcementMeta.items().stream()
+            .flatMap(item -> {
+                val candidate = item.candidate();
+                if (candidate.kind() == EnforceCandidate.Kind.CLASS) {
+                    return Stream.empty();
+                }
+                return Stream.concat(
+                    displayNameToMethodNameTransformations(item),
+                    methodNameToDisplayNameTransformations(item)
+                );
+            })
             .reduce(
                 Transformations.empty(),
-                (resultTransformations, item) -> {
-                    if (!item.candidate().isForReplacement()) {
-                        return resultTransformations;
-                    }
-                    if (item.candidate().kind() == EnforceCandidate.Kind.METHOD) {
-                        return methodReplacementRule(item, resultTransformations);
-                    } else {
-                        return resultTransformations;
-                    }
-
-                },
+                Transformations::register,
                 FunctionalUtil.throwingCombiner()
             );
     }
 
-
-    @Value
-    private static class MethodNameMatch {
-
-        int lineIndex;
-        ImmutableIntVector matchIndexes;
+    private Stream<Transformations.Transformation> methodNameToDisplayNameTransformations(EnforcementMeta.Item item) {
+        val candidate = item.candidate();
+        if (candidate.kind() != EnforceCandidate.Kind.METHOD || !candidate.displayName().isEmpty()) {
+            return Stream.empty();
+        }
+        return Stream.empty();
     }
 
-    private Transformations methodReplacementRule(EnforcementMeta.Item item, Transformations transformations) {
-        val sourceFile = item.sourceFile();
-        val lines = sourceFile.lines();
-        val linesView = lines.view();
+    private Stream<Transformations.Transformation> displayNameToMethodNameTransformations(EnforcementMeta.Item item) {
         val candidate = item.candidate();
         val newName = candidate.newName();
         val originalName = candidate.originalName();
+
+        if (newName.isEmpty() || originalName.equals(newName) || candidate.kind() != EnforceCandidate.Kind.METHOD) {
+            return Stream.empty();
+        }
+        val sourceFile = item.sourceFile();
+        val lines = sourceFile.lines();
+        val linesView = lines.view();
         val methodNameMatches = new ArrayList<MethodNameMatch>(2);
 
         for (int lineIdx = 0, linesSize = linesView.size(); lineIdx < linesSize; lineIdx++) {
@@ -90,13 +95,13 @@ public class SourceReplacementTrain {
             }
         }
         if (methodNameMatches.isEmpty()) {
-            return transformations;
+            return Stream.empty();
         }
         if (methodNameMatches.size() == 1) {
             val methodNameMatch = methodNameMatches.get(0);
             val matchIndexes = methodNameMatch.matchIndexes();
             if (matchIndexes.size() == 1) {
-                return transformations.register(
+                return Stream.of(
                     Transformations.Transformation.of(
                         lines,
                         item,
@@ -113,7 +118,7 @@ public class SourceReplacementTrain {
                 }
             });
             if (finalIndexes.size() == 1) {
-                return transformations.register(
+                return Stream.of(
                     Transformations.Transformation.of(
                         lines,
                         item,
@@ -124,7 +129,7 @@ public class SourceReplacementTrain {
                 val maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
                 if (maybeIndexOfClosestClassDistance.isPresent()) {
                     val indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
-                    return transformations.register(
+                    return Stream.of(
                         Transformations.Transformation.of(
                             lines,
                             item,
@@ -134,7 +139,15 @@ public class SourceReplacementTrain {
                 }
             }
         }
-        return transformations;
+        return Stream.empty();
+    }
+
+
+    @Value
+    private static class MethodNameMatch {
+
+        int lineIndex;
+        ImmutableIntVector matchIndexes;
     }
 
     private Optional<Integer> findIndexOfClosestClassDistance(EnforcementMeta.Item item,

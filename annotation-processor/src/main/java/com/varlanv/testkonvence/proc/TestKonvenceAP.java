@@ -225,6 +225,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                     .filter(entry -> entry.getKey().getSimpleName().contentEquals("value"))
                     .map(entry -> String.valueOf(entry.getValue().getValue()));
             })
-            .findAny();
+            .findAny()
+            .map(String::trim);
     }
 }

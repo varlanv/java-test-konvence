@@ -29,7 +29,7 @@ public class Train {
                         val sourceFile = Paths.get(
                             sourcesRootPath + File.separator + item.fullEnclosingClassName().replace(".", File.separator) + ".java"
                         );
-                        if (Files.exists(sourceFile) && Files.isRegularFile(sourceFile)) {
+                        if (Files.isRegularFile(sourceFile)) {
                             val classNameParts = item.className().split("\\.");
                             val className = classNameParts[classNameParts.length - 1];
                             return Optional.of(
