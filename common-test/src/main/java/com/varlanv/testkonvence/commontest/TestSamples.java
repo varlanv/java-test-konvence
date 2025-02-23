@@ -46,6 +46,40 @@ public class TestSamples {
                         """
                     ))
             .describe(
+                "Should replace method name to camel case if found and requested camel",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void someTest() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void someDisplayName() {
+                            }
+                        }
+                        """
+                    )
+                    .withOptions(options -> options.camelMethodName(true)))
+            .describe(
                 "Should replace only one method name if there is two methods, one is for replacement, and one method name is subset of other",
                 spec -> spec
                     .withClass("testcases.SomeTest")

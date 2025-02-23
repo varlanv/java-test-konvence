@@ -30,19 +30,13 @@ public class Train {
                             sourcesRootPath + File.separator + item.fullEnclosingClassName().replace(".", File.separator) + ".java"
                         );
                         if (Files.exists(sourceFile) && Files.isRegularFile(sourceFile)) {
-                            EnforceCandidate candidate;
                             val classNameParts = item.className().split("\\.");
                             val className = classNameParts[classNameParts.length - 1];
-                            if (item.methodName().isEmpty()) {
-                                candidate = new ClassNameFromDisplayName(item.displayName(), className);
-                            } else {
-                                candidate = new MethodNameFromDisplayName(item.displayName(), item.methodName());
-                            }
                             return Optional.of(
                                 new EnforcementMeta.Item(
                                     SourceFile.ofPath(sourceFile.toAbsolutePath()),
                                     className,
-                                    candidate
+                                    resolveEnforceCandidate(item, className)
                                 )
                             );
                         }
@@ -52,5 +46,18 @@ public class Train {
                     .map(Optional::get)
                     .collect(Collectors.toList()))
         ).run();
+    }
+
+    private EnforceCandidate resolveEnforceCandidate(APEnforcementMeta.Item item, String className) {
+        if (item.methodName().isEmpty()) {
+            return new ClassNameFromDisplayName(item.displayName(), className);
+        } else {
+            val snake = new SnakeMethodNameFromDisplayName(item.displayName(), item.methodName());
+            if (trainOptions.camelCaseMethodName()) {
+                return new CamelMethodNameFromDisplayName(snake);
+            } else {
+                return snake;
+            }
+        }
     }
 }

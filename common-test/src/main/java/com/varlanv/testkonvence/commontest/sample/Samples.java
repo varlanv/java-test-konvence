@@ -34,7 +34,8 @@ public interface Samples {
                     new Sample(
                         description,
                         resultSpec.sources(),
-                        resultSpec.extraAssertions()
+                        resultSpec.extraAssertions(),
+                        resultSpec.options()
                     )
                 );
                 return this;
@@ -43,14 +44,15 @@ public interface Samples {
             @Override
             public Samples describeMany(Stream<Map.Entry<String, Function<SampleSpec, SampleSpec.SampleSpecFinish>>> specConsumers) {
                 specConsumers.forEach(specEntry -> {
-                    var resultSpec = specEntry.getValue().apply(new SampleSpec()).toSpec();
+                        var resultSpec = specEntry.getValue().apply(new SampleSpec()).toSpec();
                         samples.add(
-                                new Sample(
-                                    specEntry.getKey(),
-                                    resultSpec.sources(),
-                                    resultSpec.extraAssertions()
-                                )
-                            );
+                            new Sample(
+                                specEntry.getKey(),
+                                resultSpec.sources(),
+                                resultSpec.extraAssertions(),
+                                resultSpec.options()
+                            )
+                        );
                     }
                 );
                 return this;

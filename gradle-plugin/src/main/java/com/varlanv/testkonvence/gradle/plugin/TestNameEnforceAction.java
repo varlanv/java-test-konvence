@@ -25,6 +25,7 @@ public class TestNameEnforceAction implements Action<Task> {
     ConfigurableFileCollection compileClasspath;
     ConfigurableFileCollection enforceFiles;
     Provider<Boolean> dryWithFailingProperty;
+    Provider<Boolean> camelCaseMethodNameProperty;
 
     @Override
     public void execute(Task task) {
@@ -46,13 +47,14 @@ public class TestNameEnforceAction implements Action<Task> {
                         throw new IllegalStateException("Enforce file does not exist: " + enforceFile);
                     }
                     new Train(
-                            enforceFile.toPath(),
-                            sourcesRoot,
-                            sourceFiles.stream().map(File::toPath).collect(Collectors.toList()),
-                            new TrainOptions(
-                                    dryWithFailingProperty.get(),
-                                    false
-                            )
+                        enforceFile.toPath(),
+                        sourcesRoot,
+                        sourceFiles.stream().map(File::toPath).collect(Collectors.toList()),
+                        new TrainOptions(
+                            dryWithFailingProperty.get(),
+                            false,
+                            camelCaseMethodNameProperty.get()
+                        )
                     ).run();
                 }
             }

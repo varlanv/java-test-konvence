@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MethodNameFromDisplayNameTest implements UnitTest {
+class SnakeMethodNameFromDisplayNameTest implements UnitTest {
 
     @TestFactory
     Stream<DynamicTest> defaultDataTable() {
@@ -40,7 +40,7 @@ class MethodNameFromDisplayNameTest implements UnitTest {
                     () -> {
                         var expectedMethodName = entry.getValue();
                         var displayName = entry.getKey();
-                        var actualMethodName = new MethodNameFromDisplayName(
+                        var actualMethodName = new SnakeMethodNameFromDisplayName(
                             displayName,
                             "anyOriginalMethodName"
                         ).newName();

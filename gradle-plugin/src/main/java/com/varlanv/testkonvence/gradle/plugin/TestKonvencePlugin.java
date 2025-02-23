@@ -83,7 +83,8 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                     ),
                                     compileClasspath,
                                     enforceFilesCollection,
-                                    testKonvenceExtension.getApplyAutomaticallyAfterTestTask()
+                                    testKonvenceExtension.getApplyAutomaticallyAfterTestTask(),
+                                    testKonvenceExtension.getCamelCaseMethodNameProperty()
                                 );
                                 val enforceTaskProvider = tasks.register(
                                     TestNameEnforceTask.name(testTask.getName()),
@@ -92,6 +93,7 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                         enforceTask.getSourcesRootProp().setFrom(testNameEnforceAction.sourcesRootProp());
                                         enforceTask.getCompileClasspath().setFrom(testNameEnforceAction.compileClasspath());
                                         enforceTask.getEnforceFiles().setFrom(testNameEnforceAction.enforceFiles());
+                                        enforceTask.getUseCamelCaseMethodName().set(testNameEnforceAction.camelCaseMethodNameProperty());
                                     }
                                 );
                                 if (testKonvenceExtension.getApplyAutomaticallyAfterTestTask().get()) {
@@ -116,7 +118,8 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                     action.sourcesRootProp(),
                                     action.compileClasspath(),
                                     action.enforceFiles(),
-                                    providers.provider(() -> false)
+                                    providers.provider(() -> false),
+                                    action.camelCaseMethodNameProperty()
                                 )
                             ));
                     });
@@ -132,7 +135,8 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                     action.sourcesRootProp(),
                                     action.compileClasspath(),
                                     action.enforceFiles(),
-                                    providers.provider(() -> true)
+                                    providers.provider(() -> true),
+                                    action.camelCaseMethodNameProperty()
                                 )
                             ));
                     });

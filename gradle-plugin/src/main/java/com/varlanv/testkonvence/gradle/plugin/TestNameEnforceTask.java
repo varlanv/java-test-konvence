@@ -15,6 +15,7 @@ public abstract class TestNameEnforceTask extends DefaultTask {
 
     public TestNameEnforceTask() {
         getDryWithFailing().convention(false);
+        getUseCamelCaseMethodName().convention(false);
     }
 
     @InputFiles
@@ -29,13 +30,17 @@ public abstract class TestNameEnforceTask extends DefaultTask {
     @Internal
     public abstract Property<Boolean> getDryWithFailing();
 
+    @Internal
+    public abstract Property<Boolean> getUseCamelCaseMethodName();
+
     @TaskAction
     public void execute() {
         new TestNameEnforceAction(
             getSourcesRootProp(),
             getCompileClasspath(),
             getEnforceFiles(),
-            getDryWithFailing()
+            getDryWithFailing(),
+            getUseCamelCaseMethodName()
         ).execute(this);
     }
 }

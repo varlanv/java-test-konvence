@@ -20,10 +20,7 @@ public class Sample {
     String description;
     List<SampleSources> sources;
     List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions;
-
-    public Sample(String description, SampleSources source) {
-        this(description, List.of(source), List.of());
-    }
+    SampleOptions options;
 
     @SneakyThrows
     public void consume(BaseTest.ThrowingConsumer<ConsumableSample> consumer) {
@@ -33,7 +30,7 @@ public class Sample {
             test.add(toFileSample(source, dir));
         }
         try {
-            var consumableSample = new ConsumableSample(description, dir, test);
+            var consumableSample = new ConsumableSample(description, dir, test, options);
             consumer.accept(consumableSample);
             for (var extraAssertion : extraAssertions) {
                 extraAssertion.accept(consumableSample);

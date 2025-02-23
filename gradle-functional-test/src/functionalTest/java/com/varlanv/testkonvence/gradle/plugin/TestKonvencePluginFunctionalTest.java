@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.commontest.*;
+import com.varlanv.testkonvence.commontest.sample.SampleOptions;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
@@ -11,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,32 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tags({@Tag(BaseTest.FUNCTIONAL_TEST_TAG), @Tag(BaseTest.SLOW_TEST_TAG)})
 class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
-    String defaultBuildGradleConfig = groovy("""
-        plugins {
-            id("java")
-            id("com.varlanv.test-konvence")
-        }
-        
-        repositories {
-            mavenLocal()
-            mavenCentral()
-        }
-        
-        dependencies {
-            testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
-            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-        }
-        
-        test {
-            useJUnitPlatform()
-        }
-        """
-    );
-
     String defaultSettingsGradleConfig = groovy("""
         rootProject.name = "functional-test"
         """);
-
 
     @TestFactory
     Stream<DynamicTest> fromSamples() {
@@ -62,7 +41,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                             Files.writeString(
                                 fixture.rootBuildFile(),
-                                defaultBuildGradleConfig
+                                defaultBuildGradleConfig(options -> options.camelMethodName(consumableSample.options().camelMethodName()))
                             );
                             var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
                             for (var sampleSourceFile : consumableSample.sources()) {
@@ -104,31 +83,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                     Files.writeString(
                         fixture.rootBuildFile(),
-                        groovy("""
-                            plugins {
-                                id("java")
-                                id("com.varlanv.test-konvence")
-                            }
-                            
-                            repositories {
-                                mavenLocal()
-                                mavenCentral()
-                            }
-                            
-                            testKonvence {
-                                applyAutomaticallyAfterTestTask(%s)
-                            }
-                            
-                            dependencies {
-                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
-                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-                            }
-                            
-                            test {
-                                useJUnitPlatform()
-                            }
-                            """.formatted(applyAutomaticallyAfterTestTask)
-                        )
+                        defaultBuildGradleConfig(options -> options.applyAutomaticallyAfterTestTask(applyAutomaticallyAfterTestTask))
                     );
                     var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
                     var sampleSourceFile = consumableSample.sourceFile();
@@ -167,31 +122,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                     Files.writeString(
                         fixture.rootBuildFile(),
-                        groovy("""
-                            plugins {
-                                id("java")
-                                id("com.varlanv.test-konvence")
-                            }
-                            
-                            repositories {
-                                mavenLocal()
-                                mavenCentral()
-                            }
-                            
-                            testKonvence {
-                                applyAutomaticallyAfterTestTask(false)
-                            }
-                            
-                            dependencies {
-                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
-                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-                            }
-                            
-                            test {
-                                useJUnitPlatform()
-                            }
-                            """
-                        )
+                        defaultBuildGradleConfig(options -> options.applyAutomaticallyAfterTestTask(false))
                     );
                     var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
                     var sampleSourceFile = consumableSample.sourceFile();
@@ -230,31 +161,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                     Files.writeString(
                         fixture.rootBuildFile(),
-                        groovy("""
-                            plugins {
-                                id("java")
-                                id("com.varlanv.test-konvence")
-                            }
-                            
-                            repositories {
-                                mavenLocal()
-                                mavenCentral()
-                            }
-                            
-                            testKonvence {
-                                applyAutomaticallyAfterTestTask(%s)
-                            }
-                            
-                            dependencies {
-                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
-                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-                            }
-                            
-                            test {
-                                useJUnitPlatform()
-                            }
-                            """.formatted(applyAutomaticallyAfterTestTask)
-                        )
+                        defaultBuildGradleConfig(options -> options.applyAutomaticallyAfterTestTask(applyAutomaticallyAfterTestTask))
                     );
                     var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
                     var sampleSourceFile = consumableSample.sourceFile();
@@ -270,5 +177,35 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
                 }
             );
         });
+    }
+
+    private String defaultBuildGradleConfig(Function<SampleOptions.SampleOptionsBuilder, SampleOptions.SampleOptionsBuilder> configure) {
+        var options = configure.apply(SampleOptions.builder()).build();
+        return groovy("""
+            plugins {
+                id("java")
+                id("com.varlanv.test-konvence")
+            }
+            
+            repositories {
+                mavenLocal()
+                mavenCentral()
+            }
+            
+            testKonvence {
+                applyAutomaticallyAfterTestTask(%s)
+                useCamelCaseForMethodNames(%s)
+            }
+            
+            dependencies {
+                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+            }
+            
+            test {
+                useJUnitPlatform()
+            }
+            """.formatted(options.applyAutomaticallyAfterTestTask(), options.camelMethodName())
+        );
     }
 }

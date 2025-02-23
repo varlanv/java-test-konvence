@@ -43,7 +43,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                 resultXmlPath,
                 sample.dir(),
                 List.of(),
-                new TrainOptions(false, false)
+                new TrainOptions(false, false, sample.options().camelMethodName())
             ).run();
 
             sample.sources().forEach(source ->

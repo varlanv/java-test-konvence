@@ -8,6 +8,7 @@ import org.intellij.lang.annotations.Language;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 @Getter(AccessLevel.PACKAGE)
@@ -16,9 +17,10 @@ public class SampleSpec {
 
     List<SampleSources> sources;
     List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions;
+    SampleOptions options;
 
     public SampleSpec() {
-        this(List.of(), List.of());
+        this(List.of(), List.of(), SampleOptions.builder().build());
     }
 
     public SampleSpecFileStep withClass(String fullyQualifiedClassName) {
@@ -62,6 +64,7 @@ public class SampleSpec {
         SampleSpecSourceStep parent;
         String expectedTransformation;
         List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions = new ArrayList<>(1);
+        SampleOptions.SampleOptionsBuilder optionsBuilder = SampleOptions.builder();
 
         SampleSpec toSpec() {
             return new SampleSpec(
@@ -77,12 +80,18 @@ public class SampleSpec {
                         )
                     )
                 ).toList(),
-                extraAssertions
+                extraAssertions,
+                optionsBuilder.build()
             );
         }
 
         public SampleSpecFinish withExtraAssertions(BaseTest.ThrowingConsumer<ConsumableSample> extraAssertion) {
             extraAssertions.add(extraAssertion);
+            return this;
+        }
+
+        public SampleSpecFinish withOptions(Consumer<SampleOptions.SampleOptionsBuilder> action) {
+            action.accept(optionsBuilder);
             return this;
         }
 

@@ -13,6 +13,7 @@ public class ConsumableSample {
     String description;
     Path dir;
     List<SampleSourceFile> sources;
+    SampleOptions options;
 
     public SampleSourceFile sourceFile() {
         if (sources.size() > 1) {

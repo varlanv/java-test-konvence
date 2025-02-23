@@ -6,6 +6,8 @@ abstract class TestKonvenceExtensionInternal implements TestKonvenceExtension {
 
     public abstract Property<Boolean> getApplyAutomaticallyAfterTestTask();
 
+    public abstract Property<Boolean> getCamelCaseMethodNameProperty();
+
     public abstract Property<Boolean> getEnableReverseTransformation();
 
     public TestKonvenceExtensionInternal() {
@@ -19,7 +21,12 @@ abstract class TestKonvenceExtensionInternal implements TestKonvenceExtension {
     }
 
     @Override
-    public void enableReverseTransformation() {
-        getEnableReverseTransformation().set(true);
+    public void enableReverseTransformation(boolean toggle) {
+        getEnableReverseTransformation().set(toggle);
+    }
+
+    @Override
+    public void useCamelCaseForMethodNames(boolean toggle) {
+        getCamelCaseMethodNameProperty().set(toggle);
     }
 }

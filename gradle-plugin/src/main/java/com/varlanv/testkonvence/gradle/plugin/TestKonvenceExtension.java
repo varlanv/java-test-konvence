@@ -6,5 +6,7 @@ public interface TestKonvenceExtension {
 
     void applyAutomaticallyAfterTestTask(boolean toggle);
 
-    void enableReverseTransformation();
+    void enableReverseTransformation(boolean toggle);
+
+    void useCamelCaseForMethodNames(boolean toggle);
 }

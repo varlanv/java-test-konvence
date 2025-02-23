@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
-public final class MethodNameFromDisplayName implements EnforceCandidate {
+public final class SnakeMethodNameFromDisplayName implements EnforceCandidate {
 
     private static final List<Function<String, String>> methodNameChain = Arrays.asList(
         // 1. Replace non-alphanumeric characters with underscores
@@ -32,15 +32,10 @@ public final class MethodNameFromDisplayName implements EnforceCandidate {
     @Getter
     String displayName;
     @Getter
-    String methodName;
+    String originalName;
     @NonFinal
     @Nullable
     String newName;
-
-    @Override
-    public String originalName() {
-        return methodName;
-    }
 
     @Override
     public String newName() {
