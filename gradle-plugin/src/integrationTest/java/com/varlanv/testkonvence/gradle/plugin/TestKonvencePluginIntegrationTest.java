@@ -65,29 +65,29 @@
 //            project.getPlugins().apply(JavaPlugin.class);
 //            project.getPlugins().apply(TestKonvencePlugin.class);
 //            evaluateProject(project);
-////            var testTask = project.getTasks().named("test", org.gradle.api.tasks.testing.Test.class).get();
-//////            List<Action<? super Task>> actions = testTask.getActions();
-//////            var enforceTask = (TestNameEnforceAction) project.getTasks().getByName(TestNameEnforceAction.name());
-////            var javaCompileTask = project.getTasks().named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class).get();
-//////
-////            System.out.println(
-////                FileUtils.listFilesAndDirs(
-////                        fixture.projectDir().toFile(),
-////                        TrueFileFilter.INSTANCE,
-////                        TrueFileFilter.INSTANCE
-////                    ).stream()
-////                    .map(it -> it.getAbsolutePath() + System.lineSeparator())
-////                    .collect(Collectors.joining())
-////            );
-////            testTask.executeTests();
-////            System.out.println(javaCompile.getClasspath().getFiles());
-////            System.out.println(enforceTask.getCompileClasspath().getFiles());
-////            System.out.println("Java sources root -> " + enforceTask.getSourcesRoot().getAsFile().get().getPath());
-////            var resolvedEnforceXml = enforceTask.getEnforceFiles().getSingleFile();
-////            System.out.println(resolvedEnforceXml);
-////            assertThat(resolvedEnforceXml).exists();
-////
-////            enforceTask.enforce();
+/// /            var testTask = project.getTasks().named("test", org.gradle.api.tasks.testing.Test.class).get();
+/// ///            List<Action<? super Task>> actions = testTask.getActions();
+/// ///            var enforceTask = (TestNameEnforceAction) project.getTasks().getByName(TestNameEnforceAction.name());
+/// /            var javaCompileTask = project.getTasks().named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class).get();
+/// ///
+/// /            System.out.println(
+/// /                FileUtils.listFilesAndDirs(
+/// /                        fixture.projectDir().toFile(),
+/// /                        TrueFileFilter.INSTANCE,
+/// /                        TrueFileFilter.INSTANCE
+/// /                    ).stream()
+/// /                    .map(it -> it.getAbsolutePath() + System.lineSeparator())
+/// /                    .collect(Collectors.joining())
+/// /            );
+/// /            testTask.executeTests();
+/// /            System.out.println(javaCompile.getClasspath().getFiles());
+/// /            System.out.println(enforceTask.getCompileClasspath().getFiles());
+/// /            System.out.println("Java sources root -> " + enforceTask.getSourcesRoot().getAsFile().get().getPath());
+/// /            var resolvedEnforceXml = enforceTask.getEnforceFiles().getSingleFile();
+/// /            System.out.println(resolvedEnforceXml);
+/// /            assertThat(resolvedEnforceXml).exists();
+/// /
+/// /            enforceTask.enforce();
 //        });
 //    }
 //}

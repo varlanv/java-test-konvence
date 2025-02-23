@@ -17,8 +17,6 @@ public interface SourceLines {
 
     SourceLines replaceAt(int idx, Function<String, String> newLine);
 
-    <T> T acceptLines(Function<List<String>, T> mapper);
-
     List<String> view();
 
     boolean changed();
@@ -46,11 +44,6 @@ public interface SourceLines {
             }
 
             @Override
-            public <T> T acceptLines(Function<List<String>, T> mapper) {
-                return mapper.apply(view);
-            }
-
-            @Override
             public List<String> view() {
                 return view;
             }
@@ -62,7 +55,7 @@ public interface SourceLines {
 
             @Override
             public String joined() {
-                if (!hasChanges[0]) {
+                if (!changed()) {
                     return originalText;
                 }
                 return Arrays.stream(lines).map(line -> line + lineSeparator).collect(Collectors.joining());

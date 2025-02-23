@@ -25,7 +25,7 @@ class IntVectorTest implements UnitTest {
         @ValueSource(ints = {0, 1, 10})
         void should_throw_exception_on_empty_vector(int initialCapacity) {
             assertThatThrownBy(
-                () -> new IntVector(initialCapacity).first()
+                    () -> new IntVector(initialCapacity).first()
             ).isInstanceOf(ArrayIndexOutOfBoundsException.class);
         }
 
@@ -41,9 +41,9 @@ class IntVectorTest implements UnitTest {
         @ValueSource(ints = {2, 5, 10})
         void should_return_first_element_for_vector_of_many_elements_when_initial_capacity_was_zero(int elementsCount) {
             var subject = IntStream.range(0, elementsCount)
-                .map(idx -> idx + 1)
-                .boxed()
-                .reduce(new IntVector(0), IntVector::add, (a, b) -> b);
+                    .map(idx -> idx + 1)
+                    .boxed()
+                    .reduce(new IntVector(0), IntVector::add, (a, b) -> b);
 
             assertThat(subject.first()).isEqualTo(1);
         }
@@ -52,9 +52,9 @@ class IntVectorTest implements UnitTest {
         @ValueSource(ints = {2, 5, 10})
         void should_return_first_element_for_vector_of_many_elements_when_initial_capacity_was_non_zero(int elementsCount) {
             var subject = IntStream.range(0, elementsCount)
-                .map(idx -> idx + 1)
-                .boxed()
-                .reduce(new IntVector(50), IntVector::add, (a, b) -> b);
+                    .map(idx -> idx + 1)
+                    .boxed()
+                    .reduce(new IntVector(50), IntVector::add, (a, b) -> b);
 
             assertThat(subject.first()).isEqualTo(1);
         }
@@ -73,7 +73,7 @@ class IntVectorTest implements UnitTest {
         @ValueSource(ints = {1, 2, 10, 100})
         void should_return_count_of_elements_for_non_empty_vector(int elementsCount) {
             var actual = IntStream.range(0, elementsCount).boxed()
-                .reduce(new IntVector(0), IntVector::add, (a, b) -> b);
+                    .reduce(new IntVector(0), IntVector::add, (a, b) -> b);
 
             assertThat(actual.size()).isEqualTo(elementsCount);
         }
@@ -86,10 +86,10 @@ class IntVectorTest implements UnitTest {
         @ValueSource(ints = {0, 1, 10})
         void should_not_iterate_over_empty_vector(int initialCapacity) {
             assertThatNoException().isThrownBy(
-                () -> new IntVector(initialCapacity).forEach(line -> {
-                        throw new RuntimeException("Should not reach here");
-                    }
-                )
+                    () -> new IntVector(initialCapacity).forEach(line -> {
+                                throw new RuntimeException("Should not reach here");
+                            }
+                    )
             );
         }
 

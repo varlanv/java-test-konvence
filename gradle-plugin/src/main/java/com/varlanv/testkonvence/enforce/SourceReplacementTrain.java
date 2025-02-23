@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.enforce;
 
 import com.varlanv.testkonvence.Constants;
+import com.varlanv.testkonvence.FunctionalUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
@@ -28,7 +29,7 @@ public class SourceReplacementTrain {
                 .reduce(
                     target.lines(),
                     (lines, transformation) -> transformation.right().action().apply(lines),
-                    (a, b) -> b
+                    FunctionalUtil.throwingCombiner()
                 );
             if (resultLines.changed()) {
                 if (trainOptions.dryWithFailing()) {
@@ -60,7 +61,7 @@ public class SourceReplacementTrain {
                     }
 
                 },
-                (a, b) -> b
+                FunctionalUtil.throwingCombiner()
             );
     }
 

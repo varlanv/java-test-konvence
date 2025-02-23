@@ -13,6 +13,7 @@ abstract class TestKonvenceExtensionInternal implements TestKonvenceExtension {
     public TestKonvenceExtensionInternal() {
         getApplyAutomaticallyAfterTestTask().convention(true);
         getEnableReverseTransformation().convention(false);
+        getCamelCaseMethodNameProperty().convention(false);
     }
 
     @Override

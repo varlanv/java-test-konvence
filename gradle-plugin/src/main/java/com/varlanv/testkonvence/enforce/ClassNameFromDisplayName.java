@@ -2,7 +2,6 @@ package com.varlanv.testkonvence.enforce;
 
 import lombok.Value;
 import lombok.val;
-import lombok.var;
 
 @Value
 public class ClassNameFromDisplayName implements EnforceCandidate {
@@ -17,8 +16,8 @@ public class ClassNameFromDisplayName implements EnforceCandidate {
         }
 
         val className = new StringBuilder();
-        var capitalizeNext = true;
-        var hasLetter = false;
+        boolean capitalizeNext = true;
+        boolean hasLetter = false;
 
         for (val ch : displayName.toCharArray()) {
             if (Character.isLetter(ch) && ch < 128) {
