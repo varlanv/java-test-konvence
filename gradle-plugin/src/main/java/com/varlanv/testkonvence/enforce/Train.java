@@ -17,13 +17,13 @@ public class Train {
     Path resultXml;
     Path sourcesRoot;
     Collection<Path> sources;
-    Boolean dryWithFailing;
+    TrainOptions trainOptions;
 
     public void run() {
         val items = new XmlEnforceMeta().items(resultXml);
         val sourcesRootPath = sourcesRoot.toAbsolutePath().toString();
-        val subject = new SourceReplacementTrain(
-            dryWithFailing,
+        new SourceReplacementTrain(
+            trainOptions,
             new EnforcementMeta(
                 items.stream().map(item -> {
                         val sourceFile = Paths.get(
@@ -40,7 +40,7 @@ public class Train {
                             }
                             return Optional.of(
                                 new EnforcementMeta.Item(
-                                    new EnforcedSourceFile(sourceFile.toAbsolutePath()),
+                                    SourceFile.ofPath(sourceFile.toAbsolutePath()),
                                     className,
                                     candidate
                                 )
@@ -51,7 +51,6 @@ public class Train {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toList()))
-        );
-        subject.run();
+        ).run();
     }
 }

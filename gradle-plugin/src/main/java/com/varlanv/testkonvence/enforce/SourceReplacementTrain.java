@@ -2,119 +2,138 @@ package com.varlanv.testkonvence.enforce;
 
 import com.varlanv.testkonvence.Constants;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.val;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 public class SourceReplacementTrain {
 
-    Boolean dryWithFailing;
+    TrainOptions trainOptions;
     EnforcementMeta enforcementMeta;
 
     public void run() {
-        rules().forEach(rule -> {
-            val target = rule.target();
-            val originalText = target.text();
-            val lineSeparator = LineSeparator.forFile(target.path(), originalText).separator();
-            val originalLines = Arrays.asList(originalText.split(lineSeparator));
-            val newLines = rule.apply(originalLines);
-            val modifiedText = newLines.stream().map(line -> line + lineSeparator).collect(Collectors.joining());
-            if (!originalText.equals(modifiedText)) {
-                if (dryWithFailing) {
+        transformations().consumeGroupedByFile((target, transformations) -> {
+            val resultLines = IntStream.range(0, transformations.size())
+                .mapToObj(i -> IntObjectPair.of(i, transformations.get(i)))
+                .sorted((a, b) -> {
+                    if (a.right().input().meta().candidate().newName().equals(b.right().input().meta().candidate().originalName())) {
+                        return 1;
+                    } else {
+                        return Integer.compare(a.left(), b.left());
+                    }
+                })
+                .reduce(
+                    target.lines(),
+                    (lines, transformation) -> transformation.right().action().apply(lines),
+                    (a, b) -> b
+                );
+            if (resultLines.changed()) {
+                if (trainOptions.dryWithFailing()) {
                     throw new IllegalStateException(
                         String.format(
                             "[%s] - found test name mismatch in file [%s]",
-                            Constants.PLUGIN_NAME, rule.target().path().toAbsolutePath()
+                            Constants.PLUGIN_NAME, target.path().toAbsolutePath()
                         )
                     );
                 } else {
-                    target.save(modifiedText);
+                    target.save(resultLines);
                 }
             }
         });
     }
 
-    private Stream<SourceReplacementRule> rules() {
+    private Transformations transformations() {
         return enforcementMeta.items().stream()
-            .map(item -> {
-                if (!item.candidate().isForReplacement()) {
-                    return new NoopSourceReplacementRule(item.sourceFile());
-                }
-                if (item.candidate().kind() == EnforceCandidate.Kind.METHOD) {
-                    return methodReplacementRule(item);
-                } else {
-                    return new NoopSourceReplacementRule(item.sourceFile());
-                }
-            })
-            .filter(sourceReplacementRule -> !sourceReplacementRule.isNoop())
-            .collect(
-                Collectors.collectingAndThen(
-                    Collectors.groupingBy(rule -> rule.target().path()),
-                    map -> map.values().stream()
-                        .map(sourceReplacementRules -> {
-                            if (sourceReplacementRules.stream().allMatch(SourceReplacementRule::isNoop)) {
-                                return new NoopSourceReplacementRule(sourceReplacementRules.get(0).target());
-                            }
-                            Function<List<String>, List<String>> mergedReplacementAction = lines -> {
-                                List<String> resultLines = lines;
-                                for (val rules : map.values()) {
-                                    for (val rule : rules) {
-                                        resultLines = rule.apply(resultLines);
-                                    }
-                                }
-                                return resultLines;
-                            };
-                            return new ActionSourceReplacementRule(sourceReplacementRules.get(0).target(), mergedReplacementAction);
-                        })
-                )
+            .reduce(
+                Transformations.empty(),
+                (resultTransformations, item) -> {
+                    if (!item.candidate().isForReplacement()) {
+                        return resultTransformations;
+                    }
+                    if (item.candidate().kind() == EnforceCandidate.Kind.METHOD) {
+                        return methodReplacementRule(item, resultTransformations);
+                    } else {
+                        return resultTransformations;
+                    }
+
+                },
+                (a, b) -> b
             );
     }
 
-    private SourceReplacementRule methodReplacementRule(EnforcementMeta.Item item) {
+
+    @Value
+    private static class MethodNameMatch {
+
+        int lineIndex;
+        ImmutableIntVector matchIndexes;
+    }
+
+    private Transformations methodReplacementRule(EnforcementMeta.Item item, Transformations transformations) {
+        val sourceFile = item.sourceFile();
+        val lines = sourceFile.lines();
+        val linesView = lines.view();
         val candidate = item.candidate();
         val newName = candidate.newName();
         val originalName = candidate.originalName();
-        return new ActionSourceReplacementRule(
-            item.sourceFile(),
-            lines -> {
-                val matchedLineIndexes = new ArrayList<Integer>(2);
-                for (int lineIdx = 0, linesSize = lines.size(); lineIdx < linesSize; lineIdx++) {
-                    val line = lines.get(lineIdx);
-                    if (line.contains(originalName)) {
-                        matchedLineIndexes.add(lineIdx);
-                    }
+        val methodNameMatches = new ArrayList<MethodNameMatch>(2);
+
+        for (int lineIdx = 0, linesSize = linesView.size(); lineIdx < linesSize; lineIdx++) {
+            val line = linesView.get(lineIdx);
+            val matchIndexes = new StringMatch(line, originalName).matchingIndexes();
+            if (matchIndexes.notEmpty()) {
+                methodNameMatches.add(new MethodNameMatch(lineIdx, matchIndexes));
+            }
+        }
+        if (methodNameMatches.isEmpty()) {
+            return transformations;
+        }
+        if (methodNameMatches.size() == 1) {
+            val methodNameMatch = methodNameMatches.get(0);
+            val matchIndexes = methodNameMatch.matchIndexes();
+            if (matchIndexes.size() == 1) {
+                return transformations.register(
+                    Transformations.Transformation.of(
+                        lines,
+                        item,
+                        (sl) -> sl.replaceAt(methodNameMatch.lineIndex(), line -> line.replace(originalName, newName))
+                    )
+                );
+            }
+        } else {
+            val finalIndexes = new ArrayList<Integer>(methodNameMatches.size());
+            methodNameMatches.forEach(match -> {
+                val line = linesView.get(match.lineIndex());
+                if (line.contains("void " + originalName + "(")) {
+                    finalIndexes.add(match.lineIndex());
                 }
-                if (matchedLineIndexes.isEmpty()) {
-                    return lines;
-                }
-                val result = new ArrayList<>(lines);
-                if (matchedLineIndexes.size() == 1) {
-                    val idx = matchedLineIndexes.get(0);
-                    val line = lines.get(idx);
-                    result.set(idx, line.replace(originalName, newName));
-                } else {
-                    val finalIndexes = new ArrayList<Integer>(matchedLineIndexes.size());
-                    for (val idx : matchedLineIndexes) {
-                        val line = lines.get(idx);
-                        if (line.contains(originalName + "(")) {
-                            finalIndexes.add(idx);
-                        }
-                    }
-                    if (finalIndexes.size() == 1) {
-                        result.set(finalIndexes.get(0), lines.get(finalIndexes.get(0)).replace(originalName, newName));
-                    } else {
-                        findIndexOfClosestClassDistance(item, lines, finalIndexes).ifPresent(lineIndex -> {
-                            val line = lines.get(lineIndex);
-                            result.set(lineIndex, line.replace(originalName, newName));
-                        });
-                    }
-                }
-                return Collections.unmodifiableList(result);
             });
+            if (finalIndexes.size() == 1) {
+                return transformations.register(
+                    Transformations.Transformation.of(
+                        lines,
+                        item,
+                        (sl) -> sl.replaceAt(finalIndexes.get(0), line -> line.replace("void " + originalName + "(", "void " + newName + "("))
+                    )
+                );
+            } else {
+                val maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
+                if (maybeIndexOfClosestClassDistance.isPresent()) {
+                    val indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
+                    return transformations.register(
+                        Transformations.Transformation.of(
+                            lines,
+                            item,
+                            (sl) -> sl.replaceAt(indexOfClosestClassDistance, line -> line.replace(originalName, newName))
+                        )
+                    );
+                }
+            }
+        }
+        return transformations;
     }
 
     private Optional<Integer> findIndexOfClosestClassDistance(EnforcementMeta.Item item,

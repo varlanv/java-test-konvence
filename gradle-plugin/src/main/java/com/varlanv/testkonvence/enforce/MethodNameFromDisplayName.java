@@ -1,13 +1,16 @@
 package com.varlanv.testkonvence.enforce;
 
-import lombok.Value;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.NonFinal;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-@Value
-public class MethodNameFromDisplayName implements EnforceCandidate {
+@RequiredArgsConstructor
+public final class MethodNameFromDisplayName implements EnforceCandidate {
 
     private static final List<Function<String, String>> methodNameChain = Arrays.asList(
         // 1. Replace non-alphanumeric characters with underscores
@@ -26,8 +29,13 @@ public class MethodNameFromDisplayName implements EnforceCandidate {
         in -> in.replaceAll("^_|_$", "")
     );
 
+    @Getter
     String displayName;
+    @Getter
     String methodName;
+    @NonFinal
+    @Nullable
+    String newName;
 
     @Override
     public String originalName() {
@@ -36,16 +44,19 @@ public class MethodNameFromDisplayName implements EnforceCandidate {
 
     @Override
     public String newName() {
-        return methodNameChain.stream().reduce(
-            displayName,
-            (result, transformation) -> {
-                if (result.isEmpty()) {
-                    return result;
-                }
-                return transformation.apply(result);
-            },
-            (a, b) -> b
-        );
+        if (newName == null) {
+            newName = methodNameChain.stream().reduce(
+                displayName,
+                (result, transformation) -> {
+                    if (result.isEmpty()) {
+                        return result;
+                    }
+                    return transformation.apply(result);
+                },
+                (a, b) -> b
+            );
+        }
+        return newName;
     }
 
     @Override

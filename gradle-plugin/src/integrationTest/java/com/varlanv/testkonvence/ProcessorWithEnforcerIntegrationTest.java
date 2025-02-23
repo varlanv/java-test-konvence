@@ -3,7 +3,9 @@ package com.varlanv.testkonvence;
 import com.varlanv.testkonvence.commontest.IntegrationTest;
 import com.varlanv.testkonvence.commontest.TestSamples;
 import com.varlanv.testkonvence.commontest.sample.ConsumableSample;
+import com.varlanv.testkonvence.commontest.sample.SampleSourceFile;
 import com.varlanv.testkonvence.enforce.Train;
+import com.varlanv.testkonvence.enforce.TrainOptions;
 import com.varlanv.testkonvence.proc.TestKonvenceAP;
 import io.toolisticon.cute.Cute;
 import org.intellij.lang.annotations.Language;
@@ -15,6 +17,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +27,6 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
     @TestFactory
     Stream<DynamicTest> fromSamples() {
         return TestSamples.testSamples().stream()
-            .filter(sample -> sample.sources().size() == 1)
             .map(sample -> DynamicTest.dynamicTest(
                     sample.description(),
                     () -> sample.consume(this::spec)
@@ -33,18 +35,20 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
     }
 
     void spec(ConsumableSample sample) {
-        var resultXml = runAnnotationProcessor(sample.sourceFile().outerClassName(), sample.sourceFile().content());
+        var sources = sample.sources().stream().collect(Collectors.toMap(SampleSourceFile::outerClassName, SampleSourceFile::content));
+        var resultXml = runAnnotationProcessor(sources);
         useTempFile(resultXmlPath -> {
             Files.write(resultXmlPath, resultXml);
             new Train(
                 resultXmlPath,
                 sample.dir(),
                 List.of(),
-                false
+                new TrainOptions(false, false)
             ).run();
 
-            var actual = sample.sourceFile().content();
-            assertThat(actual).isEqualTo(sample.sourceFile().expectedTransformation());
+            sample.sources().forEach(source ->
+                assertThat(source.content()).isEqualTo(source.expectedTransformation())
+            );
         });
     }
 

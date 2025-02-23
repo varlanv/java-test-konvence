@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.enforce.Train;
+import com.varlanv.testkonvence.enforce.TrainOptions;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -38,7 +39,7 @@ public class TestNameEnforceAction implements Action<Task> {
             if (sourceFiles.isEmpty()) {
                 log.debug("Source files are empty");
             } else if (Files.notExists(sourcesRoot)) {
-                log.error("Source root does not exist: {}", sourcesRoot);
+                log.debug("Source root does not exist: {}", sourcesRoot);
             } else {
                 for (val enforceFile : enforceFiles) {
                     if (Files.notExists(enforceFile.toPath())) {
@@ -48,7 +49,10 @@ public class TestNameEnforceAction implements Action<Task> {
                             enforceFile.toPath(),
                             sourcesRoot,
                             sourceFiles.stream().map(File::toPath).collect(Collectors.toList()),
-                            dryWithFailingProperty.get()
+                            new TrainOptions(
+                                    dryWithFailingProperty.get(),
+                                    false
+                            )
                     ).run();
                 }
             }

@@ -9,4 +9,5 @@ public interface SourceReplacementRule {
     List<String> apply(List<String> list);
 
     Boolean isNoop();
+
 }

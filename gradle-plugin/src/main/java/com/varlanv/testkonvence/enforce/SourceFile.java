@@ -1,17 +1,44 @@
 package com.varlanv.testkonvence.enforce;
 
+import lombok.SneakyThrows;
+import lombok.val;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.nio.file.StandardOpenOption;
 
 public interface SourceFile {
 
     Path path();
 
-    List<String> lines();
+    SourceLines lines();
 
-    String text();
+    void save(SourceLines sourceLines);
 
-    void save(String text);
+    static SourceFile ofPath(Path path) {
+        val sourceLines = SourceLines.ofPath(path);
+        return new SourceFile() {
 
-    void save(List<String> lines, String separator);
+            @Override
+            public Path path() {
+                return path;
+            }
+
+            @Override
+            public SourceLines lines() {
+                return sourceLines;
+            }
+
+            @Override
+            @SneakyThrows
+            public void save(SourceLines sourceLines) {
+                Files.write(
+                    path,
+                    sourceLines.joined().getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.TRUNCATE_EXISTING
+                );
+            }
+        };
+    }
 }

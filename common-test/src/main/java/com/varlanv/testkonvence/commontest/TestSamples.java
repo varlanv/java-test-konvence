@@ -88,6 +88,102 @@ public class TestSamples {
                         }
                         """))
             .describe(
+                "Should replace only one method name if there are three methods, each are subset of other and all for replacement",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("qwe1")
+                            void a() {
+                            }
+                        
+                            @Test
+                            @DisplayName("qwe2")
+                            void ab() {
+                            }
+                        
+                            @Test
+                            @DisplayName("qwe3")
+                            void abc() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("qwe1")
+                            void qwe1() {
+                            }
+                        
+                            @Test
+                            @DisplayName("qwe2")
+                            void qwe2() {
+                            }
+                        
+                            @Test
+                            @DisplayName("qwe3")
+                            void qwe3() {
+                            }
+                        }
+                        """))
+            .describe(
+                """
+                    When one method has display name that will be transformed to method name that already exists in class,
+                    and other method will be transformed to different name, then should rename both methods correctly""",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("ab")
+                            void a() {
+                            }
+                        
+                            @Test
+                            @DisplayName("qwe")
+                            void ab() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("ab")
+                            void ab() {
+                            }
+                        
+                            @Test
+                            @DisplayName("qwe")
+                            void qwe() {
+                            }
+                        }
+                        """))
+            .describe(
                 "Should replace only one method name if there is two methods, one is for replacement, and one method name is subset of other - reversed method order",
                 spec -> spec
                     .withClass("testcases.SomeTest")
