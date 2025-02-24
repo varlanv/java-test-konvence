@@ -195,6 +195,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
             testKonvence {
                 applyAutomaticallyAfterTestTask(%s)
                 useCamelCaseForMethodNames(%s)
+                enableReverseTransformation(%s)
             }
             
             dependencies {
@@ -205,7 +206,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
             test {
                 useJUnitPlatform()
             }
-            """.formatted(options.applyAutomaticallyAfterTestTask(), options.camelMethodName())
+            """.formatted(options.applyAutomaticallyAfterTestTask(), options.camelMethodName(), options.reverseTransformation())
         );
     }
 }

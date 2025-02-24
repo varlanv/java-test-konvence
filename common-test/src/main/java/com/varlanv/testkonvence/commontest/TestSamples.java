@@ -616,6 +616,37 @@ public class TestSamples {
                         }
                         """
                     )
-            );
+            )
+            .describe(
+                "Should add @DisplayName if requested reverseTransformation and @DisplayName not present",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("some test")
+                            void some_test() {
+                            }
+                        }
+                        """
+                    ).withOptions(options -> options.reverseTransformation(true)));
     }
 }

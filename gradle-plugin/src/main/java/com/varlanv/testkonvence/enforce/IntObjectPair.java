@@ -1,23 +1,19 @@
 package com.varlanv.testkonvence.enforce;
 
-public interface IntObjectPair<T> {
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    int left();
+@Getter
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class IntObjectPair<T> {
 
-    T right();
+    int left;
+    T right;
 
     static <T> IntObjectPair<T> of(int left, T right) {
-        return new IntObjectPair<T>() {
-
-            @Override
-            public int left() {
-                return left;
-            }
-
-            @Override
-            public T right() {
-                return right;
-            }
-        };
+        return new IntObjectPair<T>(left, right);
     }
 }

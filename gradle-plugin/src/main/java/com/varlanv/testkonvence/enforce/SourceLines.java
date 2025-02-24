@@ -17,6 +17,8 @@ public interface SourceLines {
 
     SourceLines replaceAt(int idx, Function<String, String> newLine);
 
+    SourceLines pushAbove(int idx, String newLine);
+
     List<String> view();
 
     boolean changed();
@@ -40,6 +42,13 @@ public interface SourceLines {
                     lines[idx] = changedLine;
                     hasChanges[0] = true;
                 }
+                return this;
+            }
+
+            @Override
+            public SourceLines pushAbove(int idx, String newLine) {
+                lines[idx] = newLine + lineSeparator + lines[idx];
+                hasChanges[0] = true;
                 return this;
             }
 
