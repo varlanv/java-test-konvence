@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.ben-manes.versions:com.github.ben-manes.versions.gradle.plugin:0.52.0")
+    implementation(libs.benmanes.version.plugin)
     compileOnly(libs.jetbrains.annotations)
     compileOnly(libs.lombok)
     compileOnly(libs.junit.platform.launcher)
