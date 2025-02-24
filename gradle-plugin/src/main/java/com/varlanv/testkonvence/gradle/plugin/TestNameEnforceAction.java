@@ -24,8 +24,8 @@ public class TestNameEnforceAction implements Action<Task> {
     ConfigurableFileCollection sourcesRootProp;
     ConfigurableFileCollection compileClasspath;
     ConfigurableFileCollection enforceFiles;
-    Provider<Boolean> dryWithFailingProperty;
-    Provider<Boolean> camelCaseMethodNameProperty;
+    Provider<Boolean> dryWithFailingProvider;
+    Provider<Boolean> camelCaseMethodNameProvider;
     Provider<Boolean> enableReverseTransformation;
 
     @Override
@@ -52,9 +52,9 @@ public class TestNameEnforceAction implements Action<Task> {
                         sourcesRoot,
                         sourceFiles.stream().map(File::toPath).collect(Collectors.toList()),
                         new TrainOptions(
-                            dryWithFailingProperty.get(),
+                            dryWithFailingProvider.get(),
                             enableReverseTransformation.get(),
-                            camelCaseMethodNameProperty.get()
+                            camelCaseMethodNameProvider.get()
                         )
                     ).run();
                 }
