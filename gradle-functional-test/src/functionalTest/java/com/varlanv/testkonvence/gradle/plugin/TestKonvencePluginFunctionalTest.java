@@ -41,7 +41,10 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
                             Files.writeString(
                                 fixture.rootBuildFile(),
-                                defaultBuildGradleConfig(options -> options.camelMethodName(consumableSample.options().camelMethodName()))
+                                defaultBuildGradleConfig(options -> options
+                                    .camelMethodName(consumableSample.options().camelMethodName())
+                                    .reverseTransformation(consumableSample.options().reverseTransformation())
+                                )
                             );
                             var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
                             for (var sampleSourceFile : consumableSample.sources()) {

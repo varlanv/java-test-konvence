@@ -16,6 +16,7 @@ public abstract class TestNameEnforceTask extends DefaultTask {
     public TestNameEnforceTask() {
         getDryWithFailing().convention(false);
         getUseCamelCaseMethodName().convention(false);
+        getEnableReverseTransformation().convention(false);
     }
 
     @InputFiles
@@ -33,6 +34,9 @@ public abstract class TestNameEnforceTask extends DefaultTask {
     @Internal
     public abstract Property<Boolean> getUseCamelCaseMethodName();
 
+    @Internal
+    public abstract Property<Boolean> getEnableReverseTransformation();
+
     @TaskAction
     public void execute() {
         new TestNameEnforceAction(
@@ -40,7 +44,8 @@ public abstract class TestNameEnforceTask extends DefaultTask {
             getCompileClasspath(),
             getEnforceFiles(),
             getDryWithFailing(),
-            getUseCamelCaseMethodName()
+            getUseCamelCaseMethodName(),
+            getEnableReverseTransformation()
         ).execute(this);
     }
 }

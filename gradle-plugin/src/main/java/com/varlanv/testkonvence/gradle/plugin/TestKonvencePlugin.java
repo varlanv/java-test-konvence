@@ -84,7 +84,8 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                     compileClasspath,
                                     enforceFilesCollection,
                                     testKonvenceExtension.getApplyAutomaticallyAfterTestTask(),
-                                    testKonvenceExtension.getCamelCaseMethodNameProperty()
+                                    testKonvenceExtension.getCamelCaseMethodNameProperty(),
+                                    testKonvenceExtension.getEnableReverseTransformation()
                                 );
                                 val enforceTaskProvider = tasks.register(
                                     TestNameEnforceTask.name(testTask.getName()),
@@ -94,6 +95,7 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                         enforceTask.getCompileClasspath().setFrom(testNameEnforceAction.compileClasspath());
                                         enforceTask.getEnforceFiles().setFrom(testNameEnforceAction.enforceFiles());
                                         enforceTask.getUseCamelCaseMethodName().set(testNameEnforceAction.camelCaseMethodNameProperty());
+                                        enforceTask.getEnableReverseTransformation().set(testNameEnforceAction.enableReverseTransformation());
                                     }
                                 );
                                 if (testKonvenceExtension.getApplyAutomaticallyAfterTestTask().get()) {
@@ -119,7 +121,8 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                     action.compileClasspath(),
                                     action.enforceFiles(),
                                     providers.provider(() -> false),
-                                    action.camelCaseMethodNameProperty()
+                                    action.camelCaseMethodNameProperty(),
+                                    action.enableReverseTransformation()
                                 )
                             ));
                     });
@@ -136,7 +139,8 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                     action.compileClasspath(),
                                     action.enforceFiles(),
                                     providers.provider(() -> true),
-                                    action.camelCaseMethodNameProperty()
+                                    action.camelCaseMethodNameProperty(),
+                                    action.enableReverseTransformation()
                                 )
                             ));
                     });
