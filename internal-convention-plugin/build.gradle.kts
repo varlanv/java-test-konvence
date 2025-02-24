@@ -1,3 +1,5 @@
+import org.gradle.plugins.ide.idea.model.IdeaModel
+
 plugins {
     `java-gradle-plugin`
 }
@@ -17,14 +19,23 @@ if (isCiBuild) {
     }
 }
 
+if (!isCiBuild) {
+    pluginManager.apply(IdeaPlugin::class.java)
+    val idea = extensions.getByName("idea") as IdeaModel
+    idea.module.isDownloadJavadoc = true
+    idea.module.isDownloadSources = true
+}
+
 repositories {
     if (!isCiBuild) {
         mavenLocal()
     }
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
+    implementation("com.github.ben-manes.versions:com.github.ben-manes.versions.gradle.plugin:0.52.0")
     compileOnly(libs.jetbrains.annotations)
     compileOnly(libs.lombok)
     compileOnly(libs.junit.platform.launcher)

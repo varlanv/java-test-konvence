@@ -1,5 +1,6 @@
 package com.varlanv.gradle.plugin;
 
+import com.github.benmanes.gradle.versions.VersionsPlugin;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -80,6 +81,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
             ignore -> {
                 pluginManager.apply(PmdPlugin.class);
                 pluginManager.apply(CheckstylePlugin.class);
+                pluginManager.apply(VersionsPlugin.class);
                 if (internalEnvironment.isLocal()) {
                     pluginManager.apply(IdeaPlugin.class);
                     var idea = (IdeaModel) extensions.getByName("idea");
