@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestSamples {
 
+    @SuppressWarnings("all")
     public static Samples testSamples() {
         return Samples.samples()
             .describe(
@@ -642,6 +643,202 @@ public class TestSamples {
                         class SomeTest {
                         
                             @Test
+                            @DisplayName("some test")
+                            void some_test() {
+                            }
+                        }
+                        """
+                    ).withOptions(options -> options.reverseTransformation(true)))
+            .describe(
+                "Requested reverseTransformation and @DisplayName not present and already has import on @DisplayName",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("some test")
+                            void some_test() {
+                            }
+                        }
+                        """
+                    ).withOptions(options -> options.reverseTransformation(true)))
+            .describe(
+                "Requested reverseTransformation and @DisplayName not present and already has import on whole junit package",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.*;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.*;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("some test")
+                            void some_test() {
+                            }
+                        }
+                        """
+                    ).withOptions(options -> options.reverseTransformation(true)))
+            .describe(
+                "Requested reverseTransformation and @DisplayName not present and @ParameterizedTest",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.params.ParameterizedTest;
+                        import org.junit.jupiter.params.provider.ValueSource;
+                        
+                        class SomeTest {
+                        
+                            @ParameterizedTest
+                            @ValueSource(ints = {1, 2, 3})
+                            void some_test(int value) {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.params.ParameterizedTest;
+                        import org.junit.jupiter.params.provider.ValueSource;
+                        
+                        class SomeTest {
+                        
+                            @ParameterizedTest
+                            @ValueSource(ints = {1, 2, 3})
+                            @DisplayName("some test")
+                            void some_test(int value) {
+                            }
+                        }
+                        """
+                    ).withOptions(options -> options.reverseTransformation(true)))
+            .describe(
+                "Requested reverseTransformation and @DisplayName not present and @TestFactory",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.TestFactory;
+                        
+                        class SomeTest {
+                        
+                            @TestFactory
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.TestFactory;
+                        
+                        class SomeTest {
+                        
+                            @TestFactory
+                            @DisplayName("some test")
+                            void some_test() {
+                            }
+                        }
+                        """
+                    ).withOptions(options -> options.reverseTransformation(true)))
+            .describe(
+                "Requested reverseTransformation and @DisplayName not present and @RepeatedTest",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.RepeatedTest;
+                        
+                        class SomeTest {
+                        
+                            @RepeatedTest(10)
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.RepeatedTest;
+                        
+                        class SomeTest {
+                        
+                            @RepeatedTest(10)
+                            @DisplayName("some test")
+                            void some_test() {
+                            }
+                        }
+                        """
+                    ).withOptions(options -> options.reverseTransformation(true)))
+            .describe(
+                "Requested reverseTransformation and @DisplayName not present and @Test and some other annotations",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.RepeatedTest;
+                        import org.junit.jupiter.api.Tag;
+                        
+                        class SomeTest {
+                        
+                            @SuppressWarnings("all")
+                            @Tag("some_tag")
+                            @RepeatedTest(10)
+                            void some_test() {
+                            }
+                        }
+                        """)
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.RepeatedTest;
+                        import org.junit.jupiter.api.Tag;
+                        
+                        class SomeTest {
+                        
+                            @SuppressWarnings("all")
+                            @Tag("some_tag")
+                            @RepeatedTest(10)
                             @DisplayName("some test")
                             void some_test() {
                             }

@@ -111,13 +111,9 @@ public class SourceReplacementTrain {
         val junitDisplayNameImport = "import org.junit.jupiter.api.DisplayName;";
         for (int lineIdx = 0; lineIdx < linesView.size(); lineIdx++) {
             val line = linesView.get(lineIdx);
-            if (line.contains("class {")) {
+            if (line.contains("class {") || line.contains("import org.junit.jupiter.api.*") || line.contains(junitDisplayNameImport)) {
                 return sourceLines;
-            } else if (line.contains("import org.junit.jupiter.api.*")) {
-                return sourceLines;
-            } else if (line.contains(junitDisplayNameImport)) {
-                return sourceLines;
-            } else if (line.contains("import org.junit.jupiter.api")) {
+            } else if (line.contains("import org.junit.jupiter.api") || line.contains("org.junit.jupiter.params.ParameterizedTest")) {
                 importJunitLines.add(IntObjectPair.of(lineIdx, line));
             }
         }

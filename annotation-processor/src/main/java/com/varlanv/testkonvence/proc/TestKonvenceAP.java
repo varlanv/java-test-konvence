@@ -108,7 +108,7 @@ public class TestKonvenceAP extends AbstractProcessor {
         return output;
     };
 
-    private final Set<String> supportedTestAnnotations = new HashSet<>(
+    private static final Set<String> supportedTestAnnotations = new HashSet<>(
         Arrays.asList(
             "org.junit.jupiter.api.Test",
             "org.junit.jupiter.params.ParameterizedTest",
@@ -118,7 +118,7 @@ public class TestKonvenceAP extends AbstractProcessor {
         )
     );
 
-    private final Set<String> supportedAnnotations = Stream.of(
+    private static final Set<String> supportedAnnotations = Stream.of(
             supportedTestAnnotations,
             Collections.singleton(
                 "org.junit.jupiter.api.DisplayName"
