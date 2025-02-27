@@ -77,7 +77,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                 var fileManager = outcome.getFileManager();
                 var fileObjects = fileManager.getFileObjects();
                 assertThat(fileObjects).hasSize(1);
-                resultXml.set(fileObjects.getFirst().getContentAsByteArray());
+                resultXml.set(fileObjects.get(0).getContentAsByteArray());
             });
         assertThat(resultXml.get()).isNotEmpty();
         return resultXml.get();

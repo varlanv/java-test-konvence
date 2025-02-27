@@ -8,13 +8,13 @@ val isCiBuild = providers.environmentVariable("CI").orNull != null
 
 if (isCiBuild) {
     java {
-        version = JavaVersion.VERSION_21
+        version = JavaVersion.VERSION_17
     }
 } else {
     java {
         toolchain {
             vendor.set(JvmVendorSpec.AZUL)
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(17))
         }
     }
 }

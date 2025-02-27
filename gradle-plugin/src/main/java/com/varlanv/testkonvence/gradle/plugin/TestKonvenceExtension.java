@@ -1,17 +1,48 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-/**
- * Configuration options for test-konvence plugin.
- */
-public interface TestKonvenceExtension {
+import org.gradle.api.Action;
+import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.Property;
 
-    static String name() {
-        return "testKonvence";
+import javax.inject.Inject;
+
+abstract class TestKonvenceExtension implements TestKonvenceExtensionView {
+
+    protected abstract Property<Boolean> getEnabled();
+
+    protected abstract Property<Boolean> getApplyAutomaticallyAfterTestTask();
+
+    protected abstract Property<Boolean> getCamelCaseMethodNameProperty();
+
+    protected abstract Property<ReverseTransformationSpec> getReverseTransformation();
+
+    @Inject
+    protected abstract ObjectFactory getObjects();
+
+    public TestKonvenceExtension() {
+        getEnabled().convention(true);
+        getReverseTransformation().convention(getObjects().newInstance(ReverseTransformationSpec.class));
+        getApplyAutomaticallyAfterTestTask().convention(true);
+        getCamelCaseMethodNameProperty().convention(false);
     }
 
-    void applyAutomaticallyAfterTestTask(boolean toggle);
+    @Override
+    public void enabled(boolean toggle) {
+        getEnabled().set(toggle);
+    }
 
-    void enableReverseTransformation(boolean toggle);
+    @Override
+    public void applyAutomaticallyAfterTestTask(boolean toggle) {
+        getApplyAutomaticallyAfterTestTask().set(toggle);
+    }
 
-    void useCamelCaseForMethodNames(boolean toggle);
+    @Override
+    public void reverseTransformation(Action<ReverseTransformationSpecView> action) {
+        action.execute(getReverseTransformation().get());
+    }
+
+    @Override
+    public void useCamelCaseForMethodNames(boolean toggle) {
+        getCamelCaseMethodNameProperty().set(toggle);
+    }
 }

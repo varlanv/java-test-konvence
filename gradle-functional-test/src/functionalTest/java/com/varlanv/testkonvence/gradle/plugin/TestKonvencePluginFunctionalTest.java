@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -24,6 +25,52 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     String defaultSettingsGradleConfig = groovy("""
         rootProject.name = "functional-test"
         """);
+
+    @TestFactory
+    Stream<DynamicTest> test_gradle_version_compatibility() {
+        return TestSamples.testSamples().stream()
+            .limit(1)
+            .flatMap(sample -> TestGradleVersions.list().stream().map(version -> Map.entry(sample, version)))
+            .map(sampleEntry ->
+                DynamicTest.dynamicTest(
+                    "GRADLE VERSION [%s] %s".formatted(sampleEntry.getValue(), sampleEntry.getKey().description()),
+                    () -> {
+                        sampleEntry.getKey().consume(consumableSample -> {
+                            runGradleRunnerFixture(
+                                new DataTable(false, false, false, sampleEntry.getValue()),
+                                List.of("test"),
+                                (fixture) -> {
+                                    Files.writeString(
+                                        fixture.settingsFile(),
+                                        defaultSettingsGradleConfig
+                                    );
+
+                                    Files.writeString(
+                                        fixture.rootBuildFile(),
+                                        defaultBuildGradleConfig(options -> options
+                                            .camelMethodName(consumableSample.options().camelMethodName())
+                                            .reverseTransformation(consumableSample.options().reverseTransformation())
+                                        )
+                                    );
+                                    var javaDir = Files.createDirectories(fixture.subjectProjectDir().resolve("src").resolve("test").resolve("java"));
+                                    for (var sampleSourceFile : consumableSample.sources()) {
+                                        var relativeSourceFilePath = consumableSample.dir().relativize(sampleSourceFile.path());
+                                        var sourceFile = javaDir.resolve(relativeSourceFilePath);
+                                        Files.createDirectories(sourceFile.getParent());
+                                        Files.move(sampleSourceFile.path(), sourceFile);
+                                    }
+                                    build(fixture.runner(), GradleRunner::build);
+                                    for (var sampleSourceFile : consumableSample.sources()) {
+                                        var relativeSourceFilePath = consumableSample.dir().relativize(sampleSourceFile.path());
+                                        var sourceFile = javaDir.resolve(relativeSourceFilePath);
+                                        var modifiedSourceFileContent = Files.readString(sourceFile);
+                                        assertThat(modifiedSourceFileContent).isEqualTo(sampleSourceFile.expectedTransformation());
+                                    }
+                                }
+                            );
+                        });
+                    }));
+    }
 
     @TestFactory
     Stream<DynamicTest> fromSamples() {
@@ -198,7 +245,9 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
             testKonvence {
                 applyAutomaticallyAfterTestTask(%s)
                 useCamelCaseForMethodNames(%s)
-                enableReverseTransformation(%s)
+                reverseTransformation {
+                    enabled(%s)
+                }
             }
             
             dependencies {

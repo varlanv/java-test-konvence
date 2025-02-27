@@ -21,6 +21,6 @@ public class ConsumableSample {
         } else if (sources.isEmpty()) {
             throw new IllegalStateException("No source file available");
         }
-        return sources.getFirst();
+        return sources.get(0);
     }
 }

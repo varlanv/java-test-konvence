@@ -214,7 +214,7 @@ public interface GradleIntegrationTest extends IntegrationTest {
         public ProjectAssertions hasOnlyOneService(String name) {
             var buildServices = new ArrayList<>(project.getGradle().getSharedServices().getRegistrations());
             assertThat(buildServices).hasSize(1);
-            assertThat(buildServices.getFirst().getName()).isEqualTo(name);
+            assertThat(buildServices.get(0).getName()).isEqualTo(name);
             return this;
         }
 
