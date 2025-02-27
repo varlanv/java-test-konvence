@@ -22,7 +22,7 @@ public class TestKonvencePlugin implements Plugin<Project> {
         val extensions = project.getExtensions();
         val testKonvenceExtension = (TestKonvenceExtensionInternal) extensions.create(
             TestKonvenceExtension.class,
-            TestKonvenceExtension.EXTENSION_NAME,
+            TestKonvenceExtension.name(),
             TestKonvenceExtensionInternal.class
         );
         val tasks = project.getTasks();

@@ -1,8 +1,13 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+/**
+ * Configuration options for test-konvence plugin.
+ */
 public interface TestKonvenceExtension {
 
-    String EXTENSION_NAME = "testKonvence";
+    static String name() {
+        return "testKonvence";
+    }
 
     void applyAutomaticallyAfterTestTask(boolean toggle);
 

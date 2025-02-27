@@ -47,6 +47,78 @@ public class TestSamples {
                         """
                     ))
             .describe(
+                "Should not add newline if source file did not have it",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void someTest() {
+                            }
+                        }"""
+                    )
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void some_display_name() {
+                            }
+                        }"""
+                    ))
+            .describe(
+                "Should not change newlines in the end of file if there are multiple newlines",
+                spec -> spec
+                    .withClass("testcases.SomeTest")
+                    .withJavaSources("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void someTest() {
+                            }
+                        }
+                        
+                        
+                        
+                        """
+                    )
+                    .withExpectedTransformation("""
+                        package testcases;
+                        
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Test;
+                        
+                        class SomeTest {
+                        
+                            @Test
+                            @DisplayName("Some display name")
+                            void some_display_name() {
+                            }
+                        }
+                        
+                        
+                        
+                        """
+                    ))
+            .describe(
                 "Should replace method name to camel case if found and requested camel",
                 spec -> spec
                     .withClass("testcases.SomeTest")

@@ -29,7 +29,7 @@ public interface SourceLines {
     static SourceLines ofPath(Path path) {
         val originalText = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
         val lineSeparator = LineSeparator.forFile(path, originalText).separator();
-        val lines = originalText.split(lineSeparator);
+        val lines = originalText.split(lineSeparator, -1);
         val view = Collections.unmodifiableList(Arrays.asList(lines));
         val hasChanges = new boolean[]{false};
 
@@ -67,7 +67,7 @@ public interface SourceLines {
                 if (!changed()) {
                     return originalText;
                 }
-                return Arrays.stream(lines).map(line -> line + lineSeparator).collect(Collectors.joining());
+                return String.join(lineSeparator, lines);
             }
         };
     }
