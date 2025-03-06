@@ -10,9 +10,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
 
-import java.io.File;
 import java.nio.file.Files;
-import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
@@ -48,7 +46,6 @@ class TestNameEnforceAction implements Action<Task> {
                     new Train(
                         enforceFile.toPath(),
                         sourcesRoot,
-                        sourceFiles.stream().map(File::toPath).collect(Collectors.toList()),
                         new TrainOptions(
                             dryWithFailingProvider.get(),
                             enableReverseTransformation.get(),

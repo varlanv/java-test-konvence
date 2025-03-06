@@ -7,7 +7,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,6 @@ class Train {
 
     Path resultXml;
     Path sourcesRoot;
-    Collection<Path> sources;
     TrainOptions trainOptions;
 
     public void run() {

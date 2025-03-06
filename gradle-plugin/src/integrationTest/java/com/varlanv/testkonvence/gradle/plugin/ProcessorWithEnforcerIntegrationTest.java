@@ -12,7 +12,6 @@ import org.junit.jupiter.api.TestFactory;
 
 import javax.tools.StandardLocation;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -33,14 +32,19 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
     }
 
     void spec(ConsumableSample sample) {
-        var sources = sample.sources().stream().collect(Collectors.toMap(SampleSourceFile::outerClassName, SampleSourceFile::content));
+        var sources = sample.sources().stream()
+            .collect(
+                Collectors.toMap(
+                    SampleSourceFile::outerClassName,
+                    SampleSourceFile::content
+                )
+            );
         var resultXml = runAnnotationProcessor(sources);
         useTempFile(resultXmlPath -> {
             Files.write(resultXmlPath, resultXml);
             new Train(
                 resultXmlPath,
                 sample.dir(),
-                List.of(),
                 new TrainOptions(false, sample.options().reverseTransformation(), sample.options().camelMethodName())
             ).run();
 
