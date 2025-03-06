@@ -7,7 +7,7 @@ import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
 
-public abstract class TestNameEnforceTask extends DefaultTask {
+abstract class TestNameEnforceTask extends DefaultTask {
 
     public static String name(String testTaskName) {
         return testTaskName + "KonvenceEnforce";

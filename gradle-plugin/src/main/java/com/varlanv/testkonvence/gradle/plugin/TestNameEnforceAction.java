@@ -1,7 +1,5 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import com.varlanv.testkonvence.enforce.Train;
-import com.varlanv.testkonvence.enforce.TrainOptions;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
-public class TestNameEnforceAction implements Action<Task> {
+class TestNameEnforceAction implements Action<Task> {
 
     private static final Logger log = Logging.getLogger(TestNameEnforceAction.class);
     ConfigurableFileCollection sourcesRootProp;
