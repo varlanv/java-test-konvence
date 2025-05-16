@@ -37,13 +37,13 @@ public class Sample {
         } finally {
             Files.walkFileTree(dir, new SimpleFileVisitor<>() {
 
-                @NotNull @Override
+                @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                     Files.delete(dir);
                     return FileVisitResult.CONTINUE;
                 }
 
-                @NotNull @Override
+                @Override
                 public FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;

@@ -123,7 +123,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
                 spotlessExtension.java(spotlessJava -> {
                     spotlessJava.importOrder();
                     spotlessJava.removeUnusedImports();
-                    spotlessJava.palantirJavaFormat().formatJavadoc(true);
+                    spotlessJava.palantirJavaFormat();
                     spotlessJava.formatAnnotations();
                     spotlessJava.encoding("UTF-8");
                     spotlessJava.endWithNewline();

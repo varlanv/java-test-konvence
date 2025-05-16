@@ -2,10 +2,14 @@ package com.varlanv.testkonvence.gradle.plugin;
 
 import org.gradle.api.Action;
 
-/** Configuration options for test-konvence plugin. */
+/**
+ * Configuration options for test-konvence plugin.
+ */
 public interface TestKonvenceExtensionView {
 
-    /** @return name of the extension. */
+    /**
+     * @return name of the extension.
+     */
     static String name() {
         return "testKonvence";
     }
