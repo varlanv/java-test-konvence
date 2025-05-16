@@ -2,6 +2,7 @@ package com.varlanv.gradle.plugin;
 
 import com.diffplug.gradle.spotless.SpotlessExtension;
 import com.diffplug.gradle.spotless.SpotlessPlugin;
+import com.diffplug.spotless.LineEnding;
 import com.github.benmanes.gradle.versions.VersionsPlugin;
 import com.github.spotbugs.snom.SpotBugsExtension;
 import com.github.spotbugs.snom.SpotBugsPlugin;
@@ -124,6 +125,10 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     spotlessJava.removeUnusedImports();
                     spotlessJava.palantirJavaFormat().formatJavadoc(true);
                     spotlessJava.formatAnnotations();
+                    spotlessJava.encoding("UTF-8");
+                    spotlessJava.endWithNewline();
+                    spotlessJava.setLineEndings(LineEnding.UNIX);
+                    spotlessJava.trimTrailingWhitespace();
                 });
             }
         );
