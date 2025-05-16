@@ -129,6 +129,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     spotlessJava.endWithNewline();
                     spotlessJava.setLineEndings(LineEnding.UNIX);
                     spotlessJava.trimTrailingWhitespace();
+                    spotlessJava.cleanthat();
                 });
             }
         );

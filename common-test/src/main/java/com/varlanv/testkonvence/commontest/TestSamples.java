@@ -939,7 +939,7 @@ public class TestSamples {
                         "/testkonvence/samples/jsonassured_1/expected/" + className + ".java"))) {
             var actualString = new String(actualIs.readAllBytes(), StandardCharsets.UTF_8);
             var expectedString = new String(expectedIs.readAllBytes(), StandardCharsets.UTF_8);
-            var packageEndIdx = actualString.indexOf(";");
+            var packageEndIdx = actualString.indexOf(';');
             var packageName = actualString.substring(packageLen, packageEndIdx);
             var fullyQualifiedClassName = packageName + "." + className;
 
