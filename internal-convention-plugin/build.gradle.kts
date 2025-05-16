@@ -36,6 +36,7 @@ repositories {
 
 dependencies {
     implementation(libs.spotbugs.plugin)
+    implementation(libs.spotless.plugin)
     implementation(libs.benmanes.version.plugin)
     compileOnly(libs.jetbrains.annotations)
     compileOnly(libs.lombok)

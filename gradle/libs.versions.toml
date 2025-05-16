@@ -11,6 +11,7 @@ apacheCommonsIo = "2.18.0"
 cuteToolisticon = "1.7.0"
 benmanesVersion = "0.52.0"
 spotbugsVersion = "6.1.11"
+spotlessVersion = "7.0.3"
 
 [libraries]
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
@@ -24,6 +25,7 @@ apache-commons-io = { group = "commons-io", name = "commons-io", version.ref = "
 toolisticon-cute = { group = "io.toolisticon.cute", name = "cute", version.ref = "cuteToolisticon" }
 benmanes-version-plugin = { group = "com.github.ben-manes.versions", name = "com.github.ben-manes.versions.gradle.plugin", version.ref = "benmanesVersion" }
 spotbugs-plugin = { group = "com.github.spotbugs.snom", name = "spotbugs-gradle-plugin", version.ref = "spotbugsVersion" }
+spotless-plugin = { group = "com.diffplug.gradle.spotless", name = "com.diffplug.gradle.spotless.gradle.plugin", version.ref = "spotlessVersion" }
 
 [plugins]
 internalConvention = { id = "com.varlanv.testkonvence.gradle.internal-gradle-convention-plugin" }

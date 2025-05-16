@@ -1,5 +1,7 @@
 package com.varlanv.gradle.plugin;
 
+import com.diffplug.gradle.spotless.SpotlessExtension;
+import com.diffplug.gradle.spotless.SpotlessPlugin;
 import com.github.benmanes.gradle.versions.VersionsPlugin;
 import com.github.spotbugs.snom.SpotBugsExtension;
 import com.github.spotbugs.snom.SpotBugsPlugin;
@@ -114,6 +116,15 @@ public class InternalConventionPlugin implements Plugin<Project> {
                 pluginManager.apply(SpotBugsPlugin.class);
                 var spotBugsExtension = (SpotBugsExtension) extensions.getByName("spotbugs");
                 spotBugsExtension.getExcludeFilter().set(staticAnalyseFolder.resolve("spotbug-exclude.xml").toFile());
+
+                pluginManager.apply(SpotlessPlugin.class);
+                var spotlessExtension = (SpotlessExtension) extensions.getByName("spotless");
+                spotlessExtension.java(spotlessJava -> {
+                    spotlessJava.importOrder();
+                    spotlessJava.removeUnusedImports();
+                    spotlessJava.googleJavaFormat();
+                    spotlessJava.formatAnnotations();
+                });
             }
         );
         // -------------------- Apply common plugins end --------------------
