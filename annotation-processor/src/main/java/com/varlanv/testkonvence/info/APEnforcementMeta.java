@@ -1,8 +1,7 @@
 package com.varlanv.testkonvence.info;
 
-import lombok.Value;
-
 import java.util.List;
+import lombok.Value;
 
 @Value
 public class APEnforcementMeta {

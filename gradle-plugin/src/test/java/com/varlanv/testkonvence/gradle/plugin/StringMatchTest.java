@@ -1,10 +1,10 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.varlanv.testkonvence.commontest.UnitTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class StringMatchTest implements UnitTest {
 

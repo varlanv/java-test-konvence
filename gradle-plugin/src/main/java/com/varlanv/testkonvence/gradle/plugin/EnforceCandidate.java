@@ -11,7 +11,6 @@ interface EnforceCandidate {
     Kind kind();
 
     enum Kind {
-
         CLASS,
         METHOD
     }

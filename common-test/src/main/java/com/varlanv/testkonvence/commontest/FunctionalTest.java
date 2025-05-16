@@ -1,5 +1,15 @@
 package com.varlanv.testkonvence.commontest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.NameFileFilter;
@@ -13,17 +23,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.params.provider.Arguments;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @Tags({@Tag(BaseTest.FUNCTIONAL_TEST_TAG), @Tag(BaseTest.SLOW_TEST_TAG)})
 public interface FunctionalTest extends BaseTest {
 
@@ -35,7 +34,8 @@ public interface FunctionalTest extends BaseTest {
 
     @BeforeAll
     default void setupFunctionalSpec() {
-        TestUtils.setProjectRoot(() -> findDirContaining(file -> "internal-convention-plugin".equals(file.getFileName().toString())));
+        TestUtils.setProjectRoot(() -> findDirContaining(
+                file -> "internal-convention-plugin".equals(file.getFileName().toString())));
     }
 
     default void runFunctionalFixture(ThrowingConsumer<FunctionalFixture> fixtureConsumer) {
@@ -44,25 +44,18 @@ public interface FunctionalTest extends BaseTest {
             var settingsFile = subjectProjectDir.resolve("settings.gradle");
             var rootBuildFile = subjectProjectDir.resolve("build.gradle");
             var propertiesFile = subjectProjectDir.resolve("gradle.properties");
-            fixtureConsumer.accept(
-                new FunctionalFixture(
-                    rootTestProjectDir,
-                    subjectProjectDir,
-                    settingsFile,
-                    rootBuildFile,
-                    propertiesFile
-                )
-            );
+            fixtureConsumer.accept(new FunctionalFixture(
+                    rootTestProjectDir, subjectProjectDir, settingsFile, rootBuildFile, propertiesFile));
         });
     }
 
-    default void runGradleRunnerFixture(DataTable params, String taskName, ThrowingConsumer<RunnerFunctionalFixture> fixtureConsumer) {
+    default void runGradleRunnerFixture(
+            DataTable params, String taskName, ThrowingConsumer<RunnerFunctionalFixture> fixtureConsumer) {
         runGradleRunnerFixture(params, List.of(taskName), fixtureConsumer);
     }
 
-    default void runGradleRunnerFixture(DataTable params,
-                                        List<String> arguments,
-                                        ThrowingConsumer<RunnerFunctionalFixture> fixtureConsumer) {
+    default void runGradleRunnerFixture(
+            DataTable params, List<String> arguments, ThrowingConsumer<RunnerFunctionalFixture> fixtureConsumer) {
         runFunctionalFixture(parentFixture -> {
             var args = new ArrayList<>(arguments);
             if (params.configurationCache()) {
@@ -77,22 +70,19 @@ public interface FunctionalTest extends BaseTest {
             var env = new HashMap<>(System.getenv());
             env.put("FUNCTIONAL_SPEC_RUN", "true");
             env.putAll(params.isCi() ? Map.of("CI", "true") : Map.of("CI", "false"));
-            fixtureConsumer.accept(
-                new RunnerFunctionalFixture(
+            fixtureConsumer.accept(new RunnerFunctionalFixture(
                     GradleRunner.create()
-                        .withPluginClasspath()
-                        .withProjectDir(parentFixture.subjectProjectDir.toFile())
-                        .withEnvironment(env)
-                        .withArguments(args)
-                        .forwardOutput()
-                        .withGradleVersion(params.gradleVersion()),
+                            .withPluginClasspath()
+                            .withProjectDir(parentFixture.subjectProjectDir.toFile())
+                            .withEnvironment(env)
+                            .withArguments(args)
+                            .forwardOutput()
+                            .withGradleVersion(params.gradleVersion()),
                     parentFixture.rootTestProjectDir,
                     parentFixture.subjectProjectDir,
                     parentFixture.settingsFile,
                     parentFixture.rootBuildFile,
-                    parentFixture.propertiesFile
-                )
-            );
+                    parentFixture.propertiesFile));
         });
     }
 
@@ -104,8 +94,10 @@ public interface FunctionalTest extends BaseTest {
         System.err.println();
         System.err.println(lineStart);
         System.err.println();
-        System.err.printf("%s STARTING GRADLE FUNCTIONAL TEST BUILD FOR SPEC %s. "
-            + "LOGS BELOW ARE COMMING FROM GRADLE BUILD UNDER TEST %s%n", mark, getClass().getSimpleName(), mark);
+        System.err.printf(
+                "%s STARTING GRADLE FUNCTIONAL TEST BUILD FOR SPEC %s. "
+                        + "LOGS BELOW ARE COMMING FROM GRADLE BUILD UNDER TEST %s%n",
+                mark, getClass().getSimpleName(), mark);
         System.err.printf("Gradle build args: [%s]%n", String.join(" ", runner.getArguments()));
         System.err.printf("Java version - [%s]%n", System.getProperty("java.version"));
         System.err.println();
@@ -117,7 +109,9 @@ public interface FunctionalTest extends BaseTest {
             System.err.println();
             System.err.println(lineEnd);
             System.err.println();
-            System.err.printf("%s FINISHED GRADLE FUNCTIONAL TEST BUILD FOR %s %s%n", mark, getClass().getSimpleName(), mark);
+            System.err.printf(
+                    "%s FINISHED GRADLE FUNCTIONAL TEST BUILD FOR %s %s%n",
+                    mark, getClass().getSimpleName(), mark);
             System.err.println();
             System.err.println(lineEnd);
             System.err.println();
@@ -126,9 +120,11 @@ public interface FunctionalTest extends BaseTest {
 
     default void verifyConfigurationCacheNotStored(BuildResult buildResult, String gradleVersion) {
         if (GradleVersion.version(gradleVersion).compareTo(GradleVersion.version("8.0")) > 0) {
-            assertThat(buildResult.getOutput()).contains("Configuration cache entry discarded because incompatible task was found:");
+            assertThat(buildResult.getOutput())
+                    .contains("Configuration cache entry discarded because incompatible task was found:");
         } else {
-            assertThat(buildResult.getOutput()).contains("Calculating task graph as no configuration cache is available for tasks:");
+            assertThat(buildResult.getOutput())
+                    .contains("Calculating task graph as no configuration cache is available for tasks:");
         }
     }
 
@@ -139,10 +135,12 @@ public interface FunctionalTest extends BaseTest {
     @SneakyThrows
     default void copyFolderContents(Path srcDir, Path destDir) {
         if (Files.notExists(srcDir)) {
-            throw new IllegalArgumentException("Cannot copy from non-existing directory '%s'!".formatted(srcDir.toAbsolutePath()));
+            throw new IllegalArgumentException(
+                    "Cannot copy from non-existing directory '%s'!".formatted(srcDir.toAbsolutePath()));
         }
         if (!Files.isDirectory(srcDir)) {
-            throw new IllegalArgumentException("Cannot copy from non-directory '%s'!".formatted(srcDir.toAbsolutePath()));
+            throw new IllegalArgumentException(
+                    "Cannot copy from non-directory '%s'!".formatted(srcDir.toAbsolutePath()));
         }
 
         Files.createDirectories(destDir);
@@ -211,33 +209,31 @@ public interface FunctionalTest extends BaseTest {
 
     default void printFileTree(Path path) {
         System.out.println(
-            FileUtils.listFiles(
-                    path.toFile(),
-                    TrueFileFilter.INSTANCE,
-                    new NotFileFilter(new NameFileFilter(".gradle"))
-                ).stream()
-                .map(it -> it.getAbsolutePath() + System.lineSeparator())
-                .collect(Collectors.joining())
-        );
+                FileUtils.listFiles(
+                                path.toFile(),
+                                TrueFileFilter.INSTANCE,
+                                new NotFileFilter(new NameFileFilter(".gradle")))
+                        .stream()
+                        .map(it -> it.getAbsolutePath() + System.lineSeparator())
+                        .collect(Collectors.joining()));
     }
 
     default Stream<Arguments> defaultDataTables() {
         return DataTables.streamDefault().map(Arguments::of);
     }
 
-    record FunctionalFixture(Path rootTestProjectDir,
-                             Path subjectProjectDir,
-                             Path settingsFile,
-                             Path rootBuildFile,
-                             Path propertiesFile) {
-    }
+    record FunctionalFixture(
+            Path rootTestProjectDir,
+            Path subjectProjectDir,
+            Path settingsFile,
+            Path rootBuildFile,
+            Path propertiesFile) {}
 
-
-    record RunnerFunctionalFixture(GradleRunner runner,
-                                   Path rootTestProjectDir,
-                                   Path subjectProjectDir,
-                                   Path settingsFile,
-                                   Path rootBuildFile,
-                                   Path propertiesFile) {
-    }
+    record RunnerFunctionalFixture(
+            GradleRunner runner,
+            Path rootTestProjectDir,
+            Path subjectProjectDir,
+            Path settingsFile,
+            Path rootBuildFile,
+            Path propertiesFile) {}
 }

@@ -1,15 +1,14 @@
 package com.varlanv.testkonvence.commontest.sample;
 
 import com.varlanv.testkonvence.commontest.BaseTest;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.intellij.lang.annotations.Language;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.intellij.lang.annotations.Language;
 
 @Getter(AccessLevel.PACKAGE)
 @RequiredArgsConstructor
@@ -29,7 +28,8 @@ public class SampleSpec {
             return new SampleSpecFileStep(this, fullyQualifiedClassName, "");
         }
         var className = packageParts[packageParts.length - 1];
-        var packageName = fullyQualifiedClassName.substring(0, fullyQualifiedClassName.length() - className.length() - 1);
+        var packageName =
+                fullyQualifiedClassName.substring(0, fullyQualifiedClassName.length() - className.length() - 1);
         return new SampleSpecFileStep(this, className, packageName);
     }
 
@@ -68,21 +68,17 @@ public class SampleSpec {
 
         SampleSpec toSpec() {
             return new SampleSpec(
-                Stream.concat(
-                    spec.sources.stream(),
-                    Stream.of(
-                        new SampleSources(
-                            parent.parent.outerClassName,
-                            parent.parent.outerClassName + ".java",
-                            parent.parent.packageName,
-                            parent.sources,
-                            expectedTransformation
-                        )
-                    )
-                ).toList(),
-                extraAssertions,
-                optionsBuilder.build()
-            );
+                    Stream.concat(
+                                    spec.sources.stream(),
+                                    Stream.of(new SampleSources(
+                                            parent.parent.outerClassName,
+                                            parent.parent.outerClassName + ".java",
+                                            parent.parent.packageName,
+                                            parent.sources,
+                                            expectedTransformation)))
+                            .toList(),
+                    extraAssertions,
+                    optionsBuilder.build());
         }
 
         public SampleSpecFinish withExtraAssertions(BaseTest.ThrowingConsumer<ConsumableSample> extraAssertion) {

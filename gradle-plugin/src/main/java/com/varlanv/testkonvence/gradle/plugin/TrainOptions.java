@@ -11,8 +11,10 @@ final class TrainOptions {
 
     @Builder.Default
     Boolean dryWithFailing = false;
+
     @Builder.Default
     Boolean reverseTransformation = false;
+
     @Builder.Default
     Boolean camelCaseMethodName = false;
 }

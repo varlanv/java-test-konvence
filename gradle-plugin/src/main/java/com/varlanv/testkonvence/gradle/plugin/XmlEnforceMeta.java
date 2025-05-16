@@ -1,10 +1,5 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.SneakyThrows;
-import lombok.Value;
-import lombok.val;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,15 +9,17 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilderFactory;
+import lombok.SneakyThrows;
+import lombok.Value;
+import lombok.val;
 
 @Value
 class XmlEnforceMeta {
 
     @SneakyThrows
     public List<APEnforcementMeta.Item> items(Path path) {
-        return items(
-            Files.newInputStream(path)
-        );
+        return items(Files.newInputStream(path));
     }
 
     @SneakyThrows
@@ -45,14 +42,11 @@ class XmlEnforceMeta {
         for (int entryIdx = 0; entryIdx < entriesLen; entryIdx++) {
             val entryNode = entries.item(entryIdx);
             val fields = entryNode.getChildNodes();
-            entriesList.add(
-                new APEnforcementMeta.Item(
+            entriesList.add(new APEnforcementMeta.Item(
                     fields.item(0).getTextContent(),
                     fields.item(1).getTextContent(),
                     fields.item(2).getTextContent(),
-                    fields.item(3).getTextContent()
-                )
-            );
+                    fields.item(3).getTextContent()));
         }
         return entriesList;
     }

@@ -1,12 +1,11 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.SneakyThrows;
-import lombok.val;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import lombok.SneakyThrows;
+import lombok.val;
 
 interface SourceFile {
 
@@ -34,10 +33,9 @@ interface SourceFile {
             @SneakyThrows
             public void save(SourceLines sourceLines) {
                 Files.write(
-                    path,
-                    sourceLines.joined().getBytes(StandardCharsets.UTF_8),
-                    StandardOpenOption.TRUNCATE_EXISTING
-                );
+                        path,
+                        sourceLines.joined().getBytes(StandardCharsets.UTF_8),
+                        StandardOpenOption.TRUNCATE_EXISTING);
             }
         };
     }

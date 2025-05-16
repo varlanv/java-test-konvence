@@ -1,8 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import org.jetbrains.annotations.Range;
-
 import java.util.function.IntConsumer;
+import org.jetbrains.annotations.Range;
 
 interface ImmutableIntVector {
 

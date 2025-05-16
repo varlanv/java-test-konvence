@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import java.nio.file.Files;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -9,8 +10,6 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
-
-import java.nio.file.Files;
 
 @Getter
 @RequiredArgsConstructor
@@ -44,14 +43,13 @@ class TestNameEnforceAction implements Action<Task> {
                         throw new IllegalStateException("Enforce file does not exist: " + enforceFile);
                     }
                     new Train(
-                        enforceFile.toPath(),
-                        sourcesRoot,
-                        new TrainOptions(
-                            dryWithFailingProvider.get(),
-                            enableReverseTransformation.get(),
-                            camelCaseMethodNameProvider.get()
-                        )
-                    ).run();
+                                    enforceFile.toPath(),
+                                    sourcesRoot,
+                                    new TrainOptions(
+                                            dryWithFailingProvider.get(),
+                                            enableReverseTransformation.get(),
+                                            camelCaseMethodNameProvider.get()))
+                            .run();
                 }
             }
         }

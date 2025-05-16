@@ -1,19 +1,18 @@
 package com.varlanv.testkonvence.info;
 
-import lombok.SneakyThrows;
-import lombok.Value;
-import lombok.val;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Collection;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Collection;
+import lombok.SneakyThrows;
+import lombok.Value;
+import lombok.val;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 @Value
 public class XmlMemoryEnforceMeta {

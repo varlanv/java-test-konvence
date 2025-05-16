@@ -1,12 +1,11 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @RequiredArgsConstructor
 class DisplayNameFromMethodName {
@@ -24,14 +23,14 @@ class DisplayNameFromMethodName {
             return String.join(" ", splitCamelToWords(methodName));
         } else {
             return Arrays.stream(snakeSplit)
-                .map(word -> {
-                    val words = splitCamelToWords(word);
-                    if (words.size() > 1) {
-                        return "'" + word + "'";
-                    }
-                    return word;
-                })
-                .collect(Collectors.joining(" "));
+                    .map(word -> {
+                        val words = splitCamelToWords(word);
+                        if (words.size() > 1) {
+                            return "'" + word + "'";
+                        }
+                        return word;
+                    })
+                    .collect(Collectors.joining(" "));
         }
     }
 

@@ -1,15 +1,14 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.varlanv.testkonvence.commontest.UnitTest;
+import java.util.ArrayList;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.ArrayList;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.*;
 
 class IntVectorTest implements UnitTest {
 
@@ -25,8 +24,7 @@ class IntVectorTest implements UnitTest {
         @ValueSource(ints = {0, 1, 10})
         void should_throw_exception_on_empty_vector(int initialCapacity) {
             var intVector = new IntVector(initialCapacity);
-            assertThatThrownBy(intVector::first)
-                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+            assertThatThrownBy(intVector::first).isInstanceOf(ArrayIndexOutOfBoundsException.class);
         }
 
         @ParameterizedTest
@@ -41,20 +39,21 @@ class IntVectorTest implements UnitTest {
         @ValueSource(ints = {2, 5, 10})
         void should_return_first_element_for_vector_of_many_elements_when_initial_capacity_was_zero(int elementsCount) {
             var subject = IntStream.range(0, elementsCount)
-                .map(idx -> idx + 1)
-                .boxed()
-                .reduce(new IntVector(0), IntVector::add, (a, b) -> b);
+                    .map(idx -> idx + 1)
+                    .boxed()
+                    .reduce(new IntVector(0), IntVector::add, (a, b) -> b);
 
             assertThat(subject.first()).isEqualTo(1);
         }
 
         @ParameterizedTest
         @ValueSource(ints = {2, 5, 10})
-        void should_return_first_element_for_vector_of_many_elements_when_initial_capacity_was_non_zero(int elementsCount) {
+        void should_return_first_element_for_vector_of_many_elements_when_initial_capacity_was_non_zero(
+                int elementsCount) {
             var subject = IntStream.range(0, elementsCount)
-                .map(idx -> idx + 1)
-                .boxed()
-                .reduce(new IntVector(50), IntVector::add, (a, b) -> b);
+                    .map(idx -> idx + 1)
+                    .boxed()
+                    .reduce(new IntVector(50), IntVector::add, (a, b) -> b);
 
             assertThat(subject.first()).isEqualTo(1);
         }
@@ -72,8 +71,8 @@ class IntVectorTest implements UnitTest {
         @ParameterizedTest
         @ValueSource(ints = {1, 2, 10, 100})
         void should_return_count_of_elements_for_non_empty_vector(int elementsCount) {
-            var actual = IntStream.range(0, elementsCount).boxed()
-                .reduce(new IntVector(0), IntVector::add, (a, b) -> b);
+            var actual =
+                    IntStream.range(0, elementsCount).boxed().reduce(new IntVector(0), IntVector::add, (a, b) -> b);
 
             assertThat(actual.size()).isEqualTo(elementsCount);
         }
@@ -85,12 +84,9 @@ class IntVectorTest implements UnitTest {
         @ParameterizedTest
         @ValueSource(ints = {0, 1, 10})
         void should_not_iterate_over_empty_vector(int initialCapacity) {
-            assertThatNoException().isThrownBy(
-                () -> new IntVector(initialCapacity).forEach(line -> {
-                        throw new RuntimeException("Should not reach here");
-                    }
-                )
-            );
+            assertThatNoException().isThrownBy(() -> new IntVector(initialCapacity).forEach(line -> {
+                throw new RuntimeException("Should not reach here");
+            }));
         }
 
         @ValueSource(ints = {1, 3, 10})
@@ -104,7 +100,9 @@ class IntVectorTest implements UnitTest {
             var result = new ArrayList<Integer>();
             subject.forEach(result::add);
             assertThat(result).hasSize(initialCapacity);
-            assertThat(result).containsExactlyElementsOf(IntStream.range(0, initialCapacity).boxed().toList());
+            assertThat(result)
+                    .containsExactlyElementsOf(
+                            IntStream.range(0, initialCapacity).boxed().toList());
         }
 
         @Test

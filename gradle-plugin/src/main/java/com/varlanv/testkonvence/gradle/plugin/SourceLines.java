@@ -1,8 +1,5 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.SneakyThrows;
-import lombok.val;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import lombok.SneakyThrows;
+import lombok.val;
 
 interface SourceLines {
 
@@ -30,7 +29,7 @@ interface SourceLines {
         val lineSeparator = LineSeparator.forFile(path, originalText).separator();
         val lines = originalText.split(lineSeparator, -1);
         val view = Collections.unmodifiableList(Arrays.asList(lines));
-        val hasChanges = new boolean[]{false};
+        val hasChanges = new boolean[] {false};
 
         return new SourceLines() {
 

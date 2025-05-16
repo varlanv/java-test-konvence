@@ -24,31 +24,18 @@ class SamplesFromIterable implements Samples {
             throw new IllegalArgumentException("Sample [%s] was already added previously".formatted(description));
         }
         var resultSpec = specConsumer.apply(new SampleSpec()).toSpec();
-        samples.add(
-            new Sample(
-                description,
-                resultSpec.sources(),
-                resultSpec.extraAssertions(),
-                resultSpec.options()
-            )
-        );
+        samples.add(new Sample(description, resultSpec.sources(), resultSpec.extraAssertions(), resultSpec.options()));
         return this;
     }
 
     @Override
-    public Samples describeMany(Stream<Map.Entry<String, Function<SampleSpec, SampleSpec.SampleSpecFinish>>> specConsumers) {
+    public Samples describeMany(
+            Stream<Map.Entry<String, Function<SampleSpec, SampleSpec.SampleSpecFinish>>> specConsumers) {
         specConsumers.forEach(specEntry -> {
-                var resultSpec = specEntry.getValue().apply(new SampleSpec()).toSpec();
-                samples.add(
-                    new Sample(
-                        specEntry.getKey(),
-                        resultSpec.sources(),
-                        resultSpec.extraAssertions(),
-                        resultSpec.options()
-                    )
-                );
-            }
-        );
+            var resultSpec = specEntry.getValue().apply(new SampleSpec()).toSpec();
+            samples.add(new Sample(
+                    specEntry.getKey(), resultSpec.sources(), resultSpec.extraAssertions(), resultSpec.options()));
+        });
         return this;
     }
 

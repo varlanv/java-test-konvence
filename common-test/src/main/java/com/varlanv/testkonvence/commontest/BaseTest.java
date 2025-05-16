@@ -1,5 +1,8 @@
 package com.varlanv.testkonvence.commontest;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.function.Predicate;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
@@ -8,14 +11,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.function.Predicate;
-
 @Execution(ExecutionMode.CONCURRENT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public interface BaseTest {
-
 
     String SLOW_TEST_TAG = "slow-test";
     String FAST_TEST_TAG = "fast-test";
@@ -45,7 +43,6 @@ public interface BaseTest {
         } finally {
             FileUtils.deleteDirectory(dir.toFile());
         }
-
     }
 
     @SneakyThrows

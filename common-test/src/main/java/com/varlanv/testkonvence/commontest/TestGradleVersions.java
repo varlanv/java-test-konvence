@@ -1,19 +1,17 @@
 package com.varlanv.testkonvence.commontest;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestGradleVersions {
 
     public static List<String> list() {
         return List.of(
-            current(),
-            latest7()
-//            latest6()
-        );
+                current(), latest7()
+                //            latest6()
+                );
     }
 
     public static String current() {

@@ -1,17 +1,16 @@
 package com.varlanv.testkonvence.commontest.sample;
 
 import com.varlanv.testkonvence.commontest.BaseTest;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @RequiredArgsConstructor
@@ -36,26 +35,20 @@ public class Sample {
                 extraAssertion.accept(consumableSample);
             }
         } finally {
-            Files.walkFileTree(dir,
-                new SimpleFileVisitor<>() {
+            Files.walkFileTree(dir, new SimpleFileVisitor<>() {
 
-                    @NotNull
-                    @Override
-                    public FileVisitResult postVisitDirectory(
-                        Path dir, IOException exc) throws IOException {
-                        Files.delete(dir);
-                        return FileVisitResult.CONTINUE;
-                    }
+                @NotNull @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
 
-                    @NotNull
-                    @Override
-                    public FileVisitResult visitFile(
-                        Path file, @NotNull BasicFileAttributes attrs)
-                        throws IOException {
-                        Files.delete(file);
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
+                @NotNull @Override
+                public FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         }
     }
 
@@ -67,16 +60,14 @@ public class Sample {
         }
         Files.createDirectories(resultDir);
         var resultFile = Files.writeString(
-            resultDir.resolve(sampleSources.fileName()),
-            sampleSources.sources(),
-            StandardCharsets.UTF_8,
-            StandardOpenOption.CREATE_NEW
-        );
+                resultDir.resolve(sampleSources.fileName()),
+                sampleSources.sources(),
+                StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE_NEW);
         return new SampleSourceFile(
-            resultFile,
-            sampleSources.outerClassName(),
-            sampleSources.packageName(),
-            sampleSources.expectedTransformation()
-        );
+                resultFile,
+                sampleSources.outerClassName(),
+                sampleSources.packageName(),
+                sampleSources.expectedTransformation());
     }
 }

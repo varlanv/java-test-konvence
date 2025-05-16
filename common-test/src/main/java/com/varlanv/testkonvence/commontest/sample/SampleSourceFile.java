@@ -1,11 +1,10 @@
 package com.varlanv.testkonvence.commontest.sample;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Getter
 @RequiredArgsConstructor

@@ -9,9 +9,9 @@ import org.jetbrains.annotations.Nullable;
 final class CamelMethodNameFromDisplayName implements EnforceCandidate {
 
     SnakeMethodNameFromDisplayName snake;
+
     @NonFinal
-    @Nullable
-    String newName;
+    @Nullable String newName;
 
     @Override
     public String displayName() {

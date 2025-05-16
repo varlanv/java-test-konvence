@@ -2,23 +2,19 @@ package com.varlanv.testkonvence.gradle.plugin;
 
 import org.gradle.api.Action;
 
-/**
- * Configuration options for test-konvence plugin.
- */
+/** Configuration options for test-konvence plugin. */
 public interface TestKonvenceExtensionView {
 
-    /**
-     * @return name of the extension.
-     */
+    /** @return name of the extension. */
     static String name() {
         return "testKonvence";
     }
 
     /**
-     * Whether to apply plugin logic.
-     * Setting this to {@code false} will completely disable tasks registration/processing.
-     * <p>
-     * Default is {@code true}
+     * Whether to apply plugin logic. Setting this to {@code false} will completely disable tasks
+     * registration/processing.
+     *
+     * <p>Default is {@code true}
      *
      * @param toggle state
      */
@@ -26,16 +22,16 @@ public interface TestKonvenceExtensionView {
 
     /**
      * Whether to run enforce task after executing any test task.
-     * <p>
-     * Default is {@code true}
+     *
+     * <p>Default is {@code true}
      *
      * @param toggle - state
      */
     void applyAutomaticallyAfterTestTask(boolean toggle);
 
     /**
-     * Configures reverse transformation, that is, generating {@code @DisplayName} annotation from test name
-     * for tests without {@code @DisplayName} annotation.
+     * Configures reverse transformation, that is, generating {@code @DisplayName} annotation from test name for tests
+     * without {@code @DisplayName} annotation.
      *
      * @param action configuration
      */
@@ -43,8 +39,8 @@ public interface TestKonvenceExtensionView {
 
     /**
      * Whether to use camel case instead of snake case for generating test name from display name
-     * <p>
-     * Default is {@code false}
+     *
+     * <p>Default is {@code false}
      *
      * @param toggle - state
      */

@@ -1,11 +1,10 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.SneakyThrows;
-import lombok.val;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import lombok.SneakyThrows;
+import lombok.val;
 
 interface LineSeparator {
 

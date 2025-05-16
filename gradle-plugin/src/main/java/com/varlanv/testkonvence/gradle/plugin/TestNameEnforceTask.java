@@ -40,12 +40,12 @@ public abstract class TestNameEnforceTask extends DefaultTask {
     @TaskAction
     public void execute() {
         new TestNameEnforceAction(
-            getSourcesRootProp(),
-            getCompileClasspath(),
-            getEnforceFiles(),
-            getDryWithFailing(),
-            getUseCamelCaseMethodName(),
-            getEnableReverseTransformation()
-        ).execute(this);
+                        getSourcesRootProp(),
+                        getCompileClasspath(),
+                        getEnforceFiles(),
+                        getDryWithFailing(),
+                        getUseCamelCaseMethodName(),
+                        getEnableReverseTransformation())
+                .execute(this);
     }
 }

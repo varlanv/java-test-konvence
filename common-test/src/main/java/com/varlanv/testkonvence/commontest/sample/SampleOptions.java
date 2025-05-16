@@ -11,8 +11,10 @@ public class SampleOptions {
 
     @Builder.Default
     Boolean camelMethodName = false;
+
     @Builder.Default
     Boolean reverseTransformation = false;
+
     @Builder.Default
     Boolean applyAutomaticallyAfterTestTask = true;
 }

@@ -18,10 +18,8 @@ public interface Samples {
     Samples merge(Samples other);
 
     static Samples fromIterable(Iterable<Sample> origin) {
-        var samples = new ArrayList<Sample>(
-            origin instanceof Collection<Sample>
-                ? ((Collection<Sample>) origin).size()
-                : 10);
+        var samples =
+                new ArrayList<Sample>(origin instanceof Collection<Sample> ? ((Collection<Sample>) origin).size() : 10);
         origin.forEach(samples::add);
         return new SamplesFromIterable(samples);
     }

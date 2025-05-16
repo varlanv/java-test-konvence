@@ -1,8 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.function.BinaryOperator;
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 class FunctionalUtil {

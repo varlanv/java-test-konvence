@@ -1,6 +1,9 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.Constants;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -9,10 +12,6 @@ import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 @RequiredArgsConstructor
 class ConfigureOnBeforeCompileTestStart implements Action<Task> {
@@ -28,7 +27,8 @@ class ConfigureOnBeforeCompileTestStart implements Action<Task> {
             val parentPath = targetPath.getParent();
             if (parentPath != null) {
                 Files.createDirectories(parentPath);
-                try (val in = ConfigureOnBeforeCompileTestStart.class.getResourceAsStream(Constants.PROCESSOR_JAR_RESOURCE)) {
+                try (val in =
+                        ConfigureOnBeforeCompileTestStart.class.getResourceAsStream(Constants.PROCESSOR_JAR_RESOURCE)) {
                     if (in == null) {
                         log.error("Unable to find processor jar file [{}]", Constants.PROCESSOR_JAR);
                     } else {

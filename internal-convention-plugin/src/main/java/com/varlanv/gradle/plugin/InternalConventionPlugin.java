@@ -122,7 +122,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
                 spotlessExtension.java(spotlessJava -> {
                     spotlessJava.importOrder();
                     spotlessJava.removeUnusedImports();
-                    spotlessJava.googleJavaFormat();
+                    spotlessJava.palantirJavaFormat().formatJavadoc(true);
                     spotlessJava.formatAnnotations();
                 });
             }
@@ -155,6 +155,8 @@ public class InternalConventionPlugin implements Plugin<Project> {
                                 "-Werror"
                             ));
                             javaCompile.finalizedBy("spotbugsMain");
+                            javaCompile.shouldRunAfter("spotlessApply");
+                            javaCompile.dependsOn("spotlessApply");
                         });
                         tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
                             var javaToolchains = (JavaToolchainService) extensions.getByName("javaToolchains");
