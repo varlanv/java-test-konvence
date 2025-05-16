@@ -24,9 +24,9 @@ class IntVectorTest implements UnitTest {
         @ParameterizedTest
         @ValueSource(ints = {0, 1, 10})
         void should_throw_exception_on_empty_vector(int initialCapacity) {
-            assertThatThrownBy(
-                () -> new IntVector(initialCapacity).first()
-            ).isInstanceOf(ArrayIndexOutOfBoundsException.class);
+            var intVector = new IntVector(initialCapacity);
+            assertThatThrownBy(intVector::first)
+                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
         }
 
         @ParameterizedTest

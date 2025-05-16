@@ -5,14 +5,14 @@ import lombok.experimental.NonFinal;
 import java.util.Arrays;
 import java.util.function.IntConsumer;
 
-class IntVector implements ImmutableIntVector {
+final class IntVector implements ImmutableIntVector {
 
     @NonFinal
     int[] array;
     @NonFinal
     int index = 0;
 
-    public IntVector(int initialCapacity) {
+    IntVector(int initialCapacity) {
         if (initialCapacity < 0) {
             throw new IllegalArgumentException("Initial capacity must be non-negative");
         }

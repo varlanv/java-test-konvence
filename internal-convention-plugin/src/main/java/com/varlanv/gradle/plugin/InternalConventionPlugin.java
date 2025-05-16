@@ -1,6 +1,8 @@
 package com.varlanv.gradle.plugin;
 
 import com.github.benmanes.gradle.versions.VersionsPlugin;
+import com.github.spotbugs.snom.SpotBugsExtension;
+import com.github.spotbugs.snom.SpotBugsPlugin;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -82,6 +84,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
         var jdkVersion = 17;
         var internalJavaVersion = 17;
         var jvmVendor = JvmVendorSpec.AZUL;
+        var staticAnalyseFolder = rootDir.resolve(".config").resolve("static-analyse");
         // -------------------- Variables end --------------------
 
 
@@ -108,6 +111,9 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     idea.getModule().setDownloadJavadoc(true);
                     idea.getModule().setDownloadSources(true);
                 }
+                pluginManager.apply(SpotBugsPlugin.class);
+                var spotBugsExtension = (SpotBugsExtension) extensions.getByName("spotbugs");
+                spotBugsExtension.getExcludeFilter().set(staticAnalyseFolder.resolve("spotbug-exclude.xml").toFile());
             }
         );
         // -------------------- Apply common plugins end --------------------
@@ -137,6 +143,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
                                 "-Xlint:all",
                                 "-Werror"
                             ));
+                            javaCompile.finalizedBy("spotbugsMain");
                         });
                         tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
                             var javaToolchains = (JavaToolchainService) extensions.getByName("javaToolchains");
@@ -233,8 +240,8 @@ public class InternalConventionPlugin implements Plugin<Project> {
                                             implementation.add(jvmComponentDependencies.project());
                                         }
                                     );
-                                    jvmTestSuite.sources(s -> {
-                                        var compileJavaTaskName = s.getCompileJavaTaskName();
+                                    jvmTestSuite.sources(sourceSet -> {
+                                        var compileJavaTaskName = sourceSet.getCompileJavaTaskName();
                                         tasks.named(compileJavaTaskName, JavaCompile.class).configure(compileTestJava -> {
                                             var compileOpts = compileTestJava.getOptions();
                                             compileOpts.getRelease().set(internalJavaVersion);
@@ -243,6 +250,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
                                                 "-Xlint:all",
                                                 "-Werror"
                                             ));
+                                            compileTestJava.finalizedBy("spotbugs" + capitalize(sourceSet.getName()));
                                         });
                                     });
                                     jvmTestSuite.getTargets().all(
@@ -299,7 +307,6 @@ public class InternalConventionPlugin implements Plugin<Project> {
                 // -------------------- Configure tests start --------------------
 
                 // -------------------- Configure static analysis start --------------------
-                var staticAnalyseFolder = rootDir.resolve(".config").resolve("static-analyse");
 
                 // Configure aggregate static analysis tasks
                 var staticAnalyseMain = tasks.register(

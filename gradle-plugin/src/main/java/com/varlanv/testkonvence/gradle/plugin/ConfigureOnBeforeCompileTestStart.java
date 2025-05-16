@@ -25,12 +25,15 @@ class ConfigureOnBeforeCompileTestStart implements Action<Task> {
     public void execute(Task task) {
         val targetPath = annotationProcessorTargetPathProvider.get();
         if (Files.notExists(targetPath)) {
-            Files.createDirectories(targetPath.getParent());
-            try (val in = ConfigureOnBeforeCompileTestStart.class.getResourceAsStream(Constants.PROCESSOR_JAR_RESOURCE)) {
-                if (in == null) {
-                    log.error("Unable to find processor jar file [{}]", Constants.PROCESSOR_JAR);
-                } else {
-                    Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            val parentPath = targetPath.getParent();
+            if (parentPath != null) {
+                Files.createDirectories(parentPath);
+                try (val in = ConfigureOnBeforeCompileTestStart.class.getResourceAsStream(Constants.PROCESSOR_JAR_RESOURCE)) {
+                    if (in == null) {
+                        log.error("Unable to find processor jar file [{}]", Constants.PROCESSOR_JAR);
+                    } else {
+                        Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
                 }
             }
         }
