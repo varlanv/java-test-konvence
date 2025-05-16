@@ -9,8 +9,6 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.testing.base.TestingExtension;
 
-import java.util.Optional;
-
 @SuppressWarnings("UnstableApiUsage")
 public class TestKonvencePlugin implements Plugin<Project> {
 
@@ -20,6 +18,7 @@ public class TestKonvencePlugin implements Plugin<Project> {
         val testKonvenceEnforceAllTaskName = "testKonvenceEnforceAll";
         val testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
         val extensions = project.getExtensions();
+        val dependencies = project.getDependencies();
         val testKonvenceExtension = (TestKonvenceExtension) extensions.create(
             TestKonvenceExtensionView.class,
             TestKonvenceExtensionView.name(),
@@ -70,13 +69,10 @@ public class TestKonvencePlugin implements Plugin<Project> {
                             tasks.named(testSourceSet.getCompileJavaTaskName(), JavaCompile.class).configure(compileTestJava -> {
                                 compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
                                 compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
-                                val options = compileTestJava.getOptions();
-                                val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
-                                val annotationProcessorClasspath = Optional.ofNullable(options.getAnnotationProcessorPath())
-                                    .map(f -> f.plus(processorJar))
-                                    .orElse(processorJar);
-                                options.setAnnotationProcessorPath(annotationProcessorClasspath);
                             });
+                            val name = testSuite.getName();
+                            val processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
+                            dependencies.add(name + "AnnotationProcessor", processorJar);
 
                             jvmTestSuite.getTargets().configureEach(testTarget -> {
                                 val testTask = testTarget.getTestTask();

@@ -79,25 +79,48 @@ class SourceReplacementTrain {
                     val displayName = new DisplayNameFromMethodName(candidate.originalName()).displayName();
                     val linesView = sourceLines.view();
                     val methodName = candidate.originalName();
-                    for (int lineIdx = 0; lineIdx < linesView.size(); lineIdx++) {
+                    val matchStr = "void " + methodName + "(";
+                    val matchedLineIndexes = new IntVector(3);
+                    val linesSize = linesView.size();
+                    for (int lineIdx = 0; lineIdx < linesSize; lineIdx++) {
                         val line = linesView.get(lineIdx);
-                        val matchIdx = line.indexOf("void " + methodName + "(");
+                        val matchIdx = line.indexOf(matchStr);
                         if (matchIdx != -1) {
+                            matchedLineIndexes.add(lineIdx);
+                        }
+                    }
+                    if (matchedLineIndexes.size() == 0) {
+                        return sourceLines;
+                    } else if (matchedLineIndexes.size() == 1) {
+                        val lineIdx = matchedLineIndexes.get(0);
+                        val line = linesView.get(lineIdx);
+                        val matchIdx = line.indexOf(matchStr);
+                        val stringBuilder = new StringBuilder();
+                        for (int i1 = 0; i1 < matchIdx; i1++) {
+                            stringBuilder.append(" ");
+                        }
+                        return findIndexOfEmptyLine(lineIdx, linesView)
+                            .map(emptyLineIdx -> {
+                                val displayNameAnnotation = stringBuilder.append("@DisplayName(\"").append(displayName).append("\")").toString();
+                                val sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
+                                return handleDisplayNameImport(sl);
+                            })
+                            .orElse(sourceLines);
+                    } else {
+                        val maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, matchedLineIndexes);
+                        if (maybeIndexOfClosestClassDistance.isPresent()) {
+                            val indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
+                            val line = linesView.get(indexOfClosestClassDistance);
+                            val matchIdx = line.indexOf(matchStr);
                             val stringBuilder = new StringBuilder();
                             for (int i1 = 0; i1 < matchIdx; i1++) {
                                 stringBuilder.append(" ");
                             }
-                            int finalLineIdx = lineIdx;
-                            return findIndexOfEmptyLine(lineIdx, linesView)
-                                .map(emptyLineIdx -> {
-                                    val displayNameAnnotation = stringBuilder.append("@DisplayName(\"").append(displayName).append("\")").toString();
-                                    val sl = sourceLines.pushAbove(finalLineIdx, displayNameAnnotation);
-                                    return handleDisplayNameImport(sl);
-                                })
-                                .orElse(sourceLines);
+                            val displayNameAnnotation = stringBuilder.append("@DisplayName(\"").append(displayName).append("\")").toString();
+                            val sl = sourceLines.pushAbove(indexOfClosestClassDistance, displayNameAnnotation);
+                            return handleDisplayNameImport(sl);
                         }
                     }
-
                     return sourceLines;
                 }
             )
@@ -179,7 +202,7 @@ class SourceReplacementTrain {
                 );
             }
         } else {
-            val finalIndexes = new ArrayList<Integer>(methodNameMatches.size());
+            val finalIndexes = new IntVector(methodNameMatches.size());
             methodNameMatches.forEach(match -> {
                 val line = linesView.get(match.lineIndex());
                 if (line.contains("void " + originalName + "(")) {
@@ -221,12 +244,12 @@ class SourceReplacementTrain {
 
     private Optional<Integer> findIndexOfClosestClassDistance(EnforcementMeta.Item item,
                                                               List<String> lines,
-                                                              List<Integer> matchedLineIndexes) {
+                                                              ImmutableIntVector matchedLineIndexes) {
         val lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
         val immediateClassName = item.immediateClassName();
         val targetClassChunk = "class " + immediateClassName + " {";
         val targetInterfaceChunk = "interface " + immediateClassName + " {";
-        for (val matchedLineIndex : matchedLineIndexes) {
+        matchedLineIndexes.forEach(matchedLineIndex -> {
             int distance = 0;
             for (int idx = matchedLineIndex; idx >= 0; idx--) {
                 val line = lines.get(idx);
@@ -236,7 +259,7 @@ class SourceReplacementTrain {
                 }
                 distance++;
             }
-        }
+        });
         return Optional.ofNullable(lineIndexToOuterClassDistance.firstEntry())
             .map(Map.Entry::getKey);
     }

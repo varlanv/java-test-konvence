@@ -161,14 +161,12 @@ public class TestKonvenceAP extends AbstractProcessor {
             writeResult();
         } else {
             for (val annotation : annotations) {
-                output.addAll(
-                    Optional.ofNullable(strategy.get(annotation.getQualifiedName().toString()))
-                        .map(action -> action.apply(roundEnv, annotation))
-                        .orElse(Collections.emptyList())
-                );
+                Optional.ofNullable(strategy.get(annotation.getQualifiedName().toString()))
+                    .map(action -> action.apply(roundEnv, annotation))
+                    .ifPresent(output::addAll);
             }
         }
-        return true;
+        return false;
     }
 
     @SneakyThrows

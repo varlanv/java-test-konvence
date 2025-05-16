@@ -6,11 +6,14 @@ import com.varlanv.testkonvence.commontest.sample.ConsumableSample;
 import com.varlanv.testkonvence.commontest.sample.SampleSourceFile;
 import com.varlanv.testkonvence.proc.TestKonvenceAP;
 import io.toolisticon.cute.Cute;
+import lombok.SneakyThrows;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 import javax.tools.StandardLocation;
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,6 +34,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
             );
     }
 
+    @SneakyThrows
     void spec(ConsumableSample sample) {
         var sources = sample.sources().stream()
             .collect(
@@ -48,9 +52,19 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                 new TrainOptions(false, sample.options().reverseTransformation(), sample.options().camelMethodName())
             ).run();
 
-            sample.sources().forEach(source ->
-                assertThat(source.content()).isEqualTo(source.expectedTransformation())
-            );
+            for (var source : sample.sources()) {
+                var actualReader = new BufferedReader(new StringReader(source.content()));
+                var expectedReader = new BufferedReader(new StringReader(source.expectedTransformation()));
+                var lineCount = 0;
+                String actualLine;
+                while ((actualLine = actualReader.readLine()) != null) {
+                    var expectedLine = expectedReader.readLine();
+                    assertThat(actualLine).as("Line number [%d]", lineCount).isEqualTo(expectedLine);
+                    lineCount++;
+                }
+                assertThat(source.content()).isEqualToIgnoringWhitespace(source.expectedTransformation());
+                assertThat(source.content()).isEqualTo(source.expectedTransformation());
+            }
         });
     }
 
