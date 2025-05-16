@@ -59,7 +59,7 @@ public interface BaseTest {
     }
 
     @SneakyThrows
-    default void useTempFile(ThrowingConsumer<Path> action) {
+    default void consumeTempFile(ThrowingConsumer<Path> action) {
         var file = newTempFile();
         try {
             action.accept(file);

@@ -44,7 +44,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                 )
             );
         var resultXml = runAnnotationProcessor(sources);
-        useTempFile(resultXmlPath -> {
+        consumeTempFile(resultXmlPath -> {
             Files.write(resultXmlPath, resultXml);
             new Train(
                 resultXmlPath,

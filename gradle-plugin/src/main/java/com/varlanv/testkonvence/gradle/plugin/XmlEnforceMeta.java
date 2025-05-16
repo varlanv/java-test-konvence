@@ -3,7 +3,6 @@ package com.varlanv.testkonvence.gradle.plugin;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
-import lombok.var;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedInputStream;
@@ -43,7 +42,7 @@ class XmlEnforceMeta {
         val entries = root.getChildNodes();
         val entriesLen = entries.getLength();
         val entriesList = new ArrayList<APEnforcementMeta.Item>(entriesLen);
-        for (var entryIdx = 0; entryIdx < entriesLen; entryIdx++) {
+        for (int entryIdx = 0; entryIdx < entriesLen; entryIdx++) {
             val entryNode = entries.item(entryIdx);
             val fields = entryNode.getChildNodes();
             entriesList.add(

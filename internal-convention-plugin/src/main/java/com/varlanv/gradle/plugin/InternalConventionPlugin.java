@@ -1,6 +1,7 @@
 package com.varlanv.gradle.plugin;
 
 import com.github.benmanes.gradle.versions.VersionsPlugin;
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -11,6 +12,8 @@ import org.gradle.api.plugins.jvm.JvmTestSuite;
 import org.gradle.api.plugins.quality.*;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.VariantVersionMappingStrategy;
+import org.gradle.api.publish.maven.MavenPomDeveloper;
+import org.gradle.api.publish.maven.MavenPomLicense;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
@@ -30,6 +33,23 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public class InternalConventionPlugin implements Plugin<Project> {
+
+    private static final String PLUGIN_GIT_URL = "https://github.com/varlanv/java-test-konvence";
+
+    private Action<MavenPomLicense> pluginLicense() {
+        return license -> {
+            license.getName().set("MIT License");
+            license.getUrl().set("https://mit-license.org/");
+        };
+    }
+
+    private Action<MavenPomDeveloper> pluginDeveloper() {
+        return developer -> {
+            developer.getId().set("varlanv96");
+            developer.getName().set("Vladyslav Varlan");
+            developer.getEmail().set("varlanv96@gmail.com");
+        };
+    }
 
     @Override
     public void apply(Project project) {
@@ -93,7 +113,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
         // -------------------- Apply common plugins end --------------------
 
         project.afterEvaluate(ignore -> {
-                // Need to run these things after project evaluate, so that InternalConventionExtension values are initialized
+                // Need to run these things after project evaluated, so that InternalConventionExtension values are initialized
                 // -------------------- Configure Java start --------------------
                 pluginManager.withPlugin(
                     "java",
@@ -112,7 +132,11 @@ public class InternalConventionPlugin implements Plugin<Project> {
                             if (!isInternalModule) {
                                 compileOpts.getRelease().set(javaVersion);
                             }
-                            compileOpts.getCompilerArgs().add("-Xlint:-options");
+                            compileOpts.getCompilerArgs().addAll(List.of(
+                                "-Xlint:-processing",
+                                "-Xlint:all",
+                                "-Werror"
+                            ));
                         });
                         tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
                             var javaToolchains = (JavaToolchainService) extensions.getByName("javaToolchains");
@@ -172,19 +196,12 @@ public class InternalConventionPlugin implements Plugin<Project> {
                                         }
                                     );
                                     mavenPublication.pom(pom -> {
-                                        pom.getUrl().set("https://github.com/varlanv/test-sync-gradle-plugin");
+                                        pom.getUrl().set(PLUGIN_GIT_URL);
                                         pom.licenses(licenses -> {
-                                            licenses.license(license -> {
-                                                license.getName().set("MIT License");
-                                                license.getUrl().set("https://mit-license.org/");
-                                            });
+                                            licenses.license(pluginLicense());
                                         });
                                         pom.developers(developers -> {
-                                            developers.developer(developer -> {
-                                                developer.getId().set("varlanv96");
-                                                developer.getName().set("Vladyslav Varlan");
-                                                developer.getEmail().set("varlanv96@gmail.com");
-                                            });
+                                            developers.developer(pluginDeveloper());
                                         });
                                     });
                                 }
@@ -221,7 +238,11 @@ public class InternalConventionPlugin implements Plugin<Project> {
                                         tasks.named(compileJavaTaskName, JavaCompile.class).configure(compileTestJava -> {
                                             var compileOpts = compileTestJava.getOptions();
                                             compileOpts.getRelease().set(internalJavaVersion);
-                                            compileOpts.getCompilerArgs().add("-Xlint:-options");
+                                            compileOpts.getCompilerArgs().addAll(List.of(
+                                                "-Xlint:-processing",
+                                                "-Xlint:all",
+                                                "-Werror"
+                                            ));
                                         });
                                     });
                                     jvmTestSuite.getTargets().all(

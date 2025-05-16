@@ -33,25 +33,26 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public interface GradleIntegrationTest extends IntegrationTest {
 
     default void runProjectFixture(ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
-        runProjectFixture(
+        configureAndRunProjectFixture(
             ProjectBuilder::build,
             fixtureConsumer
         );
     }
 
     @SneakyThrows
-    default void runProjectFixture(ThrowingConsumer<Path> projectDirConsumer,
-                                   ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
-        runProjectFixture(
+    default void configureProjectDirAndRunProjectFixture(ThrowingConsumer<Path> projectDirConsumer,
+                                                         ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
+        configureDirAndProjectAndRunProjectFixture(
             projectDirConsumer,
-            ProjectBuilder::build, fixtureConsumer
+            ProjectBuilder::build,
+            fixtureConsumer
         );
     }
 
     @SneakyThrows
-    default void runProjectFixture(Function<ProjectBuilder, Project> projectBuilderFn,
-                                   ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
-        runProjectFixture(
+    default void configureAndRunProjectFixture(Function<ProjectBuilder, Project> projectBuilderFn,
+                                               ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
+        configureDirAndProjectAndRunProjectFixture(
             pb -> {
             },
             projectBuilderFn,
@@ -59,9 +60,9 @@ public interface GradleIntegrationTest extends IntegrationTest {
         );
     }
 
-    default void runProjectFixture(ThrowingConsumer<Path> projectDirConsumer,
-                                   Function<ProjectBuilder, Project> projectBuilderFn,
-                                   ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
+    default void configureDirAndProjectAndRunProjectFixture(ThrowingConsumer<Path> projectDirConsumer,
+                                                            Function<ProjectBuilder, Project> projectBuilderFn,
+                                                            ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
         var projectDir = newTempDir();
         runAndDeleteFile(projectDir, () -> {
             projectDirConsumer.accept(projectDir);
