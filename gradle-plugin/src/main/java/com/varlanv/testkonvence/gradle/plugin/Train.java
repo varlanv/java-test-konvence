@@ -6,15 +6,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-@RequiredArgsConstructor
 class Train {
 
-    Path resultXml;
-    Path sourcesRoot;
-    TrainOptions trainOptions;
+    private final Path resultXml;
+    private final Path sourcesRoot;
+    private final TrainOptions trainOptions;
+
+    Train(Path resultXml, Path sourcesRoot, TrainOptions trainOptions) {
+        this.resultXml = resultXml;
+        this.sourcesRoot = sourcesRoot;
+        this.trainOptions = trainOptions;
+    }
 
     public void run() {
         val items = new XmlEnforceMeta().items(resultXml);

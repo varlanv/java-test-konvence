@@ -1,13 +1,16 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-@RequiredArgsConstructor
 class StringMatch {
 
-    String line;
-    String match;
+    private final String line;
+    private final String match;
+
+    StringMatch(String line, String match) {
+        this.line = line;
+        this.match = match;
+    }
 
     public ImmutableIntVector matchingIndexes() {
         if (match.isEmpty() || line.isEmpty()) {

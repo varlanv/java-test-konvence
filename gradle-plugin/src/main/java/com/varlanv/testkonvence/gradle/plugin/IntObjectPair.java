@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class IntObjectPair<T> {
 
-    int left;
-    T right;
+    private final int left;
+    private final T right;
 
     static <T> IntObjectPair<T> of(int left, T right) {
         return new IntObjectPair<T>(left, right);

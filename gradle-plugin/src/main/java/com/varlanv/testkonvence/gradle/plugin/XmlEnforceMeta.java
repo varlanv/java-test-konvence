@@ -42,7 +42,7 @@ class XmlEnforceMeta {
         for (int entryIdx = 0; entryIdx < entriesLen; entryIdx++) {
             val entryNode = entries.item(entryIdx);
             val fields = entryNode.getChildNodes();
-            entriesList.add(new APEnforcementMeta.Item(
+            entriesList.add(ImmutableItem.of(
                     fields.item(0).getTextContent(),
                     fields.item(1).getTextContent(),
                     fields.item(2).getTextContent(),

@@ -4,11 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.NonFinal;
 import org.jetbrains.annotations.Nullable;
 
-@RequiredArgsConstructor
 final class SnakeMethodNameFromDisplayName implements EnforceCandidate {
 
     private static final List<Function<String, String>> methodNameChain = Arrays.asList(
@@ -28,13 +25,17 @@ final class SnakeMethodNameFromDisplayName implements EnforceCandidate {
             in -> in.replaceAll("^_|_$", ""));
 
     @Getter
-    String displayName;
+    private final String displayName;
 
     @Getter
-    String originalName;
+    private final String originalName;
 
-    @NonFinal
     @Nullable String newName;
+
+    SnakeMethodNameFromDisplayName(String displayName, String originalName) {
+        this.displayName = displayName;
+        this.originalName = originalName;
+    }
 
     @Override
     public String newName() {

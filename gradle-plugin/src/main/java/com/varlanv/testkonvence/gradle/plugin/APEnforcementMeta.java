@@ -1,19 +1,27 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import java.util.List;
-import lombok.Value;
+import org.immutables.value.Value;
 
-@Value
-class APEnforcementMeta {
+@Value.Immutable(builder = false)
+interface APEnforcementMeta {
 
-    List<Item> items;
+    @Value.Parameter
+    List<Item> items();
 
-    @Value
-    public static class Item {
+    @Value.Immutable(builder = false)
+    interface Item {
 
-        String fullEnclosingClassName;
-        String displayName;
-        String className;
-        String methodName;
+        @Value.Parameter
+        String fullEnclosingClassName();
+
+        @Value.Parameter
+        String displayName();
+
+        @Value.Parameter
+        String className();
+
+        @Value.Parameter
+        String methodName();
     }
 }

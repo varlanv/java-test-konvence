@@ -2,7 +2,6 @@ package com.varlanv.testkonvence.gradle.plugin;
 
 import java.nio.file.Files;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.Task;
@@ -12,16 +11,54 @@ import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
 
 @Getter
-@RequiredArgsConstructor
 class TestNameEnforceAction implements Action<Task> {
 
     private static final Logger log = Logging.getLogger(TestNameEnforceAction.class);
-    ConfigurableFileCollection sourcesRootProp;
-    ConfigurableFileCollection compileClasspath;
-    ConfigurableFileCollection enforceFiles;
-    Provider<Boolean> dryWithFailingProvider;
-    Provider<Boolean> camelCaseMethodNameProvider;
-    Provider<Boolean> enableReverseTransformation;
+    private final ConfigurableFileCollection sourcesRootProp;
+    private final ConfigurableFileCollection compileClasspath;
+    private final ConfigurableFileCollection enforceFiles;
+    private final Provider<Boolean> dryWithFailingProvider;
+    private final Provider<Boolean> camelCaseMethodNameProvider;
+    private final Provider<Boolean> enableReverseTransformation;
+
+    TestNameEnforceAction(
+            ConfigurableFileCollection sourcesRootProp,
+            ConfigurableFileCollection compileClasspath,
+            ConfigurableFileCollection enforceFiles,
+            Provider<Boolean> dryWithFailingProvider,
+            Provider<Boolean> camelCaseMethodNameProvider,
+            Provider<Boolean> enableReverseTransformation) {
+        this.sourcesRootProp = sourcesRootProp;
+        this.compileClasspath = compileClasspath;
+        this.enforceFiles = enforceFiles;
+        this.dryWithFailingProvider = dryWithFailingProvider;
+        this.camelCaseMethodNameProvider = camelCaseMethodNameProvider;
+        this.enableReverseTransformation = enableReverseTransformation;
+    }
+
+    public ConfigurableFileCollection sourcesRootProp() {
+        return sourcesRootProp;
+    }
+
+    public ConfigurableFileCollection compileClasspath() {
+        return compileClasspath;
+    }
+
+    public ConfigurableFileCollection enforceFiles() {
+        return enforceFiles;
+    }
+
+    public Provider<Boolean> dryWithFailingProvider() {
+        return dryWithFailingProvider;
+    }
+
+    public Provider<Boolean> camelCaseMethodNameProvider() {
+        return camelCaseMethodNameProvider;
+    }
+
+    public Provider<Boolean> enableReverseTransformation() {
+        return enableReverseTransformation;
+    }
 
     @Override
     public void execute(Task task) {

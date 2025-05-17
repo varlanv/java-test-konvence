@@ -4,7 +4,6 @@ import com.varlanv.testkonvence.Constants;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.gradle.api.Action;
@@ -13,11 +12,14 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
 
-@RequiredArgsConstructor
 class ConfigureOnBeforeCompileTestStart implements Action<Task> {
 
     private static final Logger log = Logging.getLogger(ConfigureOnBeforeCompileTestStart.class);
-    Provider<Path> annotationProcessorTargetPathProvider;
+    private final Provider<Path> annotationProcessorTargetPathProvider;
+
+    ConfigureOnBeforeCompileTestStart(Provider<Path> annotationProcessorTargetPathProvider) {
+        this.annotationProcessorTargetPathProvider = annotationProcessorTargetPathProvider;
+    }
 
     @Override
     @SneakyThrows

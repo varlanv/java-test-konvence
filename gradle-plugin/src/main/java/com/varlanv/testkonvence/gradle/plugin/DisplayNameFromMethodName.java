@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-@RequiredArgsConstructor
 class DisplayNameFromMethodName {
 
-    String methodName;
+    private final String methodName;
+
+    DisplayNameFromMethodName(String methodName) {
+        this.methodName = methodName;
+    }
 
     public String displayName() {
         val methodName = preTransform(this.methodName);

@@ -1,17 +1,17 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.NonFinal;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
-@RequiredArgsConstructor
 final class CamelMethodNameFromDisplayName implements EnforceCandidate {
 
-    SnakeMethodNameFromDisplayName snake;
+    private final SnakeMethodNameFromDisplayName snake;
 
-    @NonFinal
     @Nullable String newName;
+
+    CamelMethodNameFromDisplayName(SnakeMethodNameFromDisplayName snake) {
+        this.snake = snake;
+    }
 
     @Override
     public String displayName() {
