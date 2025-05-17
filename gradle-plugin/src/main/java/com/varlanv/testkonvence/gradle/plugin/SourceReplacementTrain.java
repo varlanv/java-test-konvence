@@ -5,13 +5,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
 
 final class SourceReplacementTrain {
 
+    private final Logger log;
     private final TrainOptions trainOptions;
     private final EnforcementMeta enforcementMeta;
 
-    SourceReplacementTrain(TrainOptions trainOptions, EnforcementMeta enforcementMeta) {
+    SourceReplacementTrain(Logger log, TrainOptions trainOptions, EnforcementMeta enforcementMeta) {
+        this.log = log;
         this.trainOptions = trainOptions;
         this.enforcementMeta = enforcementMeta;
     }
@@ -46,7 +49,9 @@ final class SourceReplacementTrain {
                     try {
                         target.save(resultLines);
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        log.debug(
+                                "Failed to apply transformation to file [{}], ignoring exception",
+                                target.path().toAbsolutePath());
                     }
                 }
             }

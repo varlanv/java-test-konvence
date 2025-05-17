@@ -30,7 +30,7 @@ final class ConfigureOnBeforeCompileTestStart implements Action<Task> {
                     try (var in = ConfigureOnBeforeCompileTestStart.class.getResourceAsStream(
                             Constants.PROCESSOR_JAR_RESOURCE)) {
                         if (in == null) {
-                            log.error("Unable to find processor jar file [{}]", Constants.PROCESSOR_JAR);
+                            log.debug("Unable to find processor jar file [{}]", Constants.PROCESSOR_JAR);
                         } else {
                             Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
                         }
@@ -38,7 +38,7 @@ final class ConfigureOnBeforeCompileTestStart implements Action<Task> {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.debug("Unable to configure annotation processor for test compilation, will not apply plugin", e);
         }
     }
 }

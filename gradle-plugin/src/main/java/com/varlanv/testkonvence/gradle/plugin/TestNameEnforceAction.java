@@ -4,13 +4,13 @@ import java.nio.file.Files;
 import org.gradle.api.Action;
 import org.gradle.api.Task;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class TestNameEnforceAction implements Action<Task> {
 
-    private static final Logger log = Logging.getLogger(TestNameEnforceAction.class);
+    private static final Logger log = LoggerFactory.getLogger(TestNameEnforceAction.class);
     private final ConfigurableFileCollection sourcesRootProp;
     private final ConfigurableFileCollection compileClasspath;
     private final ConfigurableFileCollection enforceFiles;
@@ -78,6 +78,7 @@ class TestNameEnforceAction implements Action<Task> {
                     }
                     try {
                         new Train(
+                                        log,
                                         enforceFile.toPath(),
                                         sourcesRoot,
                                         ImmutableTrainOptions.builder()

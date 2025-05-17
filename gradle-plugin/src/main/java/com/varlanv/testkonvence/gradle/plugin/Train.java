@@ -9,14 +9,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
 
 final class Train {
 
+    private final Logger log;
     private final Path resultXml;
     private final Path sourcesRoot;
     private final TrainOptions trainOptions;
 
-    Train(Path resultXml, Path sourcesRoot, TrainOptions trainOptions) {
+    Train(Logger log, Path resultXml, Path sourcesRoot, TrainOptions trainOptions) {
+        this.log = log;
         this.resultXml = resultXml;
         this.sourcesRoot = sourcesRoot;
         this.trainOptions = trainOptions;
@@ -26,6 +29,7 @@ final class Train {
         var items = new XmlEnforceMeta().items(resultXml);
         var sourcesRootPath = sourcesRoot.toAbsolutePath().toString();
         new SourceReplacementTrain(
+                        log,
                         trainOptions,
                         new EnforcementMeta(
                                 toItemsStream(items, sourcesRootPath).collect(Collectors.toList())))
@@ -48,7 +52,7 @@ final class Train {
                         className,
                         resolveEnforceCandidate(item, className)));
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                return Optional.<EnforcementMeta.Item>empty();
             }
         }
         return Optional.<EnforcementMeta.Item>empty();

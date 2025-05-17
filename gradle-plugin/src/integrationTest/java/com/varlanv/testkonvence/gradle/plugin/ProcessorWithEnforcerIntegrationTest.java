@@ -19,8 +19,12 @@ import javax.tools.StandardLocation;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessorWithEnforcerIntegrationTest.class);
 
     @TestFactory
     Stream<DynamicTest> fromSamples() {
@@ -35,6 +39,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
         consumeTempFile(resultXmlPath -> {
             Files.write(resultXmlPath, resultXml);
             new Train(
+                            log,
                             resultXmlPath,
                             sample.dir(),
                             ImmutableTrainOptions.builder()
