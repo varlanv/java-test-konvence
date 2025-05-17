@@ -155,7 +155,7 @@ public interface FunctionalTest extends BaseTest {
                         Files.copy(path, newPath);
                     }
                 } catch (Exception e) {
-                    throw BaseTest.hide(e);
+                    BaseTest.hide(e);
                 }
             });
         }
@@ -166,7 +166,7 @@ public interface FunctionalTest extends BaseTest {
                     try {
                         FileUtils.deleteDirectory(path.toFile());
                     } catch (IOException e) {
-                        throw BaseTest.hide(e);
+                        BaseTest.hide(e);
                     }
                 }
             });
@@ -180,7 +180,7 @@ public interface FunctionalTest extends BaseTest {
     default Path findDirContaining(ThrowingPredicate<Path> predicate) {
         return findDir(file -> {
             try (Stream<Path> stream = Files.list(file)) {
-                return stream.anyMatch(predicate.toJava());
+                return stream.anyMatch(predicate.toUnnchecked());
             }
         });
     }

@@ -3,6 +3,7 @@ package com.varlanv.testkonvence.commontest;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
@@ -90,6 +91,20 @@ public interface BaseTest {
         void run() throws Exception;
     }
 
+    interface ThrowingSupplier<T> {
+        T get() throws Exception;
+
+        default Supplier<T> toUnchecked() {
+            return () -> {
+                try {
+                    return get();
+                } catch (Exception e) {
+                    return BaseTest.hide(e);
+                }
+            };
+        }
+    }
+
     interface ThrowingConsumer<T> {
         void accept(T t) throws Exception;
     }
@@ -97,12 +112,12 @@ public interface BaseTest {
     interface ThrowingPredicate<T> {
         boolean test(T t) throws Exception;
 
-        default Predicate<T> toJava() {
+        default Predicate<T> toUnnchecked() {
             return t -> {
                 try {
                     return test(t);
                 } catch (Exception e) {
-                    throw hide(e);
+                    return hide(e);
                 }
             };
         }
@@ -113,7 +128,11 @@ public interface BaseTest {
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends Throwable> T hide(Throwable t) throws T {
+    static <T extends Throwable, R> R hide(Throwable t) throws T {
         throw (T) t;
+    }
+
+    static <T> T supplyQuiet(ThrowingSupplier<T> supplier) {
+        return supplier.toUnchecked().get();
     }
 }

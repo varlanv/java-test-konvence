@@ -1,22 +1,26 @@
 package com.varlanv.testkonvence.commontest.sample;
 
+import com.varlanv.testkonvence.commontest.BaseTest;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import org.immutables.value.Value;
 
-@Getter
-@RequiredArgsConstructor
-public class SampleSourceFile {
+@Value.Immutable(builder = false)
+public interface SampleSourceFile {
 
-    private final Path path;
-    private final String outerClassName;
-    private final String packageName;
-    private final String expectedTransformation;
+    @Value.Parameter
+    Path path();
 
-    @SneakyThrows
-    public String content() {
-        return Files.readString(path);
+    @Value.Parameter
+    String outerClassName();
+
+    @Value.Parameter
+    String packageName();
+
+    @Value.Parameter
+    String expectedTransformation();
+
+    default String content() {
+        return BaseTest.supplyQuiet(() -> Files.readString(path()));
     }
 }

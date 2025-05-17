@@ -64,7 +64,7 @@ public class Sample {
                 sampleSources.sources(),
                 StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE_NEW);
-        return new SampleSourceFile(
+        return ImmutableSampleSourceFile.of(
                 resultFile,
                 sampleSources.outerClassName(),
                 sampleSources.packageName(),
