@@ -100,56 +100,6 @@ public class InternalConventionPlugin implements Plugin<Project> {
         repositories.add(repositories.mavenCentral());
         // -------------------- Configure repositories end --------------------
 
-        // -------------------- Apply common plugins start --------------------
-        if (isGradlePlugin) {
-            pluginManager.apply(JavaGradlePluginPlugin.class);
-        }
-        pluginManager.withPlugin(
-            "java",
-            ignore -> {
-                pluginManager.apply(PmdPlugin.class);
-                pluginManager.apply(CheckstylePlugin.class);
-                pluginManager.apply(VersionsPlugin.class);
-                if (internalEnvironment.isLocal()) {
-                    pluginManager.apply(IdeaPlugin.class);
-                    extensions.<IdeaModel>configure("idea", idea -> {
-                        idea.getModule().setDownloadJavadoc(true);
-                        idea.getModule().setDownloadSources(true);
-                    });
-                }
-                pluginManager.apply(SpotBugsPlugin.class);
-                extensions.<SpotBugsExtension>configure("spotbugs", spotBugsExtension -> spotBugsExtension
-                    .getExcludeFilter().set(staticAnalyseFolder.resolve("spotbug-exclude.xml").toFile()));
-
-                pluginManager.apply(SpotlessPlugin.class);
-                extensions.<SpotlessExtension>configure("spotless", spotlessExtension -> spotlessExtension
-                    .java(spotlessJava -> {
-                        spotlessJava.importOrder();
-                        spotlessJava.removeUnusedImports();
-                        spotlessJava.palantirJavaFormat();
-                        spotlessJava.formatAnnotations();
-                        spotlessJava.encoding("UTF-8");
-                        spotlessJava.endWithNewline();
-                        spotlessJava.setLineEndings(LineEnding.UNIX);
-                        spotlessJava.trimTrailingWhitespace();
-                        spotlessJava.cleanthat();
-                    }));
-                pluginManager.apply(CheckerFrameworkPlugin.class);
-
-                if (!projectName.equals("common-test")) {
-                    extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> {
-                            checkerFramework
-                                .setCheckers(List.of(
-                                    "org.checkerframework.checker.nullness.NullnessChecker"
-                                ));
-                            checkerFramework.setExcludeTests(true);
-                        }
-                    );
-                }
-            }
-        );
-        // -------------------- Apply common plugins end --------------------
-
         project.afterEvaluate(ignore -> {
                 // Need to run these things after project evaluated, so that InternalConventionExtension values are initialized
                 // -------------------- Configure Java start --------------------
@@ -210,7 +160,59 @@ public class InternalConventionPlugin implements Plugin<Project> {
                         if (!internalEnvironment.isTest() && !projectPath.equals(":common-test")) {
                             dependencies.add(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME, dependencies.project(Collections.singletonMap("path", ":common-test")));
                         }
+
                         // -------------------- Add common dependencies end --------------------
+                        // -------------------- Apply common plugins start --------------------
+                        if (isGradlePlugin) {
+                            pluginManager.apply(JavaGradlePluginPlugin.class);
+                        }
+                        pluginManager.apply(PmdPlugin.class);
+                        pluginManager.apply(CheckstylePlugin.class);
+                        pluginManager.apply(VersionsPlugin.class);
+                        if (internalEnvironment.isLocal()) {
+                            pluginManager.apply(IdeaPlugin.class);
+                            extensions.<IdeaModel>configure("idea", idea -> {
+                                idea.getModule().setDownloadJavadoc(true);
+                                idea.getModule().setDownloadSources(true);
+                            });
+                        }
+                        pluginManager.apply(SpotBugsPlugin.class);
+                        extensions.<SpotBugsExtension>configure("spotbugs", spotBugsExtension -> spotBugsExtension
+                            .getExcludeFilter().set(staticAnalyseFolder.resolve("spotbug-exclude.xml").toFile()));
+
+                        pluginManager.apply(SpotlessPlugin.class);
+                        extensions.<SpotlessExtension>configure("spotless", spotlessExtension -> spotlessExtension
+                            .java(spotlessJava -> {
+                                spotlessJava.importOrder();
+                                spotlessJava.removeUnusedImports();
+                                spotlessJava.palantirJavaFormat();
+                                spotlessJava.formatAnnotations();
+                                spotlessJava.encoding("UTF-8");
+                                spotlessJava.endWithNewline();
+                                spotlessJava.setLineEndings(LineEnding.UNIX);
+                                spotlessJava.trimTrailingWhitespace();
+                                spotlessJava.cleanthat();
+                            }));
+
+                        if (!projectName.equals("common-test")) {
+                            pluginManager.apply(CheckerFrameworkPlugin.class);
+                            var checkerFrameworkQualDependency = internalProperties.getLib("checkerFramework-qual");
+                            var checkerFrameworkCheckerDependency = internalProperties.getLib("checkerFramework-checker");
+                            dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, checkerFrameworkQualDependency);
+                            dependencies.add(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, checkerFrameworkQualDependency);
+                            dependencies.add("checkerFramework", checkerFrameworkCheckerDependency);
+
+                            extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> {
+                                    checkerFramework
+                                        .setCheckers(List.of(
+                                            "org.checkerframework.checker.nullness.NullnessChecker",
+                                            "org.checkerframework.checker.calledmethods.CalledMethodsChecker"
+                                        ));
+                                    checkerFramework.setExcludeTests(true);
+                                }
+                            );
+                        }
+                        // -------------------- Apply common plugins end --------------------
                     }
                 );
                 // -------------------- Configure Java end --------------------

@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import javax.tools.StandardLocation;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.amework.checker.nullness.qual.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

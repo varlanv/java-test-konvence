@@ -1,8 +1,8 @@
 package com.varlanv.testkonvence.proc;
 
 import java.util.*;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 final class ImmutableList<T> {
 

@@ -3,7 +3,7 @@ package com.varlanv.testkonvence.commontest;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class TestUtils {
 

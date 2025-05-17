@@ -1,7 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class IntObjectPair<T> {
 

@@ -1,6 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class CamelMethodNameFromDisplayName implements EnforceCandidate {
 

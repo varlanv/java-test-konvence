@@ -3,7 +3,7 @@ package com.varlanv.testkonvence.gradle.plugin;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class SnakeMethodNameFromDisplayName implements EnforceCandidate {
 

@@ -20,13 +20,13 @@ public class InternalProperties {
         return versionCatalog.findLibrary(name)
             .map(maybeLib -> maybeLib.map(lib -> String.format("%s:%s:%s", lib.getGroup(), lib.getName(), lib.getVersion())))
             .map(Provider::getOrNull)
-            .orElseThrow();
+            .orElseThrow(() -> new IllegalStateException("Unable to find library [%s]".formatted(name)));
 
     }
 
     public String getVersion(String name) {
         return versionCatalog.findVersion(name)
             .map(VersionConstraint::getRequiredVersion)
-            .orElseThrow();
+            .orElseThrow(() -> new IllegalStateException("Unable to find version [%s]".formatted(name)));
     }
 }
