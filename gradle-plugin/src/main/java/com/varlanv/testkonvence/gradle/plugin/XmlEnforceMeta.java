@@ -18,7 +18,9 @@ import org.w3c.dom.NodeList;
 final class XmlEnforceMeta {
 
     public List<APEnforcementMeta.Item> items(Path path) throws Exception {
-        return items(Files.newInputStream(path));
+        try (var inputStream = Files.newInputStream(path)) {
+            return items(inputStream);
+        }
     }
 
     public List<APEnforcementMeta.Item> items(InputStream inputStream) throws Exception {

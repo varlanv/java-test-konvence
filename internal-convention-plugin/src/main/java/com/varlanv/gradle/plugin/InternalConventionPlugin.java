@@ -206,7 +206,8 @@ public class InternalConventionPlugin implements Plugin<Project> {
                                     checkerFramework
                                         .setCheckers(List.of(
                                             "org.checkerframework.checker.nullness.NullnessChecker",
-                                            "org.checkerframework.checker.calledmethods.CalledMethodsChecker"
+                                            "org.checkerframework.checker.calledmethods.CalledMethodsChecker",
+                                            "org.checkerframework.checker.resourceleak.ResourceLeakChecker"
                                         ));
                                     checkerFramework.setExcludeTests(true);
                                 }
