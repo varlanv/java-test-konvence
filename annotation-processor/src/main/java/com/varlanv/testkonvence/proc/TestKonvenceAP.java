@@ -12,8 +12,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
-import lombok.SneakyThrows;
-import lombok.Value;
 
 public class TestKonvenceAP extends AbstractProcessor {
 
@@ -125,17 +123,11 @@ public class TestKonvenceAP extends AbstractProcessor {
             .flatMap(Set::stream)
             .collect(Collectors.toSet());
 
-    @Value
-    private static class Pair<T1, T2> {
-        T1 left;
-        T2 right;
-    }
-
     private final Map<String, BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>>> strategy =
             Stream.concat(
-                            supportedTestAnnotations.stream().map(it -> new Pair<>(it, testAnnotationFn)),
-                            Stream.of(new Pair<>("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn)))
-                    .collect(Collectors.toMap(Pair::left, Pair::right));
+                            supportedTestAnnotations.stream().map(it -> ImmutablePair.of(it, testAnnotationFn)),
+                            Stream.of(ImmutablePair.of("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn)))
+                    .collect(Collectors.toMap(ImmutablePair::left, ImmutablePair::right));
 
     private String findTopLevelClassName(Element start) {
         String topLevelClassName;
@@ -168,29 +160,32 @@ public class TestKonvenceAP extends AbstractProcessor {
         return false;
     }
 
-    @SneakyThrows
     private void writeResult() {
-        var filer = processingEnv.getFiler();
-        var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(output.stream()
-                .sorted(Comparator.comparing(APEnforcementMeta.Item::fullEnclosingClassName)
-                        .thenComparing(APEnforcementMeta.Item::className)
-                        .thenComparing(APEnforcementMeta.Item::displayName)
-                        .thenComparing(APEnforcementMeta.Item::methodName))
-                .collect(Collectors.toList()));
-        var resource =
-                filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
-        try (var writer = resource.openWriter()) {
-            if (output.isEmpty()) {
-                writer.write("");
-                writer.flush();
-            } else {
-                var xmlOption = processingEnv.getOptions().get(indentXmlOption);
-                if ("true".equals(xmlOption)) {
-                    xmlMemoryEnforceMeta.indentWriteTo(writer);
+        try {
+            var filer = processingEnv.getFiler();
+            var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(ImmutableList.copyOf(output.stream()
+                    .sorted(Comparator.comparing(APEnforcementMeta.Item::fullEnclosingClassName)
+                            .thenComparing(APEnforcementMeta.Item::className)
+                            .thenComparing(APEnforcementMeta.Item::displayName)
+                            .thenComparing(APEnforcementMeta.Item::methodName))
+                    .collect(Collectors.toList())));
+            var resource =
+                    filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
+            try (var writer = resource.openWriter()) {
+                if (output.isEmpty()) {
+                    writer.write("");
+                    writer.flush();
                 } else {
-                    xmlMemoryEnforceMeta.writeTo(writer);
+                    var xmlOption = processingEnv.getOptions().get(indentXmlOption);
+                    if ("true".equals(xmlOption)) {
+                        xmlMemoryEnforceMeta.indentWriteTo(writer);
+                    } else {
+                        xmlMemoryEnforceMeta.writeTo(writer);
+                    }
                 }
             }
+        } catch (Exception e) {
+            InternalUtils.hide(e);
         }
     }
 
