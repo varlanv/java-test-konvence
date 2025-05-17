@@ -1,15 +1,22 @@
 package com.varlanv.testkonvence.commontest.sample;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.immutables.value.Value;
 
-@Getter
-@RequiredArgsConstructor
-public class SampleSources {
+@Value.Immutable(builder = false)
+public interface SampleSources {
 
-    private final String outerClassName;
-    private final String fileName;
-    private final String packageName;
-    private final String sources;
-    private final String expectedTransformation;
+    @Value.Parameter
+    String outerClassName();
+
+    @Value.Parameter
+    String fileName();
+
+    @Value.Parameter
+    String packageName();
+
+    @Value.Parameter
+    String sources();
+
+    @Value.Parameter
+    String expectedTransformation();
 }

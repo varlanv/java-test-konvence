@@ -70,7 +70,7 @@ public class SampleSpec {
             return new SampleSpec(
                     Stream.concat(
                                     spec.sources.stream(),
-                                    Stream.of(new SampleSources(
+                                    Stream.of(ImmutableSampleSources.of(
                                             parent.parent.outerClassName,
                                             parent.parent.outerClassName + ".java",
                                             parent.parent.packageName,
