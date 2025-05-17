@@ -1,5 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import com.varlanv.testkonvence.APEnforcementMetaItem;
+import com.varlanv.testkonvence.ImmutableAPEnforcementMetaItem;
 import com.varlanv.testkonvence.ImmutableList;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -19,13 +21,13 @@ import org.w3c.dom.NodeList;
 
 final class XmlEnforceMeta {
 
-    public List<APEnforcementMeta.Item> items(Path path) throws Exception {
+    public List<APEnforcementMetaItem> items(Path path) throws Exception {
         try (var inputStream = Files.newInputStream(path)) {
             return items(inputStream);
         }
     }
 
-    public List<APEnforcementMeta.Item> items(InputStream inputStream) throws Exception {
+    public List<APEnforcementMetaItem> items(InputStream inputStream) throws Exception {
         var bas = new ByteArrayInputStream(readAllBytes(inputStream));
         var bytes = readAllBytes(bas);
 
@@ -40,10 +42,15 @@ final class XmlEnforceMeta {
         }
         var childNodes = root.getChildNodes();
         var nodes = nodeList(childNodes).value();
-        var entriesList = new ArrayList<APEnforcementMeta.Item>(childNodes.getLength());
+        var entriesList = new ArrayList<APEnforcementMetaItem>(childNodes.getLength());
         for (var node : nodes) {
             List<@NonNull String> fields = textContents(node.getChildNodes()).value();
-            entriesList.add(ImmutableItem.of(fields.get(0), fields.get(1), fields.get(2), fields.get(3)));
+            entriesList.add(ImmutableAPEnforcementMetaItem.builder()
+                    .fullEnclosingClassName(fields.get(0))
+                    .displayName(fields.get(1))
+                    .className(fields.get(2))
+                    .methodName(fields.get(3))
+                    .build());
         }
         return entriesList;
     }

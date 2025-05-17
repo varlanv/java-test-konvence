@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import com.varlanv.testkonvence.Pair;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

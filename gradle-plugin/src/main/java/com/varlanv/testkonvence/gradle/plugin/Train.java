@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import com.varlanv.testkonvence.APEnforcementMetaItem;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,11 +32,11 @@ final class Train {
                 .run();
     }
 
-    private Stream<EnforcementMeta.Item> toItemsStream(List<APEnforcementMeta.Item> items, String sourcesRootPath) {
+    private Stream<EnforcementMeta.Item> toItemsStream(List<APEnforcementMetaItem> items, String sourcesRootPath) {
         return items.stream().map(item -> parseItem(sourcesRootPath, item)).flatMap(Optional::stream);
     }
 
-    private Optional<EnforcementMeta.Item> parseItem(String sourcesRootPath, APEnforcementMeta.Item item) {
+    private Optional<EnforcementMeta.Item> parseItem(String sourcesRootPath, APEnforcementMetaItem item) {
         var sourceFile = Paths.get(sourcesRootPath + File.separator
                 + item.fullEnclosingClassName().replace(".", File.separator) + ".java");
         if (Files.isRegularFile(sourceFile)) {
@@ -53,7 +54,7 @@ final class Train {
         return Optional.<EnforcementMeta.Item>empty();
     }
 
-    private EnforceCandidate resolveEnforceCandidate(APEnforcementMeta.Item item, String className) {
+    private EnforceCandidate resolveEnforceCandidate(APEnforcementMetaItem item, String className) {
         if (item.methodName().isEmpty()) {
             return new ClassNameFromDisplayName(item.displayName(), className);
         } else {

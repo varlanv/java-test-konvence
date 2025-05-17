@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
     <Match>
-        <Bug code="EI, EI2, FS, CT, NP"/>
+        <Bug code="EI, EI2, CT"/>
+    </Match>
+    <Match>
+        <Bug code="FS"/>
+        <Class name="com.varlanv.testkonvence.commontest.TestSamples"/>
+    </Match>
+    <Match>
+        <Bug code="NP"/>
+        <Method name="equals"/>
     </Match>
 </FindBugsFilter>

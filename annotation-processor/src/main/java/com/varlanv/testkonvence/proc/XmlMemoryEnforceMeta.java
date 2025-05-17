@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.proc;
 
+import com.varlanv.testkonvence.APEnforcementMetaItem;
 import com.varlanv.testkonvence.ImmutableList;
 import java.io.Writer;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,9 +13,9 @@ import org.w3c.dom.Element;
 
 final class XmlMemoryEnforceMeta {
 
-    private final ImmutableList<APEnforcementMeta.Item> entries;
+    private final ImmutableList<APEnforcementMetaItem> entries;
 
-    XmlMemoryEnforceMeta(ImmutableList<APEnforcementMeta.Item> entries) {
+    XmlMemoryEnforceMeta(ImmutableList<APEnforcementMetaItem> entries) {
         this.entries = entries;
     }
 

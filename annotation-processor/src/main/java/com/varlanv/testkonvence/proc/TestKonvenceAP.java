@@ -1,6 +1,9 @@
 package com.varlanv.testkonvence.proc;
 
+import com.varlanv.testkonvence.APEnforcementMetaItem;
+import com.varlanv.testkonvence.ImmutableAPEnforcementMetaItem;
 import com.varlanv.testkonvence.ImmutableList;
+import com.varlanv.testkonvence.Pair;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -17,10 +20,10 @@ public final class TestKonvenceAP extends AbstractProcessor {
     public static final String enforcementsXmlName = "testkonvence_enforcements.xml";
     public static final String indentXmlOption = "com.varlanv.testkonvence.indentXml";
 
-    private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> testAnnotationFn =
+    private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMetaItem>> testAnnotationFn =
             (roundEnv, annotation) -> {
                 var elements = roundEnv.getElementsAnnotatedWith(annotation);
-                var output = new ArrayList<APEnforcementMeta.Item>();
+                var output = new ArrayList<APEnforcementMetaItem>();
                 for (var element : elements) {
                     var kind = element.getKind();
                     output.add(findDisplayNameAnnotationValue(element)
@@ -29,7 +32,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
                                     var methodElement = (ExecutableElement) element;
                                     var methodName =
                                             methodElement.getSimpleName().toString();
-                                    return ImmutableItem.builder()
+                                    return ImmutableAPEnforcementMetaItem.builder()
                                             .fullEnclosingClassName(findTopLevelClassName(element))
                                             .displayName(displayNameValue)
                                             .className(element.getEnclosingElement()
@@ -38,7 +41,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
                                             .methodName(methodName)
                                             .build();
                                 } else {
-                                    return ImmutableItem.builder()
+                                    return ImmutableAPEnforcementMetaItem.builder()
                                             .fullEnclosingClassName(findTopLevelClassName(element))
                                             .displayName(displayNameValue)
                                             .className(((TypeElement) element)
@@ -53,7 +56,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
                                     var methodElement = (ExecutableElement) element;
                                     var methodName =
                                             methodElement.getSimpleName().toString();
-                                    return ImmutableItem.builder()
+                                    return ImmutableAPEnforcementMetaItem.builder()
                                             .fullEnclosingClassName(findTopLevelClassName(element))
                                             .displayName("")
                                             .className(element.getEnclosingElement()
@@ -62,7 +65,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
                                             .methodName(methodName)
                                             .build();
                                 } else {
-                                    return ImmutableItem.builder()
+                                    return ImmutableAPEnforcementMetaItem.builder()
                                             .fullEnclosingClassName(findTopLevelClassName(element))
                                             .displayName("")
                                             .className(((TypeElement) element)
@@ -76,17 +79,17 @@ public final class TestKonvenceAP extends AbstractProcessor {
                 return output;
             };
 
-    private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> displayNameAnnotationFn =
+    private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMetaItem>> displayNameAnnotationFn =
             (roundEnv, annotation) -> {
                 var elements = roundEnv.getElementsAnnotatedWith(annotation);
-                var output = new ArrayList<APEnforcementMeta.Item>();
+                var output = new ArrayList<APEnforcementMetaItem>();
                 for (var element : elements) {
                     findDisplayNameAnnotationValue(element).ifPresent(displayNameValue -> {
                         var kind = element.getKind();
                         if (kind == ElementKind.METHOD) {
                             var methodElement = (ExecutableElement) element;
                             var methodName = methodElement.getSimpleName().toString();
-                            output.add(ImmutableItem.builder()
+                            output.add(ImmutableAPEnforcementMetaItem.builder()
                                     .fullEnclosingClassName(findTopLevelClassName(element))
                                     .displayName(displayNameValue)
                                     .className(element.getEnclosingElement()
@@ -95,7 +98,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
                                     .methodName(methodName)
                                     .build());
                         } else {
-                            output.add(ImmutableItem.builder()
+                            output.add(ImmutableAPEnforcementMetaItem.builder()
                                     .fullEnclosingClassName(findTopLevelClassName(element))
                                     .displayName(displayNameValue)
                                     .className(((TypeElement) element)
@@ -121,11 +124,11 @@ public final class TestKonvenceAP extends AbstractProcessor {
             .flatMap(Set::stream)
             .collect(Collectors.toSet());
 
-    private final Map<String, BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>>> strategy =
+    private final Map<String, BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMetaItem>>> strategy =
             Stream.concat(
-                            supportedTestAnnotations.stream().map(it -> ImmutablePair.of(it, testAnnotationFn)),
-                            Stream.of(ImmutablePair.of("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn)))
-                    .collect(Collectors.toMap(ImmutablePair::left, ImmutablePair::right));
+                            supportedTestAnnotations.stream().map(it -> Pair.of(it, testAnnotationFn)),
+                            Stream.of(Pair.of("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn)))
+                    .collect(Collectors.toMap(Pair::left, Pair::right));
 
     private static String findTopLevelClassName(Element start) {
         String topLevelClassName;
@@ -142,7 +145,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
         return topLevelClassName;
     }
 
-    Set<APEnforcementMeta.Item> output = new LinkedHashSet<>();
+    Set<APEnforcementMetaItem> output = new LinkedHashSet<>();
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -163,10 +166,10 @@ public final class TestKonvenceAP extends AbstractProcessor {
         try {
             var filer = processingEnv.getFiler();
             var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(ImmutableList.copyOfNonNull(output.stream()
-                    .sorted(Comparator.comparing(APEnforcementMeta.Item::fullEnclosingClassName)
-                            .thenComparing(APEnforcementMeta.Item::className)
-                            .thenComparing(APEnforcementMeta.Item::displayName)
-                            .thenComparing(APEnforcementMeta.Item::methodName))
+                    .sorted(Comparator.comparing(APEnforcementMetaItem::fullEnclosingClassName)
+                            .thenComparing(APEnforcementMetaItem::className)
+                            .thenComparing(APEnforcementMetaItem::displayName)
+                            .thenComparing(APEnforcementMetaItem::methodName))
                     .collect(Collectors.toList())));
             var resource =
                     filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
