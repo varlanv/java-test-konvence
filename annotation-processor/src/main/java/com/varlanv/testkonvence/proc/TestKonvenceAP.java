@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.proc;
 
+import com.varlanv.testkonvence.ImmutableList;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;

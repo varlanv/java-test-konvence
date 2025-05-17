@@ -20,10 +20,10 @@ dependencies {
 }
 
 tasks.named<Jar>("jar") {
-    dependsOn(":annotation-processor:jar")
+    dependsOn(":annotation-processor:shadowJar")
     from(project.rootDir.toPath()
         .resolve("annotation-processor")
         .resolve("build")
         .resolve("libs")
-        .resolve("annotation-processor-${providers.gradleProperty("version").get()}.jar"))
+        .resolve("annotation-processor-${providers.gradleProperty("version").get()}-all.jar"))
 }

@@ -13,7 +13,7 @@ public final class ImmutableList<T> implements Iterable<@NonNull T> {
         this.value = value;
     }
 
-    public static <T> ImmutableList<T> copyOf(Collection<@Nullable T> collection) {
+    public static <T> ImmutableList<T> copyOf(Collection<T> collection) {
         var result = new ArrayList<@NonNull T>(collection.size());
         for (var t : collection) {
             if (t == null) {
@@ -24,7 +24,7 @@ public final class ImmutableList<T> implements Iterable<@NonNull T> {
         return new ImmutableList<>(result);
     }
 
-    public static <T> ImmutableList<T> copyOfWithoutNulls(Collection<@Nullable T> collection) {
+    public static <T> ImmutableList<T> copyOfWithoutNulls(Collection<T> collection) {
         var result = new ArrayList<@NonNull T>(collection.size());
         for (var t : collection) {
             if (t != null) {
