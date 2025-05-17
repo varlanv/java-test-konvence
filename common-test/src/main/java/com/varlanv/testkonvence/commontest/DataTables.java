@@ -3,24 +3,35 @@ package com.varlanv.testkonvence.commontest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import lombok.Value;
+import org.immutables.value.Value;
 
-@Value
-public class DataTables {
+@Value.Immutable(builder = false)
+public interface DataTables {
 
-    List<Boolean> isCiList;
-    List<Boolean> configurationCacheList;
-    List<Boolean> buildCacheList;
-    List<String> gradleVersions;
+    @Value.Parameter
+    ImmutableList<Boolean> isCiList();
 
-    public static Stream<DataTable> streamDefault() {
+    @Value.Parameter
+    ImmutableList<Boolean> configurationCacheList();
+
+    @Value.Parameter
+    ImmutableList<Boolean> buildCacheList();
+
+    @Value.Parameter
+    ImmutableList<String> gradleVersions();
+
+    static Stream<DataTable> streamDefault() {
         return getDefault().list().stream();
     }
 
-    public static DataTables getDefault() {
+    static DataTables getDefault() {
         //        if (Objects.equals(System.getenv("CI"), "true")) {
         //        if (true) {
-        return new DataTables(List.of(false), List.of(false), List.of(false), List.of(TestGradleVersions.current()));
+        return ImmutableDataTables.of(
+                ImmutableList.of(false),
+                ImmutableList.of(false),
+                ImmutableList.of(false),
+                ImmutableList.of(TestGradleVersions.current()));
         //        } else {
         //            return new DataTables(
         //                List.of(true, false),
@@ -30,11 +41,12 @@ public class DataTables {
         //            );
     }
 
-    public List<DataTable> list() {
+    default List<DataTable> list() {
         List<DataTable> result = new ArrayList<>();
-        gradleVersions.forEach(gradleVersion -> isCiList.forEach(
-                isCi -> configurationCacheList.forEach(configurationCache -> buildCacheList.forEach(buildCache ->
-                        result.add(new DataTable(isCi, configurationCache, buildCache, gradleVersion))))));
+        gradleVersions().forEach(gradleVersion -> isCiList()
+                .forEach(isCi -> configurationCacheList().forEach(configurationCache -> buildCacheList()
+                        .forEach(buildCache ->
+                                result.add(new DataTable(isCi, configurationCache, buildCache, gradleVersion))))));
         return result;
     }
 }

@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.experimental.NonFinal;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -27,6 +23,7 @@ import org.gradle.api.services.BuildServiceParameters;
 import org.gradle.api.services.BuildServiceRegistration;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 
 public interface GradleIntegrationTest extends IntegrationTest {
@@ -35,13 +32,11 @@ public interface GradleIntegrationTest extends IntegrationTest {
         configureAndRunProjectFixture(ProjectBuilder::build, fixtureConsumer);
     }
 
-    @SneakyThrows
     default void configureProjectDirAndRunProjectFixture(
             ThrowingConsumer<Path> projectDirConsumer, ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
         configureDirAndProjectAndRunProjectFixture(projectDirConsumer, ProjectBuilder::build, fixtureConsumer);
     }
 
-    @SneakyThrows
     default void configureAndRunProjectFixture(
             Function<ProjectBuilder, Project> projectBuilderFn,
             ThrowingConsumer<SingleProjectFixture> fixtureConsumer) {
@@ -63,26 +58,27 @@ public interface GradleIntegrationTest extends IntegrationTest {
         });
     }
 
-    @SneakyThrows
     default void runProjectWithParentFixture(Consumer<ProjectWithParentFixture> fixtureConsumer) {
-        var parentProjectDirectory = newTempDir();
-        runAndDeleteFile(parentProjectDirectory, () -> {
-            var projectDirectory = Files.createDirectory(parentProjectDirectory.resolve("gradle_test"));
-            var parentProjectDirectoryFile = parentProjectDirectory.toFile();
-            var parentProject = ProjectBuilder.builder()
-                    .withProjectDir(parentProjectDirectoryFile)
-                    .build();
-            var project = ProjectBuilder.builder()
-                    .withProjectDir(projectDirectory.toFile())
-                    .withParent(parentProject)
-                    .build();
-            fixtureConsumer.accept(new ProjectWithParentFixture(
-                    project,
-                    parentProject,
-                    projectDirectory,
-                    parentProjectDirectory,
-                    project.getObjects(),
-                    project.getProviders()));
+        BaseTest.runQuiet(() -> {
+            var parentProjectDirectory = newTempDir();
+            runAndDeleteFile(parentProjectDirectory, () -> {
+                var projectDirectory = Files.createDirectory(parentProjectDirectory.resolve("gradle_test"));
+                var parentProjectDirectoryFile = parentProjectDirectory.toFile();
+                var parentProject = ProjectBuilder.builder()
+                        .withProjectDir(parentProjectDirectoryFile)
+                        .build();
+                var project = ProjectBuilder.builder()
+                        .withProjectDir(projectDirectory.toFile())
+                        .withParent(parentProject)
+                        .build();
+                fixtureConsumer.accept(ImmutableProjectWithParentFixture.of(
+                        project,
+                        parentProject,
+                        projectDirectory,
+                        parentProjectDirectory,
+                        project.getObjects(),
+                        project.getProviders()));
+            });
         });
     }
 
@@ -90,30 +86,33 @@ public interface GradleIntegrationTest extends IntegrationTest {
         return ((ProjectInternal) project).evaluate();
     }
 
-    @Getter
-    @RequiredArgsConstructor
-    class SingleProjectFixture {
-
-        private final Path projectDir;
-        private final Project project;
-        private final ObjectFactory objects;
-        private final ProviderFactory providers;
+    record SingleProjectFixture(Path projectDir, Project project, ObjectFactory objects, ProviderFactory providers) {
 
         private SingleProjectFixture(Path projectDir, Project project) {
             this(projectDir, project, project.getObjects(), project.getProviders());
         }
     }
 
-    @Getter
-    @RequiredArgsConstructor
-    class ProjectWithParentFixture {
+    @Value.Immutable(builder = false)
+    interface ProjectWithParentFixture {
 
-        private final Project project;
-        private final Project parentProject;
-        private final Path projectDir;
-        private final Path parentProjectDir;
-        private final ObjectFactory objects;
-        private final ProviderFactory providers;
+        @Value.Parameter
+        Project project();
+
+        @Value.Parameter
+        Project parentProject();
+
+        @Value.Parameter
+        Path projectDir();
+
+        @Value.Parameter
+        Path parentProjectDir();
+
+        @Value.Parameter
+        ObjectFactory objects();
+
+        @Value.Parameter
+        ProviderFactory providers();
     }
 
     default <T extends Task> TaskProviderAssertions<T> gradleAssert(TaskProvider<T> taskProvider) {
@@ -128,11 +127,14 @@ public interface GradleIntegrationTest extends IntegrationTest {
         return new ProjectAssertions(project);
     }
 
-    @RequiredArgsConstructor
     class TaskProviderAssertions<SELF extends Task> {
 
         private final TaskProvider<SELF> subject;
-        private @NonFinal @Nullable TaskAssertions<SELF> taskAssertions;
+        private @Nullable TaskAssertions<SELF> taskAssertions;
+
+        public TaskProviderAssertions(TaskProvider<SELF> subject) {
+            this.subject = subject;
+        }
 
         public TaskProviderAssertions<SELF> dependsOn(TaskProvider<? extends Task> taskProvider) {
             getTaskAssertions().dependsOn(taskProvider);
@@ -158,10 +160,13 @@ public interface GradleIntegrationTest extends IntegrationTest {
         }
     }
 
-    @RequiredArgsConstructor
     class TaskAssertions<SELF extends Task> {
 
         private final SELF subject;
+
+        public TaskAssertions(SELF subject) {
+            this.subject = subject;
+        }
 
         public TaskAssertions<SELF> dependsOn(TaskProvider<? extends Task> taskProvider) {
             var dependsOn = subject.getDependsOn();
@@ -188,10 +193,13 @@ public interface GradleIntegrationTest extends IntegrationTest {
         }
     }
 
-    @RequiredArgsConstructor
     class ProjectAssertions {
 
         private final Project project;
+
+        public ProjectAssertions(Project project) {
+            this.project = project;
+        }
 
         public ProjectAssertions doesNotHaveTask(String taskName) {
             assertThatThrownBy(() -> project.getTasks().named(taskName))
@@ -208,7 +216,6 @@ public interface GradleIntegrationTest extends IntegrationTest {
             return this;
         }
 
-        @SneakyThrows
         @SuppressWarnings("unchecked")
         public <
                         BSP extends BuildServiceParameters,
@@ -222,7 +229,7 @@ public interface GradleIntegrationTest extends IntegrationTest {
                     .findFirst();
             assertThat(maybeBuildServiceRegistration).isPresent();
             var buildServiceRegistration = maybeBuildServiceRegistration.get();
-            consumer.accept((BSR) buildServiceRegistration);
+            consumer.toUnchecked().accept((BSR) buildServiceRegistration);
             return this;
         }
 

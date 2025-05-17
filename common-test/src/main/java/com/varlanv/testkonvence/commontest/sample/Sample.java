@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import lombok.SneakyThrows;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,22 +59,23 @@ public interface Sample {
         });
     }
 
-    @SneakyThrows
     private SampleSourceFile toFileSample(SampleSources sampleSources, Path dir) {
-        var resultDir = dir;
-        for (var packagePart : sampleSources.packageName().split("\\.")) {
-            resultDir = resultDir.resolve(packagePart);
-        }
-        Files.createDirectories(resultDir);
-        var resultFile = Files.writeString(
-                resultDir.resolve(sampleSources.fileName()),
-                sampleSources.sources(),
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE_NEW);
-        return ImmutableSampleSourceFile.of(
-                resultFile,
-                sampleSources.outerClassName(),
-                sampleSources.packageName(),
-                sampleSources.expectedTransformation());
+        return BaseTest.supplyQuiet(() -> {
+            var resultDir = dir;
+            for (var packagePart : sampleSources.packageName().split("\\.")) {
+                resultDir = resultDir.resolve(packagePart);
+            }
+            Files.createDirectories(resultDir);
+            var resultFile = Files.writeString(
+                    resultDir.resolve(sampleSources.fileName()),
+                    sampleSources.sources(),
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE_NEW);
+            return ImmutableSampleSourceFile.of(
+                    resultFile,
+                    sampleSources.outerClassName(),
+                    sampleSources.packageName(),
+                    sampleSources.expectedTransformation());
+        });
     }
 }

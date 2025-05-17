@@ -1,46 +1,48 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.Constants;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.val;
 
-@RequiredArgsConstructor
 class SourceReplacementTrain {
 
-    TrainOptions trainOptions;
-    EnforcementMeta enforcementMeta;
+    private final TrainOptions trainOptions;
+    private final EnforcementMeta enforcementMeta;
+
+    SourceReplacementTrain(TrainOptions trainOptions, EnforcementMeta enforcementMeta) {
+        this.trainOptions = trainOptions;
+        this.enforcementMeta = enforcementMeta;
+    }
 
     public void run() {
         transformations().consumeGroupedByFile((target, transformations) -> {
-            val resultLines = IntStream.range(0, transformations.size())
-                    .mapToObj(i -> IntObjectPair.of(i, transformations.get(i)))
-                    .sorted((a, b) -> {
-                        if (a.right()
-                                .input()
-                                .meta()
-                                .candidate()
-                                .newName()
-                                .equals(b.right().input().meta().candidate().originalName())) {
-                            return 1;
-                        } else {
-                            return Integer.compare(a.left(), b.left());
-                        }
-                    })
-                    .reduce(
-                            target.lines(),
-                            (lines, transformation) ->
-                                    transformation.right().action().apply(lines),
-                            FunctionalUtil.throwingCombiner());
+            var resultLines = IntStream.range(0, transformations.size())
+                .mapToObj(i -> IntObjectPair.of(i, transformations.get(i)))
+                .sorted((a, b) -> {
+                    if (a.right()
+                        .input()
+                        .meta()
+                        .candidate()
+                        .newName()
+                        .equals(b.right().input().meta().candidate().originalName())) {
+                        return 1;
+                    } else {
+                        return Integer.compare(a.left(), b.left());
+                    }
+                })
+                .reduce(
+                    target.lines(),
+                    (lines, transformation) ->
+                        transformation.right().action().apply(lines),
+                    FunctionalUtil.throwingCombiner());
             if (resultLines.changed()) {
                 if (trainOptions.dryWithFailing()) {
                     throw new IllegalStateException(String.format(
-                            "[%s] - found test name mismatch in file [%s]",
-                            Constants.PLUGIN_NAME, target.path().toAbsolutePath()));
+                        "[%s] - found test name mismatch in file [%s]",
+                        Constants.PLUGIN_NAME, target.path().toAbsolutePath()));
                 } else {
                     target.save(resultLines);
                 }
@@ -50,34 +52,34 @@ class SourceReplacementTrain {
 
     private Transformations transformations() {
         return enforcementMeta.items().stream()
-                .flatMap(item -> {
-                    val candidate = item.candidate();
-                    if (candidate.kind() == EnforceCandidate.Kind.CLASS) {
-                        return Stream.empty();
-                    }
-                    return Stream.concat(
-                            displayNameToMethodNameTransformations(item), methodNameToDisplayNameTransformations(item));
-                })
-                .reduce(Transformations.empty(), Transformations::register, FunctionalUtil.throwingCombiner());
+            .flatMap(item -> {
+                var candidate = item.candidate();
+                if (candidate.kind() == EnforceCandidate.Kind.CLASS) {
+                    return Stream.empty();
+                }
+                return Stream.concat(
+                    displayNameToMethodNameTransformations(item), methodNameToDisplayNameTransformations(item));
+            })
+            .reduce(Transformations.empty(), Transformations::register, FunctionalUtil.throwingCombiner());
     }
 
     private Stream<Transformations.Transformation> methodNameToDisplayNameTransformations(EnforcementMeta.Item item) {
-        val candidate = item.candidate();
+        var candidate = item.candidate();
         if (!trainOptions.reverseTransformation()
-                || candidate.kind() != EnforceCandidate.Kind.METHOD
-                || !candidate.displayName().isEmpty()) {
+            || candidate.kind() != EnforceCandidate.Kind.METHOD
+            || !candidate.displayName().isEmpty()) {
             return Stream.empty();
         }
         return Stream.of(Transformations.Transformation.of(item.sourceFile().lines(), item, sourceLines -> {
-            val displayName = new DisplayNameFromMethodName(candidate.originalName()).displayName();
-            val linesView = sourceLines.view();
-            val methodName = candidate.originalName();
-            val matchStr = "void " + methodName + "(";
-            val matchedLineIndexes = new IntVector(3);
-            val linesSize = linesView.size();
+            var displayName = new DisplayNameFromMethodName(candidate.originalName()).displayName();
+            var linesView = sourceLines.view();
+            var methodName = candidate.originalName();
+            var matchStr = "void " + methodName + "(";
+            var matchedLineIndexes = new IntVector(3);
+            var linesSize = linesView.size();
             for (int lineIdx = 0; lineIdx < linesSize; lineIdx++) {
-                val line = linesView.get(lineIdx);
-                val matchIdx = line.indexOf(matchStr);
+                var line = linesView.get(lineIdx);
+                var matchIdx = line.indexOf(matchStr);
                 if (matchIdx != -1) {
                     matchedLineIndexes.add(lineIdx);
                 }
@@ -85,41 +87,34 @@ class SourceReplacementTrain {
             if (matchedLineIndexes.size() == 0) {
                 return sourceLines;
             } else if (matchedLineIndexes.size() == 1) {
-                val lineIdx = matchedLineIndexes.get(0);
-                val line = linesView.get(lineIdx);
-                val matchIdx = line.indexOf(matchStr);
-                val stringBuilder = new StringBuilder();
-                for (int i1 = 0; i1 < matchIdx; i1++) {
-                    stringBuilder.append(" ");
-                }
+                var lineIdx = matchedLineIndexes.get(0);
+                var line = linesView.get(lineIdx);
+                var matchIdx = line.indexOf(matchStr);
+                var stringBuilder = new StringBuilder();
+                stringBuilder.append(" ".repeat(Math.max(0, matchIdx)));
                 return findIndexOfEmptyLine(lineIdx, linesView)
-                        .map(emptyLineIdx -> {
-                            val displayNameAnnotation = stringBuilder
-                                    .append("@DisplayName(\"")
-                                    .append(displayName)
-                                    .append("\")")
-                                    .toString();
-                            val sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
-                            return handleDisplayNameImport(sl);
-                        })
-                        .orElse(sourceLines);
-            } else {
-                val maybeIndexOfClosestClassDistance =
-                        findIndexOfClosestClassDistance(item, linesView, matchedLineIndexes);
-                if (maybeIndexOfClosestClassDistance.isPresent()) {
-                    val indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
-                    val line = linesView.get(indexOfClosestClassDistance);
-                    val matchIdx = line.indexOf(matchStr);
-                    val stringBuilder = new StringBuilder();
-                    for (int i1 = 0; i1 < matchIdx; i1++) {
-                        stringBuilder.append(" ");
-                    }
-                    val displayNameAnnotation = stringBuilder
+                    .map(emptyLineIdx -> {
+                        var displayNameAnnotation = stringBuilder
                             .append("@DisplayName(\"")
                             .append(displayName)
                             .append("\")")
                             .toString();
-                    val sl = sourceLines.pushAbove(indexOfClosestClassDistance, displayNameAnnotation);
+                        var sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
+                        return handleDisplayNameImport(sl);
+                    })
+                    .orElse(sourceLines);
+            } else {
+                var maybeIndexOfClosestClassDistance =
+                    findIndexOfClosestClassDistance(item, linesView, matchedLineIndexes);
+                if (maybeIndexOfClosestClassDistance.isPresent()) {
+                    int indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
+                    var line = linesView.get(indexOfClosestClassDistance);
+                    var matchIdx = line.indexOf(matchStr);
+                    var displayNameAnnotation = " ".repeat(Math.max(0, matchIdx)) +
+                        "@DisplayName(\"" +
+                        displayName +
+                        "\")";
+                    var sl = sourceLines.pushAbove(indexOfClosestClassDistance, displayNameAnnotation);
                     return handleDisplayNameImport(sl);
                 }
             }
@@ -128,17 +123,17 @@ class SourceReplacementTrain {
     }
 
     private SourceLines handleDisplayNameImport(SourceLines sourceLines) {
-        val linesView = sourceLines.view();
-        val importJunitLines = new LinkedHashSet<IntObjectPair<String>>();
-        val junitDisplayNameImport = "import org.junit.jupiter.api.DisplayName;";
+        var linesView = sourceLines.view();
+        var importJunitLines = new LinkedHashSet<IntObjectPair<String>>();
+        var junitDisplayNameImport = "import org.junit.jupiter.api.DisplayName;";
         for (int lineIdx = 0; lineIdx < linesView.size(); lineIdx++) {
-            val line = linesView.get(lineIdx);
+            var line = linesView.get(lineIdx);
             if (line.contains("class {")
-                    || line.contains("import org.junit.jupiter.api.*")
-                    || line.contains(junitDisplayNameImport)) {
+                || line.contains("import org.junit.jupiter.api.*")
+                || line.contains(junitDisplayNameImport)) {
                 return sourceLines;
             } else if (line.contains("import org.junit.jupiter.api")
-                    || line.contains("org.junit.jupiter.params.ParameterizedTest")) {
+                || line.contains("org.junit.jupiter.params.ParameterizedTest")) {
                 importJunitLines.add(IntObjectPair.of(lineIdx, line));
             }
         }
@@ -146,16 +141,16 @@ class SourceReplacementTrain {
             return sourceLines;
         }
 
-        val junitImportPair = IntObjectPair.of(-1, junitDisplayNameImport);
-        val sortedJunitImports = Stream.concat(importJunitLines.stream(), Stream.of(junitImportPair))
-                .sorted(Comparator.comparing(IntObjectPair::right))
-                .collect(Collectors.toList());
-        val indexOfJunitDisplayNameImport = sortedJunitImports.indexOf(junitImportPair);
+        var junitImportPair = IntObjectPair.of(-1, junitDisplayNameImport);
+        var sortedJunitImports = Stream.concat(importJunitLines.stream(), Stream.of(junitImportPair))
+            .sorted(Comparator.comparing(IntObjectPair::right))
+            .collect(Collectors.toList());
+        var indexOfJunitDisplayNameImport = sortedJunitImports.indexOf(junitImportPair);
         if (indexOfJunitDisplayNameImport == 0) {
-            val idx = sortedJunitImports.get(1).left();
+            var idx = sortedJunitImports.get(1).left();
             return sourceLines.pushAbove(idx, junitDisplayNameImport);
         } else {
-            val idx = sortedJunitImports.get(indexOfJunitDisplayNameImport - 1).left();
+            var idx = sortedJunitImports.get(indexOfJunitDisplayNameImport - 1).left();
             return sourceLines.pushAbove(idx, junitDisplayNameImport);
         }
     }
@@ -170,21 +165,21 @@ class SourceReplacementTrain {
     }
 
     private Stream<Transformations.Transformation> displayNameToMethodNameTransformations(EnforcementMeta.Item item) {
-        val candidate = item.candidate();
-        val newName = candidate.newName();
-        val originalName = candidate.originalName();
+        var candidate = item.candidate();
+        var newName = candidate.newName();
+        var originalName = candidate.originalName();
 
         if (newName.isEmpty() || originalName.equals(newName) || candidate.kind() != EnforceCandidate.Kind.METHOD) {
             return Stream.empty();
         }
-        val sourceFile = item.sourceFile();
-        val lines = sourceFile.lines();
-        val linesView = lines.view();
-        val methodNameMatches = new ArrayList<MethodNameMatch>(2);
+        var sourceFile = item.sourceFile();
+        var lines = sourceFile.lines();
+        var linesView = lines.view();
+        var methodNameMatches = new ArrayList<MethodNameMatch>(2);
 
         for (int lineIdx = 0, linesSize = linesView.size(); lineIdx < linesSize; lineIdx++) {
-            val line = linesView.get(lineIdx);
-            val matchIndexes = new StringMatch(line, originalName).matchingIndexes();
+            var line = linesView.get(lineIdx);
+            var matchIndexes = new StringMatch(line, originalName).matchingIndexes();
             if (matchIndexes.notEmpty()) {
                 methodNameMatches.add(new MethodNameMatch(lineIdx, matchIndexes));
             }
@@ -193,64 +188,76 @@ class SourceReplacementTrain {
             return Stream.empty();
         }
         if (methodNameMatches.size() == 1) {
-            val methodNameMatch = methodNameMatches.get(0);
-            val matchIndexes = methodNameMatch.matchIndexes();
+            var methodNameMatch = methodNameMatches.get(0);
+            var matchIndexes = methodNameMatch.matchIndexes();
             if (matchIndexes.size() == 1) {
                 return Stream.of(Transformations.Transformation.of(
-                        lines,
-                        item,
-                        (sl) -> sl.replaceAt(
-                                methodNameMatch.lineIndex(), line -> line.replace(originalName, newName))));
+                    lines,
+                    item,
+                    (sl) -> sl.replaceAt(
+                        methodNameMatch.lineIndex(), line -> line.replace(originalName, newName))));
             }
         } else {
-            val finalIndexes = new IntVector(methodNameMatches.size());
+            var finalIndexes = new IntVector(methodNameMatches.size());
             methodNameMatches.forEach(match -> {
-                val line = linesView.get(match.lineIndex());
+                var line = linesView.get(match.lineIndex());
                 if (line.contains("void " + originalName + "(")) {
                     finalIndexes.add(match.lineIndex());
                 }
             });
             if (finalIndexes.size() == 1) {
                 return Stream.of(Transformations.Transformation.of(
+                    lines,
+                    item,
+                    (sl) -> sl.replaceAt(
+                        finalIndexes.get(0),
+                        line -> line.replace("void " + originalName + "(", "void " + newName + "("))));
+            } else {
+                var maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
+                if (maybeIndexOfClosestClassDistance.isPresent()) {
+                    var indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
+                    return Stream.of(Transformations.Transformation.of(
                         lines,
                         item,
                         (sl) -> sl.replaceAt(
-                                finalIndexes.get(0),
-                                line -> line.replace("void " + originalName + "(", "void " + newName + "("))));
-            } else {
-                val maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
-                if (maybeIndexOfClosestClassDistance.isPresent()) {
-                    val indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
-                    return Stream.of(Transformations.Transformation.of(
-                            lines,
-                            item,
-                            (sl) -> sl.replaceAt(
-                                    indexOfClosestClassDistance, line -> line.replace(originalName, newName))));
+                            indexOfClosestClassDistance, line -> line.replace(originalName, newName))));
                 }
             }
         }
         return Stream.empty();
     }
 
-    @Value
     private static class MethodNameMatch {
 
-        int lineIndex;
-        ImmutableIntVector matchIndexes;
+        private final int lineIndex;
+        private final ImmutableIntVector matchIndexes;
+
+        private MethodNameMatch(int lineIndex, ImmutableIntVector matchIndexes) {
+            this.lineIndex = lineIndex;
+            this.matchIndexes = matchIndexes;
+        }
+
+        public int lineIndex() {
+            return lineIndex;
+        }
+
+        public ImmutableIntVector matchIndexes() {
+            return matchIndexes;
+        }
     }
 
     private Optional<Integer> findIndexOfClosestClassDistance(
-            EnforcementMeta.Item item, List<String> lines, ImmutableIntVector matchedLineIndexes) {
-        val lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
-        val immediateClassName = item.immediateClassName();
-        val targetClassChunk = "class " + immediateClassName + " {";
-        val targetInterfaceChunk = "interface " + immediateClassName + " {";
+        EnforcementMeta.Item item, List<String> lines, ImmutableIntVector matchedLineIndexes) {
+        var lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
+        var immediateClassName = item.immediateClassName();
+        var targetClassChunk = "class " + immediateClassName + " {";
+        var targetInterfaceChunk = "interface " + immediateClassName + " {";
         matchedLineIndexes.forEach(matchedLineIndex -> {
             int distance = 0;
             for (int idx = matchedLineIndex; idx >= 0; idx--) {
-                val line = lines.get(idx);
+                var line = lines.get(idx);
                 if (line.contains(immediateClassName)
-                        && (line.contains(targetClassChunk) || line.contains(targetInterfaceChunk))) {
+                    && (line.contains(targetClassChunk) || line.contains(targetInterfaceChunk))) {
                     lineIndexToOuterClassDistance.put(matchedLineIndex, distance);
                     break;
                 }

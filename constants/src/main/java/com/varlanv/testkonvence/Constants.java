@@ -1,9 +1,8 @@
 package com.varlanv.testkonvence;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public class Constants {
+
+    private Constants() {}
 
     public static final String PLUGIN_NAME = "com.varlanv.testkonvence";
     public static final String PLUGIN_VERSION = "0.0.1";

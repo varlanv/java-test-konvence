@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
@@ -86,7 +85,6 @@ public interface FunctionalTest extends BaseTest {
         });
     }
 
-    @SneakyThrows
     default BuildResult build(GradleRunner runner, ThrowingFunction<GradleRunner, BuildResult> runFn) {
         var lineStart = "*".repeat(215);
         var lineEnd = "*".repeat(161);
@@ -104,7 +102,7 @@ public interface FunctionalTest extends BaseTest {
         System.err.println(lineStart);
         System.err.println();
         try {
-            return runFn.apply(runner);
+            return runFn.toUnchecked().apply(runner);
         } finally {
             System.err.println();
             System.err.println(lineEnd);
@@ -132,45 +130,46 @@ public interface FunctionalTest extends BaseTest {
         copyFolderContents(Paths.get(srcDirPath), Paths.get(destDirPath));
     }
 
-    @SneakyThrows
     default void copyFolderContents(Path srcDir, Path destDir) {
-        if (Files.notExists(srcDir)) {
-            throw new IllegalArgumentException(
-                    "Cannot copy from non-existing directory '%s'!".formatted(srcDir.toAbsolutePath()));
-        }
-        if (!Files.isDirectory(srcDir)) {
-            throw new IllegalArgumentException(
-                    "Cannot copy from non-directory '%s'!".formatted(srcDir.toAbsolutePath()));
-        }
+        BaseTest.runQuiet(() -> {
+            if (Files.notExists(srcDir)) {
+                throw new IllegalArgumentException(
+                        "Cannot copy from non-existing directory '%s'!".formatted(srcDir.toAbsolutePath()));
+            }
+            if (!Files.isDirectory(srcDir)) {
+                throw new IllegalArgumentException(
+                        "Cannot copy from non-directory '%s'!".formatted(srcDir.toAbsolutePath()));
+            }
 
-        Files.createDirectories(destDir);
-        try (var stream = Files.walk(srcDir)) {
-            stream.forEach(path -> {
-                var relative = srcDir.relativize(path);
-                var newPath = destDir.resolve(relative);
-                try {
-                    if (Files.isDirectory(path)) {
-                        Files.createDirectories(newPath);
-                    } else {
-                        Files.copy(path, newPath);
-                    }
-                } catch (Exception e) {
-                    BaseTest.hide(e);
-                }
-            });
-        }
-        try (var stream = Files.walk(destDir)) {
-            stream.forEach(path -> {
-                var fileName = path.getFileName().toString();
-                if (IGNORED_FILES_FOR_COPY.contains(fileName) && Files.isDirectory(path)) {
+            Files.createDirectories(destDir);
+            try (var stream = Files.walk(srcDir)) {
+                stream.forEach(path -> {
+                    var relative = srcDir.relativize(path);
+                    var newPath = destDir.resolve(relative);
                     try {
-                        FileUtils.deleteDirectory(path.toFile());
-                    } catch (IOException e) {
+                        if (Files.isDirectory(path)) {
+                            Files.createDirectories(newPath);
+                        } else {
+                            Files.copy(path, newPath);
+                        }
+                    } catch (Exception e) {
                         BaseTest.hide(e);
                     }
-                }
-            });
-        }
+                });
+            }
+            try (var stream = Files.walk(destDir)) {
+                stream.forEach(path -> {
+                    var fileName = path.getFileName().toString();
+                    if (IGNORED_FILES_FOR_COPY.contains(fileName) && Files.isDirectory(path)) {
+                        try {
+                            FileUtils.deleteDirectory(path.toFile());
+                        } catch (IOException e) {
+                            BaseTest.hide(e);
+                        }
+                    }
+                });
+            }
+        });
     }
 
     default Path useCasesDir() {
@@ -189,22 +188,23 @@ public interface FunctionalTest extends BaseTest {
         return findDir(file -> file.getFileName().toString().equals(dirName));
     }
 
-    @SneakyThrows
     default Path findDir(ThrowingPredicate<Path> predicate) {
-        return findDir(predicate, new File("").getCanonicalFile().toPath());
+        return BaseTest.supplyQuiet(
+                () -> findDir(predicate, new File("").getCanonicalFile().toPath()));
     }
 
-    @SneakyThrows
     default Path findDir(ThrowingPredicate<Path> predicate, Path current) {
-        if (predicate.test(current)) {
-            return current;
-        } else {
-            var parentFile = current.getParent();
-            if (parentFile == null) {
-                throw new RuntimeException("Cannot find directory with predicate");
+        return BaseTest.supplyQuiet(() -> {
+            if (predicate.test(current)) {
+                return current;
+            } else {
+                var parentFile = current.getParent();
+                if (parentFile == null) {
+                    throw new RuntimeException("Cannot find directory with predicate");
+                }
+                return findDir(predicate, parentFile);
             }
-            return findDir(predicate, parentFile);
-        }
+        });
     }
 
     default void printFileTree(Path path) {

@@ -2,11 +2,12 @@ package com.varlanv.testkonvence.commontest;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import lombok.NonNull;
-import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.parallel.Execution;
@@ -22,61 +23,67 @@ public interface BaseTest {
     String INTEGRATION_TEST_TAG = "integration-test";
     String FUNCTIONAL_TEST_TAG = "functional-test";
 
-    @SneakyThrows
     default Path newTempDir() {
-        var dir = Files.createTempDirectory("testsyncjunit-");
-        dir.toFile().deleteOnExit();
-        return dir;
+        return supplyQuiet(() -> {
+            var dir = Files.createTempDirectory("testsyncjunit-");
+            dir.toFile().deleteOnExit();
+            return dir;
+        });
     }
 
-    @SneakyThrows
     default Path newTempFile() {
-        var file = Files.createTempFile("testsyncjunit-", "");
-        file.toFile().deleteOnExit();
-        return file;
+        return supplyQuiet(() -> {
+            var file = Files.createTempFile("testsyncjunit-", "");
+            file.toFile().deleteOnExit();
+            return file;
+        });
     }
 
-    @SneakyThrows
     default void useTempDir(ThrowingConsumer<Path> action) {
-        var dir = newTempDir();
-        try {
-            action.accept(dir);
-        } finally {
-            FileUtils.deleteDirectory(dir.toFile());
-        }
-    }
-
-    @SneakyThrows
-    default <T> T useTempFile(ThrowingFunction<Path, T> action) {
-        var file = newTempFile();
-        try {
-            return action.apply(file);
-        } finally {
-            Files.deleteIfExists(file);
-        }
-    }
-
-    @SneakyThrows
-    default void consumeTempFile(ThrowingConsumer<Path> action) {
-        var file = newTempFile();
-        try {
-            action.accept(file);
-        } finally {
-            Files.deleteIfExists(file);
-        }
-    }
-
-    @SneakyThrows
-    default void runAndDeleteFile(@NonNull Path file, ThrowingRunnable runnable) {
-        try {
-            runnable.run();
-        } finally {
-            if (Files.isRegularFile(file)) {
-                Files.deleteIfExists(file);
-            } else {
-                FileUtils.forceDelete(file.toFile());
+        runQuiet(() -> {
+            var dir = newTempDir();
+            try {
+                action.accept(dir);
+            } finally {
+                FileUtils.deleteDirectory(dir.toFile());
             }
-        }
+        });
+    }
+
+    default <T> T useTempFile(ThrowingFunction<Path, T> action) {
+        return supplyQuiet(() -> {
+            var file = newTempFile();
+            try {
+                return action.apply(file);
+            } finally {
+                Files.deleteIfExists(file);
+            }
+        });
+    }
+
+    default void consumeTempFile(ThrowingConsumer<Path> action) {
+        runQuiet(() -> {
+            var file = newTempFile();
+            try {
+                action.accept(file);
+            } finally {
+                Files.deleteIfExists(file);
+            }
+        });
+    }
+
+    default void runAndDeleteFile(@NonNull Path file, ThrowingRunnable runnable) {
+        runQuiet(() -> {
+            try {
+                runnable.run();
+            } finally {
+                if (Files.isRegularFile(file)) {
+                    Files.deleteIfExists(file);
+                } else {
+                    FileUtils.forceDelete(file.toFile());
+                }
+            }
+        });
     }
 
     default String java(@Language("Java") String java) {
@@ -117,6 +124,16 @@ public interface BaseTest {
 
     interface ThrowingConsumer<T> {
         void accept(T t) throws Exception;
+
+        default Consumer<T> toUnchecked() {
+            return t -> {
+                try {
+                    accept(t);
+                } catch (Exception e) {
+                    BaseTest.hide(e);
+                }
+            };
+        }
     }
 
     interface ThrowingPredicate<T> {
@@ -135,6 +152,16 @@ public interface BaseTest {
 
     interface ThrowingFunction<T, R> {
         R apply(T t) throws Exception;
+
+        default Function<T, R> toUnchecked() {
+            return t -> {
+                try {
+                    return apply(t);
+                } catch (Exception e) {
+                    return hide(e);
+                }
+            };
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -1,11 +1,10 @@
 package com.varlanv.testkonvence.commontest;
 
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestGradleVersions {
+
+    private TestGradleVersions() {}
 
     public static List<String> list() {
         return List.of(

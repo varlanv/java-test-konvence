@@ -5,12 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestSamples {
+
+    private TestSamples() {}
 
     public static Samples testSamples() {
         return Stream.of(inlineTestSamples(), samplesFromResources())
@@ -926,29 +924,30 @@ public class TestSamples {
                                 .withOptions(options -> options.reverseTransformation(true)));
     }
 
-    @SneakyThrows
     @SuppressWarnings("all")
     private static Samples samplesFromResources() {
-        var samples = Samples.samples();
-        var className = "JsonAssuredTest";
-        var packageLen = "package ".length();
+        return BaseTest.supplyQuiet(() -> {
+            var samples = Samples.samples();
+            var className = "JsonAssuredTest";
+            var packageLen = "package ".length();
 
-        try (var actualIs = Objects.requireNonNull(Samples.class.getResourceAsStream(
-                        "/testkonvence/samples/jsonassured_1/actual/" + className + ".java"));
-                var expectedIs = Objects.requireNonNull(Samples.class.getResourceAsStream(
-                        "/testkonvence/samples/jsonassured_1/expected/" + className + ".java"))) {
-            var actualString = new String(actualIs.readAllBytes(), StandardCharsets.UTF_8);
-            var expectedString = new String(expectedIs.readAllBytes(), StandardCharsets.UTF_8);
-            var packageEndIdx = actualString.indexOf(';');
-            var packageName = actualString.substring(packageLen, packageEndIdx);
-            var fullyQualifiedClassName = packageName + "." + className;
+            try (var actualIs = Objects.requireNonNull(Samples.class.getResourceAsStream(
+                            "/testkonvence/samples/jsonassured_1/actual/" + className + ".java"));
+                    var expectedIs = Objects.requireNonNull(Samples.class.getResourceAsStream(
+                            "/testkonvence/samples/jsonassured_1/expected/" + className + ".java"))) {
+                var actualString = new String(actualIs.readAllBytes(), StandardCharsets.UTF_8);
+                var expectedString = new String(expectedIs.readAllBytes(), StandardCharsets.UTF_8);
+                var packageEndIdx = actualString.indexOf(';');
+                var packageName = actualString.substring(packageLen, packageEndIdx);
+                var fullyQualifiedClassName = packageName + "." + className;
 
-            samples.describe(className, spec -> spec.withClass(fullyQualifiedClassName)
-                    .withJavaSources(actualString)
-                    .withExpectedTransformation(expectedString)
-                    .withOptions(options -> options.reverseTransformation(true)));
-        }
+                samples.describe(className, spec -> spec.withClass(fullyQualifiedClassName)
+                        .withJavaSources(actualString)
+                        .withExpectedTransformation(expectedString)
+                        .withOptions(options -> options.reverseTransformation(true)));
+            }
 
-        return samples;
+            return samples;
+        });
     }
 }
