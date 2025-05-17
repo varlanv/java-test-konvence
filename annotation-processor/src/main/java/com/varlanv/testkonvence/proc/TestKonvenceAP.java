@@ -162,7 +162,7 @@ public class TestKonvenceAP extends AbstractProcessor {
     private void writeResult() {
         try {
             var filer = processingEnv.getFiler();
-            var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(ImmutableList.copyOf(output.stream()
+            var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(ImmutableList.copyOfNonNull(output.stream()
                     .sorted(Comparator.comparing(APEnforcementMeta.Item::fullEnclosingClassName)
                             .thenComparing(APEnforcementMeta.Item::className)
                             .thenComparing(APEnforcementMeta.Item::displayName)

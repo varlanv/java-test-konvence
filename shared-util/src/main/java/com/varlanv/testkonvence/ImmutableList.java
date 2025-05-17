@@ -13,18 +13,13 @@ public final class ImmutableList<T> implements Iterable<@NonNull T> {
         this.value = value;
     }
 
-    public static <T> ImmutableList<T> copyOf(Collection<T> collection) {
+    public static <T> ImmutableList<T> copyOfNonNull(Collection<@NonNull T> collection) {
         var result = new ArrayList<@NonNull T>(collection.size());
-        for (var t : collection) {
-            if (t == null) {
-                throw new IllegalArgumentException();
-            }
-            result.add(t);
-        }
+        result.addAll(collection);
         return new ImmutableList<>(result);
     }
 
-    public static <T> ImmutableList<T> copyOfWithoutNulls(Collection<T> collection) {
+    public static <T> ImmutableList<T> copyOfIgnoringNulls(Collection<@Nullable T> collection) {
         var result = new ArrayList<@NonNull T>(collection.size());
         for (var t : collection) {
             if (t != null) {

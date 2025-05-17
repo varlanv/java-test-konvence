@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import com.varlanv.testkonvence.ImmutableList;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -48,7 +50,7 @@ final class XmlEnforceMeta {
 
     private ImmutableList<String> textContents(@Nullable NodeList nodeList) {
         var children = nodeList(nodeList);
-        return children.mapSkippingNull(Node::getTextContent);
+        return children.mapOptional((Node node) -> Optional.<String>ofNullable(node.getTextContent()));
     }
 
     private ImmutableList<Node> nodeList(@Nullable NodeList nodeList) {
@@ -61,7 +63,7 @@ final class XmlEnforceMeta {
             var entryNode = nodeList.item(entryIdx);
             result.add(entryNode);
         }
-        return ImmutableList.copyOfWithoutNulls(result);
+        return ImmutableList.copyOfIgnoringNulls(result);
     }
 
     private byte[] readAllBytes(InputStream is) throws Exception {

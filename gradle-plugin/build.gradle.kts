@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.gradlePluginPublish)
     alias(libs.plugins.internalConvention)
-//    id("com.gradleup.shadow") version "8.3.6"
 }
 
 gradlePlugin {
@@ -14,16 +13,25 @@ gradlePlugin {
 }
 
 dependencies {
+    compileOnly(projects.sharedUtil)
     compileOnly(projects.constants)
     testImplementation(projects.annotationProcessor)
     testImplementation(libs.toolisticon.cute)
 }
 
 tasks.named<Jar>("jar") {
-    dependsOn(":annotation-processor:shadowJar")
-    from(project.rootDir.toPath()
+    dependsOn(":annotation-processor:jar")
+    dependsOn(":shared-util:jar")
+    val rootDirPath = project.rootDir.toPath()
+    from(rootDirPath
+        .resolve("shared-util")
+        .resolve("build")
+        .resolve("classes")
+        .resolve("java")
+        .resolve("main"))
+    from(rootDirPath
         .resolve("annotation-processor")
         .resolve("build")
         .resolve("libs")
-        .resolve("annotation-processor-${providers.gradleProperty("version").get()}-all.jar"))
+        .resolve("annotation-processor-${providers.gradleProperty("version").get()}.jar"))
 }
