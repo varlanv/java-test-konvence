@@ -1,7 +1,5 @@
 package com.varlanv.testkonvence.proc;
 
-import com.varlanv.testkonvence.info.APEnforcementMeta;
-import com.varlanv.testkonvence.info.XmlMemoryEnforceMeta;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -16,7 +14,6 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
 import lombok.SneakyThrows;
 import lombok.Value;
-import lombok.val;
 
 public class TestKonvenceAP extends AbstractProcessor {
 
@@ -26,53 +23,57 @@ public class TestKonvenceAP extends AbstractProcessor {
 
     private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> testAnnotationFn =
             (roundEnv, annotation) -> {
-                val elements = roundEnv.getElementsAnnotatedWith(annotation);
-                val output = new ArrayList<APEnforcementMeta.Item>();
-                for (val element : elements) {
-                    val kind = element.getKind();
+                var elements = roundEnv.getElementsAnnotatedWith(annotation);
+                var output = new ArrayList<APEnforcementMeta.Item>();
+                for (var element : elements) {
+                    var kind = element.getKind();
                     output.add(findDisplayNameAnnotationValue(element)
                             .map(displayNameValue -> {
                                 if (kind == ElementKind.METHOD) {
-                                    val methodElement = (ExecutableElement) element;
-                                    val methodName =
+                                    var methodElement = (ExecutableElement) element;
+                                    var methodName =
                                             methodElement.getSimpleName().toString();
-                                    return new APEnforcementMeta.Item(
-                                            findTopLevelClassName(element),
-                                            displayNameValue,
-                                            element.getEnclosingElement()
+                                    return ImmutableItem.builder()
+                                            .fullEnclosingClassName(findTopLevelClassName(element))
+                                            .displayName(displayNameValue)
+                                            .className(element.getEnclosingElement()
                                                     .getSimpleName()
-                                                    .toString(),
-                                            methodName);
+                                                    .toString())
+                                            .methodName(methodName)
+                                            .build();
                                 } else {
-                                    return new APEnforcementMeta.Item(
-                                            findTopLevelClassName(element),
-                                            displayNameValue,
-                                            ((TypeElement) element)
+                                    return ImmutableItem.builder()
+                                            .fullEnclosingClassName(findTopLevelClassName(element))
+                                            .displayName(displayNameValue)
+                                            .className(((TypeElement) element)
                                                     .getQualifiedName()
-                                                    .toString(),
-                                            "");
+                                                    .toString())
+                                            .methodName("")
+                                            .build();
                                 }
                             })
                             .orElseGet(() -> {
                                 if (kind == ElementKind.METHOD) {
-                                    val methodElement = (ExecutableElement) element;
-                                    val methodName =
+                                    var methodElement = (ExecutableElement) element;
+                                    var methodName =
                                             methodElement.getSimpleName().toString();
-                                    return new APEnforcementMeta.Item(
-                                            findTopLevelClassName(element),
-                                            "",
-                                            element.getEnclosingElement()
+                                    return ImmutableItem.builder()
+                                            .fullEnclosingClassName(findTopLevelClassName(element))
+                                            .displayName("")
+                                            .className(element.getEnclosingElement()
                                                     .getSimpleName()
-                                                    .toString(),
-                                            methodName);
+                                                    .toString())
+                                            .methodName(methodName)
+                                            .build();
                                 } else {
-                                    return new APEnforcementMeta.Item(
-                                            findTopLevelClassName(element),
-                                            "",
-                                            ((TypeElement) element)
+                                    return ImmutableItem.builder()
+                                            .fullEnclosingClassName(findTopLevelClassName(element))
+                                            .displayName("")
+                                            .className(((TypeElement) element)
                                                     .getQualifiedName()
-                                                    .toString(),
-                                            "");
+                                                    .toString())
+                                            .methodName("")
+                                            .build();
                                 }
                             }));
                 }
@@ -81,27 +82,31 @@ public class TestKonvenceAP extends AbstractProcessor {
 
     private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> displayNameAnnotationFn =
             (roundEnv, annotation) -> {
-                val elements = roundEnv.getElementsAnnotatedWith(annotation);
-                val output = new ArrayList<APEnforcementMeta.Item>();
-                for (val element : elements) {
+                var elements = roundEnv.getElementsAnnotatedWith(annotation);
+                var output = new ArrayList<APEnforcementMeta.Item>();
+                for (var element : elements) {
                     findDisplayNameAnnotationValue(element).ifPresent(displayNameValue -> {
-                        val kind = element.getKind();
+                        var kind = element.getKind();
                         if (kind == ElementKind.METHOD) {
-                            val methodElement = (ExecutableElement) element;
-                            val methodName = methodElement.getSimpleName().toString();
-                            output.add(new APEnforcementMeta.Item(
-                                    findTopLevelClassName(element),
-                                    displayNameValue,
-                                    element.getEnclosingElement()
+                            var methodElement = (ExecutableElement) element;
+                            var methodName = methodElement.getSimpleName().toString();
+                            output.add(ImmutableItem.builder()
+                                    .fullEnclosingClassName(findTopLevelClassName(element))
+                                    .displayName(displayNameValue)
+                                    .className(element.getEnclosingElement()
                                             .getSimpleName()
-                                            .toString(),
-                                    methodName));
+                                            .toString())
+                                    .methodName(methodName)
+                                    .build());
                         } else {
-                            output.add(new APEnforcementMeta.Item(
-                                    findTopLevelClassName(element),
-                                    displayNameValue,
-                                    ((TypeElement) element).getQualifiedName().toString(),
-                                    ""));
+                            output.add(ImmutableItem.builder()
+                                    .fullEnclosingClassName(findTopLevelClassName(element))
+                                    .displayName(displayNameValue)
+                                    .className(((TypeElement) element)
+                                            .getQualifiedName()
+                                            .toString())
+                                    .methodName("")
+                                    .build());
                         }
                     });
                 }
@@ -136,7 +141,7 @@ public class TestKonvenceAP extends AbstractProcessor {
         String topLevelClassName;
         Element enclosingElement = start;
         while (true) {
-            val nestedEnclElement = enclosingElement.getEnclosingElement();
+            var nestedEnclElement = enclosingElement.getEnclosingElement();
             if (nestedEnclElement.getKind() == ElementKind.PACKAGE) {
                 topLevelClassName =
                         ((TypeElement) enclosingElement).getQualifiedName().toString();
@@ -154,7 +159,7 @@ public class TestKonvenceAP extends AbstractProcessor {
         if (roundEnv.processingOver()) {
             writeResult();
         } else {
-            for (val annotation : annotations) {
+            for (var annotation : annotations) {
                 Optional.ofNullable(strategy.get(annotation.getQualifiedName().toString()))
                         .map(action -> action.apply(roundEnv, annotation))
                         .ifPresent(output::addAll);
@@ -165,21 +170,21 @@ public class TestKonvenceAP extends AbstractProcessor {
 
     @SneakyThrows
     private void writeResult() {
-        val filer = processingEnv.getFiler();
-        val xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(output.stream()
+        var filer = processingEnv.getFiler();
+        var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(output.stream()
                 .sorted(Comparator.comparing(APEnforcementMeta.Item::fullEnclosingClassName)
                         .thenComparing(APEnforcementMeta.Item::className)
                         .thenComparing(APEnforcementMeta.Item::displayName)
                         .thenComparing(APEnforcementMeta.Item::methodName))
                 .collect(Collectors.toList()));
-        val resource =
+        var resource =
                 filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
-        try (val writer = resource.openWriter()) {
+        try (var writer = resource.openWriter()) {
             if (output.isEmpty()) {
                 writer.write("");
                 writer.flush();
             } else {
-                val xmlOption = processingEnv.getOptions().get(indentXmlOption);
+                var xmlOption = processingEnv.getOptions().get(indentXmlOption);
                 if ("true".equals(xmlOption)) {
                     xmlMemoryEnforceMeta.indentWriteTo(writer);
                 } else {
@@ -207,7 +212,7 @@ public class TestKonvenceAP extends AbstractProcessor {
     private Optional<String> findDisplayNameAnnotationValue(Element element) {
         return element.getAnnotationMirrors().stream()
                 .flatMap(mirror -> {
-                    val typeElement = (TypeElement) mirror.getAnnotationType().asElement();
+                    var typeElement = (TypeElement) mirror.getAnnotationType().asElement();
                     if (!typeElement.getQualifiedName().contentEquals("org.junit.jupiter.api.DisplayName")) {
                         return Stream.empty();
                     }

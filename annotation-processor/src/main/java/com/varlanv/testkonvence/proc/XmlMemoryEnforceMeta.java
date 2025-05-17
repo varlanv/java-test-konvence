@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence.info;
+package com.varlanv.testkonvence.proc;
 
 import java.io.StringWriter;
 import java.io.Writer;
