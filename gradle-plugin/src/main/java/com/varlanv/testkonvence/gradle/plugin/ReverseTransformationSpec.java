@@ -6,10 +6,6 @@ abstract class ReverseTransformationSpec implements ReverseTransformationSpecVie
 
     protected abstract Property<Boolean> getEnabled();
 
-    public ReverseTransformationSpec() {
-        getEnabled().convention(true);
-    }
-
     @Override
     public void enabled(boolean toggle) {
         getEnabled().set(toggle);

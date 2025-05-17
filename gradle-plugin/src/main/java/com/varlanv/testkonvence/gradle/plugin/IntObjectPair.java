@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 final class IntObjectPair<T> {
 
@@ -21,7 +22,7 @@ final class IntObjectPair<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof IntObjectPair)) return false;
         IntObjectPair<?> that = (IntObjectPair<?>) o;
         return left == that.left && Objects.equals(right, that.right);

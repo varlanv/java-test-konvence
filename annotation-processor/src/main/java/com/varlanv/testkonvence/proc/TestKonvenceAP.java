@@ -12,9 +12,9 @@ import javax.tools.StandardLocation;
 
 public class TestKonvenceAP extends AbstractProcessor {
 
-    static final String enforcementsXmlPackage = "com.varlanv.testkonvence";
-    static final String enforcementsXmlName = "testkonvence_enforcements.xml";
-    static final String indentXmlOption = "com.varlanv.testkonvence.indentXml";
+    public static final String enforcementsXmlPackage = "com.varlanv.testkonvence";
+    public static final String enforcementsXmlName = "testkonvence_enforcements.xml";
+    public static final String indentXmlOption = "com.varlanv.testkonvence.indentXml";
 
     private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> testAnnotationFn =
             (roundEnv, annotation) -> {

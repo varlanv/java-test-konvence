@@ -13,12 +13,6 @@ public abstract class TestNameEnforceTask extends DefaultTask {
         return testTaskName + "KonvenceEnforce";
     }
 
-    public TestNameEnforceTask() {
-        getDryWithFailing().convention(false);
-        getUseCamelCaseMethodName().convention(false);
-        getEnableReverseTransformation().convention(false);
-    }
-
     @InputFiles
     public abstract ConfigurableFileCollection getSourcesRootProp();
 

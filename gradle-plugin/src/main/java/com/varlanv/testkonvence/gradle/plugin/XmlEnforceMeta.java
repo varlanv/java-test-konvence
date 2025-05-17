@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 final class XmlEnforceMeta {
 
@@ -30,19 +34,32 @@ final class XmlEnforceMeta {
         if (root == null) {
             return Collections.emptyList();
         }
-        var entries = root.getChildNodes();
-        var entriesLen = entries.getLength();
-        var entriesList = new ArrayList<APEnforcementMeta.Item>(entriesLen);
-        for (var entryIdx = 0; entryIdx < entriesLen; entryIdx++) {
-            var entryNode = entries.item(entryIdx);
-            var fields = entryNode.getChildNodes();
-            entriesList.add(ImmutableItem.of(
-                    fields.item(0).getTextContent(),
-                    fields.item(1).getTextContent(),
-                    fields.item(2).getTextContent(),
-                    fields.item(3).getTextContent()));
+        var childNodes = root.getChildNodes();
+        var nodes = nodeList(childNodes).value();
+        var entriesList = new ArrayList<APEnforcementMeta.Item>(childNodes.getLength());
+        for (var node : nodes) {
+            List<@NonNull String> fields = textContents(node.getChildNodes()).value();
+            entriesList.add(ImmutableItem.of(fields.get(0), fields.get(1), fields.get(2), fields.get(3)));
         }
         return entriesList;
+    }
+
+    private ImmutableList<String> textContents(@Nullable NodeList nodeList) {
+        var children = nodeList(nodeList);
+        return children.mapSkippingNull(Node::getTextContent);
+    }
+
+    private ImmutableList<Node> nodeList(@Nullable NodeList nodeList) {
+        if (nodeList == null) {
+            return ImmutableList.empty();
+        }
+        var entriesLen = nodeList.getLength();
+        var result = new ArrayList<@Nullable Node>(entriesLen);
+        for (var entryIdx = 0; entryIdx < entriesLen; entryIdx++) {
+            var entryNode = nodeList.item(entryIdx);
+            result.add(entryNode);
+        }
+        return ImmutableList.copyOfWithoutNulls(result);
     }
 
     private byte[] readAllBytes(InputStream is) throws Exception {

@@ -1,10 +1,11 @@
-package com.varlanv.testkonvence.commontest;
+package com.varlanv.testkonvence.gradle.plugin;
 
 import java.util.*;
+import java.util.function.Function;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-public final class ImmutableList<T> implements Iterable<@NonNull T> {
+final class ImmutableList<T> implements Iterable<@NonNull T> {
 
     private final List<@NonNull T> value;
 
@@ -12,7 +13,7 @@ public final class ImmutableList<T> implements Iterable<@NonNull T> {
         this.value = value;
     }
 
-    public static <T> ImmutableList<T> copyOf(Collection<T> collection) {
+    public static <T> ImmutableList<T> copyOf(Collection<@Nullable T> collection) {
         var result = new ArrayList<@NonNull T>(collection.size());
         for (var t : collection) {
             if (t == null) {
@@ -33,14 +34,28 @@ public final class ImmutableList<T> implements Iterable<@NonNull T> {
         return new ImmutableList<>(result);
     }
 
-    @SafeVarargs
-    @SuppressWarnings("varargs")
-    public static <T> ImmutableList<T> of(T... value) {
-        return copyOf(Arrays.asList(value));
+    public static <T> ImmutableList<T> empty() {
+        List<@NonNull T> list = Collections.emptyList();
+        return new ImmutableList<T>(list);
     }
 
     public List<@NonNull T> value() {
         return Collections.unmodifiableList(value);
+    }
+
+    public <R> ImmutableList<R> mapSkippingNull(Function<T, @Nullable R> mapper) {
+        if (value.isEmpty()) {
+            return ImmutableList.empty();
+        } else {
+            var result = new ArrayList<@NonNull R>(value.size());
+            for (var t : value) {
+                R mapped = mapper.apply(t);
+                if (mapped != null) {
+                    result.add(mapped);
+                }
+            }
+            return new ImmutableList<>(result);
+        }
     }
 
     @Override

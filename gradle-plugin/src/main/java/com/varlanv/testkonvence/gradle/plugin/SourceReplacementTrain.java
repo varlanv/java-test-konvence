@@ -58,7 +58,7 @@ class SourceReplacementTrain {
                 .flatMap(item -> {
                     var candidate = item.candidate();
                     if (candidate.kind() == EnforceCandidate.Kind.CLASS) {
-                        return Stream.empty();
+                        return Stream.<Transformations.Transformation>empty();
                     }
                     return Stream.concat(
                             displayNameToMethodNameTransformations(item), methodNameToDisplayNameTransformations(item));
@@ -142,8 +142,9 @@ class SourceReplacementTrain {
             return sourceLines;
         }
 
-        var junitImportPair = IntObjectPair.of(-1, junitDisplayNameImport);
-        var sortedJunitImports = Stream.concat(importJunitLines.stream(), Stream.of(junitImportPair))
+        var junitImportPair = IntObjectPair.<String>of(-1, junitDisplayNameImport);
+        var sortedJunitImports = Stream.<IntObjectPair<String>>concat(
+                        importJunitLines.stream(), Stream.of(junitImportPair))
                 .sorted(Comparator.comparing(IntObjectPair::right))
                 .collect(Collectors.toList());
         var indexOfJunitDisplayNameImport = sortedJunitImports.indexOf(junitImportPair);
@@ -171,7 +172,7 @@ class SourceReplacementTrain {
         var originalName = candidate.originalName();
 
         if (newName.isEmpty() || originalName.equals(newName) || candidate.kind() != EnforceCandidate.Kind.METHOD) {
-            return Stream.empty();
+            return Stream.<Transformations.Transformation>empty();
         }
         var sourceFile = item.sourceFile();
         var lines = sourceFile.lines();
@@ -186,13 +187,13 @@ class SourceReplacementTrain {
             }
         }
         if (methodNameMatches.isEmpty()) {
-            return Stream.empty();
+            return Stream.<Transformations.Transformation>empty();
         }
         if (methodNameMatches.size() == 1) {
             var methodNameMatch = methodNameMatches.get(0);
             var matchIndexes = methodNameMatch.matchIndexes();
             if (matchIndexes.size() == 1) {
-                return Stream.of(Transformations.Transformation.of(
+                return Stream.<Transformations.Transformation>of(Transformations.Transformation.of(
                         lines,
                         item,
                         (sl) -> sl.replaceAt(
@@ -207,7 +208,7 @@ class SourceReplacementTrain {
                 }
             });
             if (finalIndexes.size() == 1) {
-                return Stream.of(Transformations.Transformation.of(
+                return Stream.<Transformations.Transformation>of(Transformations.Transformation.of(
                         lines,
                         item,
                         (sl) -> sl.replaceAt(
@@ -217,7 +218,7 @@ class SourceReplacementTrain {
                 var maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
                 if (maybeIndexOfClosestClassDistance.isPresent()) {
                     var indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
-                    return Stream.of(Transformations.Transformation.of(
+                    return Stream.<Transformations.Transformation>of(Transformations.Transformation.of(
                             lines,
                             item,
                             (sl) -> sl.replaceAt(
@@ -225,7 +226,7 @@ class SourceReplacementTrain {
                 }
             }
         }
-        return Stream.empty();
+        return Stream.<Transformations.Transformation>empty();
     }
 
     private static class MethodNameMatch {

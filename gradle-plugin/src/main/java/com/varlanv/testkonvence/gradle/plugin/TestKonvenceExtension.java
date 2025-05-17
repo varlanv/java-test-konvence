@@ -1,8 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import javax.inject.Inject;
 import org.gradle.api.Action;
-import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 
 abstract class TestKonvenceExtension implements TestKonvenceExtensionView {
@@ -14,16 +12,6 @@ abstract class TestKonvenceExtension implements TestKonvenceExtensionView {
     protected abstract Property<Boolean> getCamelCaseMethodNameProperty();
 
     protected abstract Property<ReverseTransformationSpec> getReverseTransformation();
-
-    @Inject
-    protected abstract ObjectFactory getObjects();
-
-    public TestKonvenceExtension() {
-        getEnabled().convention(true);
-        getReverseTransformation().convention(getObjects().newInstance(ReverseTransformationSpec.class));
-        getApplyAutomaticallyAfterTestTask().convention(true);
-        getCamelCaseMethodNameProperty().convention(false);
-    }
 
     @Override
     public void enabled(boolean toggle) {

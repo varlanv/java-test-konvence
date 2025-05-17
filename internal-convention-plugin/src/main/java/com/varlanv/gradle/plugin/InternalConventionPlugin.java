@@ -136,11 +136,14 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     }));
                 pluginManager.apply(CheckerFrameworkPlugin.class);
 
-                if (Set.of("annotation-processor", "constants").contains(projectName)) {
-                    extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> checkerFramework
-                        .setCheckers(List.of(
-                            "org.checkerframework.checker.nullness.NullnessChecker"
-                        ))
+                if (Set.of("annotation-processor", "constants", "gradle-plugin").contains(projectName)) {
+                    extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> {
+                            checkerFramework
+                                .setCheckers(List.of(
+                                    "org.checkerframework.checker.nullness.NullnessChecker"
+                                ));
+                            checkerFramework.setExcludeTests(true);
+                        }
                     );
                 }
             }

@@ -18,8 +18,17 @@ public class TestKonvencePlugin implements Plugin<Project> {
         var testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
         var extensions = project.getExtensions();
         var dependencies = project.getDependencies();
+        var objects = project.getObjects();
         var testKonvenceExtension = (TestKonvenceExtension) extensions.create(
                 TestKonvenceExtensionView.class, TestKonvenceExtensionView.name(), TestKonvenceExtension.class);
+
+        testKonvenceExtension.getEnabled().convention(true);
+        var reverseTransformationSpec = objects.newInstance(ReverseTransformationSpec.class);
+        reverseTransformationSpec.getEnabled().convention(true);
+        testKonvenceExtension.getReverseTransformation().convention(reverseTransformationSpec);
+        testKonvenceExtension.getApplyAutomaticallyAfterTestTask().convention(true);
+        testKonvenceExtension.getCamelCaseMethodNameProperty().convention(false);
+
         var tasks = project.getTasks();
         var providers = project.getProviders();
 
@@ -40,7 +49,6 @@ public class TestKonvencePlugin implements Plugin<Project> {
                             });
 
                     var log = project.getLogger();
-                    var objects = project.getObjects();
                     var layout = project.getLayout();
                     var buildDirectory = layout.getBuildDirectory();
                     var testing = (TestingExtension) extensions.getByName("testing");
@@ -101,6 +109,14 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                         TestNameEnforceTask.name(testTask.getName()),
                                         TestNameEnforceTask.class,
                                         enforceTask -> {
+                                            enforceTask.getDryWithFailing().convention(false);
+                                            enforceTask
+                                                    .getUseCamelCaseMethodName()
+                                                    .convention(false);
+                                            enforceTask
+                                                    .getEnableReverseTransformation()
+                                                    .convention(false);
+
                                             enforceTask
                                                     .getSourcesRootProp()
                                                     .setFrom(testNameEnforceAction.sourcesRootProp());
