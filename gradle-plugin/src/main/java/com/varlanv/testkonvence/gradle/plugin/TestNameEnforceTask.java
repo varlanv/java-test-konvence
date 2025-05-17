@@ -13,6 +13,8 @@ public abstract class TestNameEnforceTask extends DefaultTask {
         return testTaskName + "KonvenceEnforce";
     }
 
+    public TestNameEnforceTask() {}
+
     @InputFiles
     public abstract ConfigurableFileCollection getSourcesRootProp();
 

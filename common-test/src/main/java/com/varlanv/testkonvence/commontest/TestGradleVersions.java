@@ -2,7 +2,7 @@ package com.varlanv.testkonvence.commontest;
 
 import java.util.List;
 
-public class TestGradleVersions {
+public final class TestGradleVersions {
 
     private TestGradleVersions() {}
 

@@ -23,7 +23,9 @@ final class IntObjectPair<T> {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (!(o instanceof IntObjectPair)) return false;
+        if (!(o instanceof IntObjectPair)) {
+            return false;
+        }
         IntObjectPair<?> that = (IntObjectPair<?>) o;
         return left == that.left && Objects.equals(right, that.right);
     }

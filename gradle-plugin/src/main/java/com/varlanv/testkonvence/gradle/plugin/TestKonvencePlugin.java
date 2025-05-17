@@ -21,7 +21,6 @@ public class TestKonvencePlugin implements Plugin<Project> {
         var objects = project.getObjects();
         var testKonvenceExtension = (TestKonvenceExtension) extensions.create(
                 TestKonvenceExtensionView.class, TestKonvenceExtensionView.name(), TestKonvenceExtension.class);
-
         testKonvenceExtension.getEnabled().convention(true);
         var reverseTransformationSpec = objects.newInstance(ReverseTransformationSpec.class);
         reverseTransformationSpec.getEnabled().convention(true);

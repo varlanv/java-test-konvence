@@ -300,17 +300,17 @@
                     LT, MINUS, MOD, NOT_EQUAL, PLUS, QUESTION, SL, SR, STAR, METHOD_REF,
                     TYPE_EXTENSION_AND "/>
         </module>
-        <module name="AnnotationLocation">
-            <property name="id" value="AnnotationLocationMostCases"/>
-            <property name="tokens"
-                      value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF,
-                      RECORD_DEF, COMPACT_CTOR_DEF"/>
-        </module>
-        <module name="AnnotationLocation">
-            <property name="id" value="AnnotationLocationVariables"/>
-            <property name="tokens" value="VARIABLE_DEF"/>
-            <property name="allowSamelineMultipleAnnotations" value="true"/>
-        </module>
+<!--        <module name="AnnotationLocation">-->
+<!--            <property name="id" value="AnnotationLocationMostCases"/>-->
+<!--            <property name="tokens"-->
+<!--                      value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF,-->
+<!--                      RECORD_DEF, COMPACT_CTOR_DEF"/>-->
+<!--        </module>-->
+<!--        <module name="AnnotationLocation">-->
+<!--            <property name="id" value="AnnotationLocationVariables"/>-->
+<!--            <property name="tokens" value="VARIABLE_DEF"/>-->
+<!--            <property name="allowSamelineMultipleAnnotations" value="true"/>-->
+<!--        </module>-->
         <module name="NonEmptyAtclauseDescription"/>
         <module name="InvalidJavadocPosition"/>
         <module name="JavadocTagContinuationIndentation"/>

@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TestUtils {
+public final class TestUtils {
 
     private TestUtils() {}
 

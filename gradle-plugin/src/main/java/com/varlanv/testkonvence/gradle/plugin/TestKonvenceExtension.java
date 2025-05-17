@@ -13,6 +13,8 @@ abstract class TestKonvenceExtension implements TestKonvenceExtensionView {
 
     protected abstract Property<ReverseTransformationSpec> getReverseTransformation();
 
+    public TestKonvenceExtension() {}
+
     @Override
     public void enabled(boolean toggle) {
         getEnabled().set(toggle);

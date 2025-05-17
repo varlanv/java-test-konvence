@@ -45,7 +45,7 @@ final class ImmutableList<T> implements Iterable<@NonNull T> {
 
     public <R> ImmutableList<R> mapSkippingNull(Function<T, @Nullable R> mapper) {
         if (value.isEmpty()) {
-            return ImmutableList.empty();
+            return empty();
         } else {
             var result = new ArrayList<@NonNull R>(value.size());
             for (var t : value) {
@@ -65,7 +65,9 @@ final class ImmutableList<T> implements Iterable<@NonNull T> {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (!(o instanceof ImmutableList)) return false;
+        if (!(o instanceof ImmutableList)) {
+            return false;
+        }
         var that = (ImmutableList<?>) o;
         return Objects.equals(value, that.value);
     }

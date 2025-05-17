@@ -136,7 +136,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     }));
                 pluginManager.apply(CheckerFrameworkPlugin.class);
 
-                if (Set.of("annotation-processor", "constants", "gradle-plugin").contains(projectName)) {
+                if (!projectName.equals("common-test")) {
                     extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> {
                             checkerFramework
                                 .setCheckers(List.of(

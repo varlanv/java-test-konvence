@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-class SourceReplacementTrain {
+final class SourceReplacementTrain {
 
     private final TrainOptions trainOptions;
     private final EnforcementMeta enforcementMeta;
@@ -229,7 +229,7 @@ class SourceReplacementTrain {
         return Stream.<Transformations.Transformation>empty();
     }
 
-    private static class MethodNameMatch {
+    private static final class MethodNameMatch {
 
         private final int lineIndex;
         private final ImmutableIntVector matchIndexes;

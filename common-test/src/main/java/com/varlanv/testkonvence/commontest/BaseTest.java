@@ -102,7 +102,7 @@ public interface BaseTest {
                 try {
                     run();
                 } catch (Exception e) {
-                    BaseTest.hide(e);
+                    hide(e);
                 }
             };
         }
@@ -116,7 +116,7 @@ public interface BaseTest {
                 try {
                     return get();
                 } catch (Exception e) {
-                    return BaseTest.hide(e);
+                    return hide(e);
                 }
             };
         }
@@ -130,7 +130,7 @@ public interface BaseTest {
                 try {
                     accept(t);
                 } catch (Exception e) {
-                    BaseTest.hide(e);
+                    hide(e);
                 }
             };
         }

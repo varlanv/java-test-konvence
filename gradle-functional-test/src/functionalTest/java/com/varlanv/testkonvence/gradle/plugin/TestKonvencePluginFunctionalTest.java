@@ -3,7 +3,7 @@ package com.varlanv.testkonvence.gradle.plugin;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.varlanv.testkonvence.commontest.*;
-import com.varlanv.testkonvence.commontest.sample.SampleOptions;
+import com.varlanv.testkonvence.commontest.sample.ImmutableSampleOptions;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -235,8 +235,8 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     }
 
     private String defaultBuildGradleConfig(
-            Function<SampleOptions.SampleOptionsBuilder, SampleOptions.SampleOptionsBuilder> configure) {
-        var options = configure.apply(SampleOptions.builder()).build();
+            Function<ImmutableSampleOptions.Builder, ImmutableSampleOptions.Builder> configure) {
+        var options = configure.apply(ImmutableSampleOptions.builder()).build();
         return groovy(
                 """
             plugins {

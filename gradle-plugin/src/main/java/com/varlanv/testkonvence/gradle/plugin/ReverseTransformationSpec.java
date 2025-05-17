@@ -4,6 +4,8 @@ import org.gradle.api.provider.Property;
 
 abstract class ReverseTransformationSpec implements ReverseTransformationSpecView {
 
+    public ReverseTransformationSpec() {}
+
     protected abstract Property<Boolean> getEnabled();
 
     @Override

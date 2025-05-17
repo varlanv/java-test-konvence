@@ -40,7 +40,9 @@ final class ImmutableList<T> {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (!(o instanceof ImmutableList)) return false;
+        if (!(o instanceof ImmutableList)) {
+            return false;
+        }
         ImmutableList<?> that = (ImmutableList<?>) o;
         return Objects.equals(value, that.value);
     }

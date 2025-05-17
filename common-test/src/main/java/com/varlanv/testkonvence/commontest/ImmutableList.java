@@ -50,7 +50,9 @@ public final class ImmutableList<T> implements Iterable<@NonNull T> {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (!(o instanceof ImmutableList)) return false;
+        if (!(o instanceof ImmutableList)) {
+            return false;
+        }
         var that = (ImmutableList<?>) o;
         return Objects.equals(value, that.value);
     }

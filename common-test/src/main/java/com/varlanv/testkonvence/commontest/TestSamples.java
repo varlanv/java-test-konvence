@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class TestSamples {
+public final class TestSamples {
 
     private TestSamples() {}
 

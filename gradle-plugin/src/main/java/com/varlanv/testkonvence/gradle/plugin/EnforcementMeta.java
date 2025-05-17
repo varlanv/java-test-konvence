@@ -18,7 +18,9 @@ final class EnforcementMeta {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (!(o instanceof EnforcementMeta)) return false;
+        if (!(o instanceof EnforcementMeta)) {
+            return false;
+        }
         EnforcementMeta that = (EnforcementMeta) o;
         return Objects.equals(items, that.items);
     }
@@ -54,7 +56,9 @@ final class EnforcementMeta {
 
         @Override
         public boolean equals(@Nullable Object o) {
-            if (!(o instanceof Item)) return false;
+            if (!(o instanceof Item)) {
+                return false;
+            }
             Item item = (Item) o;
             return Objects.equals(sourceFile, item.sourceFile)
                     && Objects.equals(immediateClassName, item.immediateClassName)

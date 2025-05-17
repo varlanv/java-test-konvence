@@ -1,6 +1,6 @@
 package com.varlanv.testkonvence;
 
-public class Constants {
+public final class Constants {
 
     private Constants() {}
 

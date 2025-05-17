@@ -108,7 +108,7 @@
     <rule ref="category/java/codestyle.xml/UnnecessaryAnnotationValueElement"/>
     <!-- <rule ref="category/java/codestyle.xml/UnnecessaryBoxing" /> -->
     <!-- <rule ref="category/java/codestyle.xml/UnnecessaryCast" /> -->
-    <rule ref="category/java/codestyle.xml/UnnecessaryConstructor"/>
+<!--    <rule ref="category/java/codestyle.xml/UnnecessaryConstructor"/>-->
     <rule ref="category/java/codestyle.xml/UnnecessaryFullyQualifiedName"/>
 <!--    <rule ref="category/java/codestyle.xml/UnnecessaryImport"/>-->
     <rule ref="category/java/codestyle.xml/UnnecessaryLocalBeforeReturn"/>
@@ -174,7 +174,7 @@
     <!-- <rule ref="category/java/documentation.xml/CommentContent" /> -->
     <!-- <rule ref="category/java/documentation.xml/CommentRequired" /> -->
     <!-- <rule ref="category/java/documentation.xml/CommentSize" /> -->
-    <rule ref="category/java/documentation.xml/UncommentedEmptyConstructor"/>
+<!--    <rule ref="category/java/documentation.xml/UncommentedEmptyConstructor"/>-->
     <rule ref="category/java/documentation.xml/UncommentedEmptyMethodBody"/>
 
 
