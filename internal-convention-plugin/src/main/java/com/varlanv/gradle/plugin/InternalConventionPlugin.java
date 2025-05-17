@@ -6,6 +6,7 @@ import com.diffplug.spotless.LineEnding;
 import com.github.benmanes.gradle.versions.VersionsPlugin;
 import com.github.spotbugs.snom.SpotBugsExtension;
 import com.github.spotbugs.snom.SpotBugsPlugin;
+import org.checkerframework.gradle.plugin.CheckerFrameworkPlugin;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -110,27 +111,37 @@ public class InternalConventionPlugin implements Plugin<Project> {
                 pluginManager.apply(VersionsPlugin.class);
                 if (internalEnvironment.isLocal()) {
                     pluginManager.apply(IdeaPlugin.class);
-                    var idea = (IdeaModel) extensions.getByName("idea");
-                    idea.getModule().setDownloadJavadoc(true);
-                    idea.getModule().setDownloadSources(true);
+                    extensions.<IdeaModel>configure("idea", idea -> {
+                        idea.getModule().setDownloadJavadoc(true);
+                        idea.getModule().setDownloadSources(true);
+                    });
                 }
                 pluginManager.apply(SpotBugsPlugin.class);
-                var spotBugsExtension = (SpotBugsExtension) extensions.getByName("spotbugs");
-                spotBugsExtension.getExcludeFilter().set(staticAnalyseFolder.resolve("spotbug-exclude.xml").toFile());
+                extensions.<SpotBugsExtension>configure("spotbugs", spotBugsExtension -> spotBugsExtension
+                    .getExcludeFilter().set(staticAnalyseFolder.resolve("spotbug-exclude.xml").toFile()));
 
                 pluginManager.apply(SpotlessPlugin.class);
-                var spotlessExtension = (SpotlessExtension) extensions.getByName("spotless");
-                spotlessExtension.java(spotlessJava -> {
-                    spotlessJava.importOrder();
-                    spotlessJava.removeUnusedImports();
-                    spotlessJava.palantirJavaFormat();
-                    spotlessJava.formatAnnotations();
-                    spotlessJava.encoding("UTF-8");
-                    spotlessJava.endWithNewline();
-                    spotlessJava.setLineEndings(LineEnding.UNIX);
-                    spotlessJava.trimTrailingWhitespace();
-                    spotlessJava.cleanthat();
-                });
+                extensions.<SpotlessExtension>configure("spotless", spotlessExtension -> spotlessExtension
+                    .java(spotlessJava -> {
+                        spotlessJava.importOrder();
+                        spotlessJava.removeUnusedImports();
+                        spotlessJava.palantirJavaFormat();
+                        spotlessJava.formatAnnotations();
+                        spotlessJava.encoding("UTF-8");
+                        spotlessJava.endWithNewline();
+                        spotlessJava.setLineEndings(LineEnding.UNIX);
+                        spotlessJava.trimTrailingWhitespace();
+                        spotlessJava.cleanthat();
+                    }));
+                pluginManager.apply(CheckerFrameworkPlugin.class);
+
+                if (!projectName.equals("common-test")) {
+//                    extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> checkerFramework
+//                        .setCheckers(List.of(
+//                            "org.checkerframework.checker.nullness.NullnessChecker"
+//                        ))
+//                    );
+                }
             }
         );
         // -------------------- Apply common plugins end --------------------
@@ -141,35 +152,37 @@ public class InternalConventionPlugin implements Plugin<Project> {
                 pluginManager.withPlugin(
                     "java",
                     plugin -> {
-                        var java = (JavaPluginExtension) extensions.getByName("java");
-                        java.withSourcesJar();
-                        var isInternalModule = internalConventionExtension.getInternalModule().get();
-                        java.toolchain((spec -> {
-                            spec.getLanguageVersion().set(JavaLanguageVersion.of(isInternalModule ? internalJavaVersion : jdkVersion));
-                            spec.getVendor().set(jvmVendor);
-                        }));
-                        var mainSourceSet = java.getSourceSets().getByName("main");
-
-                        tasks.named(mainSourceSet.getCompileJavaTaskName(), JavaCompile.class).configure(javaCompile -> {
-                            var compileOpts = javaCompile.getOptions();
-                            if (!isInternalModule) {
-                                compileOpts.getRelease().set(javaVersion);
-                            }
-                            compileOpts.getCompilerArgs().addAll(List.of(
-                                "-Xlint:-processing",
-                                "-Xlint:all",
-                                "-Werror"
-                            ));
-                            javaCompile.finalizedBy("spotbugsMain");
-                            javaCompile.shouldRunAfter("spotlessApply");
-                            javaCompile.dependsOn("spotlessApply");
-                        });
-                        tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
-                            var javaToolchains = (JavaToolchainService) extensions.getByName("javaToolchains");
-                            javadoc.getJavadocTool().set(javaToolchains.javadocToolFor(toolchainSpec -> {
-                                toolchainSpec.getLanguageVersion().set(JavaLanguageVersion.of(javaVersion));
-                                toolchainSpec.getVendor().set(jvmVendor);
+                        extensions.<JavaPluginExtension>configure("java", java -> {
+                            java.withSourcesJar();
+                            var isInternalModule = internalConventionExtension.getInternalModule().get();
+                            java.toolchain((spec -> {
+                                spec.getLanguageVersion().set(JavaLanguageVersion.of(isInternalModule ? internalJavaVersion : jdkVersion));
+                                spec.getVendor().set(jvmVendor);
                             }));
+                            var mainSourceSet = java.getSourceSets().getByName("main");
+
+                            tasks.named(mainSourceSet.getCompileJavaTaskName(), JavaCompile.class).configure(javaCompile -> {
+                                var compileOpts = javaCompile.getOptions();
+                                if (!isInternalModule) {
+                                    compileOpts.getRelease().set(javaVersion);
+                                }
+                                compileOpts.getCompilerArgs().addAll(List.of(
+                                    "-Xlint:-processing",
+                                    "-Xlint:all",
+                                    "-Werror"
+                                ));
+                                javaCompile.finalizedBy("spotbugsMain");
+                                javaCompile.shouldRunAfter("spotlessApply");
+                                javaCompile.dependsOn("spotlessApply");
+                            });
+                            tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
+                                extensions.<JavaToolchainService>configure("javaToolchains", javaToolchains -> {
+                                    javadoc.getJavadocTool().set(javaToolchains.javadocToolFor(toolchainSpec -> {
+                                        toolchainSpec.getLanguageVersion().set(JavaLanguageVersion.of(javaVersion));
+                                        toolchainSpec.getVendor().set(jvmVendor);
+                                    }));
+                                });
+                            });
                         });
 
                         // -------------------- Add common dependencies start --------------------

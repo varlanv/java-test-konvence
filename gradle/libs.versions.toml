@@ -12,6 +12,8 @@ cuteToolisticon = "1.7.0"
 benmanesVersion = "0.52.0"
 spotbugsVersion = "6.1.11"
 spotlessVersion = "7.0.3"
+checkerFrameworkVersion = "0.6.53"
+immutablesVersion = "2.7.3"
 
 [libraries]
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
@@ -26,6 +28,8 @@ toolisticon-cute = { group = "io.toolisticon.cute", name = "cute", version.ref =
 benmanes-version-plugin = { group = "com.github.ben-manes.versions", name = "com.github.ben-manes.versions.gradle.plugin", version.ref = "benmanesVersion" }
 spotbugs-plugin = { group = "com.github.spotbugs.snom", name = "spotbugs-gradle-plugin", version.ref = "spotbugsVersion" }
 spotless-plugin = { group = "com.diffplug.gradle.spotless", name = "com.diffplug.gradle.spotless.gradle.plugin", version.ref = "spotlessVersion" }
+checkerFramework-plugin = { group = "org.checkerframework", name = "org.checkerframework.gradle.plugin", version.ref = "checkerFrameworkVersion" }
+immutables-values = { group = "org.immutables", name = "value", version.ref = "immutablesVersion" }
 
 [plugins]
 internalConvention = { id = "com.varlanv.testkonvence.gradle.internal-gradle-convention-plugin" }
