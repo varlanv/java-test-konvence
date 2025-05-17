@@ -10,7 +10,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-class XmlMemoryEnforceMeta {
+final class XmlMemoryEnforceMeta {
 
     private final ImmutableList<APEnforcementMeta.Item> entries;
 

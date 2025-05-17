@@ -1,6 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-class StringMatch {
+final class StringMatch {
 
     private final String line;
     private final String match;

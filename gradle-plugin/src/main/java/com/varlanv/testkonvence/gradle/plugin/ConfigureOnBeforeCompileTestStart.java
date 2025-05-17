@@ -10,7 +10,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
 
-class ConfigureOnBeforeCompileTestStart implements Action<Task> {
+final class ConfigureOnBeforeCompileTestStart implements Action<Task> {
 
     private static final Logger log = Logging.getLogger(ConfigureOnBeforeCompileTestStart.class);
     private final Provider<Path> annotationProcessorTargetPathProvider;

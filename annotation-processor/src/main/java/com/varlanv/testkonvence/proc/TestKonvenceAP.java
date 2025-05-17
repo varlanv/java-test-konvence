@@ -11,7 +11,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.tools.StandardLocation;
 
-public class TestKonvenceAP extends AbstractProcessor {
+public final class TestKonvenceAP extends AbstractProcessor {
 
     public static final String enforcementsXmlPackage = "com.varlanv.testkonvence";
     public static final String enforcementsXmlName = "testkonvence_enforcements.xml";

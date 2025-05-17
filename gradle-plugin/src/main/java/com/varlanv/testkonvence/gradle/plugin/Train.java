@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class Train {
+final class Train {
 
     private final Path resultXml;
     private final Path sourcesRoot;

@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
-public class InternalConventionPlugin implements Plugin<Project> {
+public final class InternalConventionPlugin implements Plugin<Project> {
 
     private static final String PLUGIN_GIT_URL = "https://github.com/varlanv/java-test-konvence";
 

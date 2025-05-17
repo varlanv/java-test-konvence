@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class DisplayNameFromMethodName {
+final class DisplayNameFromMethodName {
 
     private final String methodName;
 

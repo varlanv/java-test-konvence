@@ -3,7 +3,7 @@ package com.varlanv.gradle.plugin;
 /**
  * Simple utility for running different configuration base on local/CI/functional-test environments
  */
-public class InternalEnvironment {
+final class InternalEnvironment {
 
     private final boolean isCi;
     private final boolean isTest;

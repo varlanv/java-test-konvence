@@ -4,7 +4,7 @@ import org.gradle.api.artifacts.VersionCatalog;
 import org.gradle.api.artifacts.VersionConstraint;
 import org.gradle.api.provider.Provider;
 
-public class InternalProperties {
+class InternalProperties {
 
     private final VersionCatalog versionCatalog;
 

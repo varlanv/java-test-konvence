@@ -9,7 +9,7 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.testing.base.TestingExtension;
 
 @SuppressWarnings("UnstableApiUsage")
-public class TestKonvencePlugin implements Plugin<Project> {
+public final class TestKonvencePlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
