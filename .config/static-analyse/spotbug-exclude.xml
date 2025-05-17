@@ -5,7 +5,10 @@
     </Match>
     <Match>
         <Bug code="FS"/>
-        <Class name="com.varlanv.testkonvence.commontest.TestSamples"/>
+        <Or>
+            <Class name="com.varlanv.testkonvence.commontest.TestSamples"/>
+            <Class name="com.varlanv.testkonvence.gradle.plugin.TestKonvencePluginFunctionalTest"/>
+        </Or>
     </Match>
     <Match>
         <Bug code="NP"/>
