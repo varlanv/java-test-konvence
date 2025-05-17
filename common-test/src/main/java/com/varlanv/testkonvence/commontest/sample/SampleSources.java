@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SampleSources {
 
-    String outerClassName;
-    String fileName;
-    String packageName;
-    String sources;
-    String expectedTransformation;
+    private final String outerClassName;
+    private final String fileName;
+    private final String packageName;
+    private final String sources;
+    private final String expectedTransformation;
 }

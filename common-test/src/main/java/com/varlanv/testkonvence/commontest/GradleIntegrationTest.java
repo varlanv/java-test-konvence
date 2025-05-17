@@ -94,10 +94,10 @@ public interface GradleIntegrationTest extends IntegrationTest {
     @RequiredArgsConstructor
     class SingleProjectFixture {
 
-        Path projectDir;
-        Project project;
-        ObjectFactory objects;
-        ProviderFactory providers;
+        private final Path projectDir;
+        private final Project project;
+        private final ObjectFactory objects;
+        private final ProviderFactory providers;
 
         private SingleProjectFixture(Path projectDir, Project project) {
             this(projectDir, project, project.getObjects(), project.getProviders());
@@ -108,12 +108,12 @@ public interface GradleIntegrationTest extends IntegrationTest {
     @RequiredArgsConstructor
     class ProjectWithParentFixture {
 
-        Project project;
-        Project parentProject;
-        Path projectDir;
-        Path parentProjectDir;
-        ObjectFactory objects;
-        ProviderFactory providers;
+        private final Project project;
+        private final Project parentProject;
+        private final Path projectDir;
+        private final Path parentProjectDir;
+        private final ObjectFactory objects;
+        private final ProviderFactory providers;
     }
 
     default <T extends Task> TaskProviderAssertions<T> gradleAssert(TaskProvider<T> taskProvider) {
@@ -131,7 +131,7 @@ public interface GradleIntegrationTest extends IntegrationTest {
     @RequiredArgsConstructor
     class TaskProviderAssertions<SELF extends Task> {
 
-        TaskProvider<SELF> subject;
+        private final TaskProvider<SELF> subject;
         private @NonFinal @Nullable TaskAssertions<SELF> taskAssertions;
 
         public TaskProviderAssertions<SELF> dependsOn(TaskProvider<? extends Task> taskProvider) {
@@ -161,7 +161,7 @@ public interface GradleIntegrationTest extends IntegrationTest {
     @RequiredArgsConstructor
     class TaskAssertions<SELF extends Task> {
 
-        SELF subject;
+        private final SELF subject;
 
         public TaskAssertions<SELF> dependsOn(TaskProvider<? extends Task> taskProvider) {
             var dependsOn = subject.getDependsOn();
@@ -191,7 +191,7 @@ public interface GradleIntegrationTest extends IntegrationTest {
     @RequiredArgsConstructor
     class ProjectAssertions {
 
-        Project project;
+        private final Project project;
 
         public ProjectAssertions doesNotHaveTask(String taskName) {
             assertThatThrownBy(() -> project.getTasks().named(taskName))

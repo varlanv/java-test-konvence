@@ -16,10 +16,10 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class Sample {
 
-    String description;
-    List<SampleSources> sources;
-    List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions;
-    SampleOptions options;
+    private final String description;
+    private final List<SampleSources> sources;
+    private final List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions;
+    private final SampleOptions options;
 
     @SneakyThrows
     public void consume(BaseTest.ThrowingConsumer<ConsumableSample> consumer) {

@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ConsumableSample {
 
-    String description;
-    Path dir;
-    List<SampleSourceFile> sources;
-    SampleOptions options;
+    private final String description;
+    private final Path dir;
+    private final List<SampleSourceFile> sources;
+    private final SampleOptions options;
 
     public SampleSourceFile sourceFile() {
         if (sources.size() > 1) {

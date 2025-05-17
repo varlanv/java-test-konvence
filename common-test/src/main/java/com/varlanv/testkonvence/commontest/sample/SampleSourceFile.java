@@ -10,10 +10,10 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor
 public class SampleSourceFile {
 
-    Path path;
-    String outerClassName;
-    String packageName;
-    String expectedTransformation;
+    private final Path path;
+    private final String outerClassName;
+    private final String packageName;
+    private final String expectedTransformation;
 
     @SneakyThrows
     public String content() {

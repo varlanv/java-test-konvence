@@ -14,9 +14,9 @@ import org.intellij.lang.annotations.Language;
 @RequiredArgsConstructor
 public class SampleSpec {
 
-    List<SampleSources> sources;
-    List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions;
-    SampleOptions options;
+    private final List<SampleSources> sources;
+    private final List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions;
+    private final SampleOptions options;
 
     public SampleSpec() {
         this(List.of(), List.of(), SampleOptions.builder().build());
@@ -36,9 +36,9 @@ public class SampleSpec {
     @RequiredArgsConstructor
     public static class SampleSpecFileStep {
 
-        SampleSpec spec;
-        String outerClassName;
-        String packageName;
+        private final SampleSpec spec;
+        private final String outerClassName;
+        private final String packageName;
 
         public SampleSpecSourceStep withJavaSources(@Language("Java") String sources) {
             return new SampleSpecSourceStep(spec, this, sources);
@@ -48,9 +48,9 @@ public class SampleSpec {
     @RequiredArgsConstructor
     public static class SampleSpecSourceStep {
 
-        SampleSpec spec;
-        SampleSpecFileStep parent;
-        String sources;
+        private final SampleSpec spec;
+        private final SampleSpecFileStep parent;
+        private final String sources;
 
         public SampleSpecFinish withExpectedTransformation(@Language("Java") String expectedTransformation) {
             return new SampleSpecFinish(spec, this, expectedTransformation);
@@ -60,9 +60,9 @@ public class SampleSpec {
     @RequiredArgsConstructor
     public static class SampleSpecFinish {
 
-        SampleSpec spec;
-        SampleSpecSourceStep parent;
-        String expectedTransformation;
+        private final SampleSpec spec;
+        private final SampleSpecSourceStep parent;
+        private final String expectedTransformation;
         List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions = new ArrayList<>(1);
         SampleOptions.SampleOptionsBuilder optionsBuilder = SampleOptions.builder();
 
