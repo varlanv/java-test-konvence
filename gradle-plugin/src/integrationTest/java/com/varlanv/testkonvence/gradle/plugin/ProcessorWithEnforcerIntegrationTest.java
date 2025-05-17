@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.tools.StandardLocation;
-import lombok.SneakyThrows;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -29,7 +28,6 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                 .map(sample -> DynamicTest.dynamicTest(sample.description(), () -> sample.consume(this::spec)));
     }
 
-    @SneakyThrows
     void spec(ConsumableSample sample) {
         var sources = sample.sources().value().stream()
                 .collect(Collectors.toMap(SampleSourceFile::outerClassName, SampleSourceFile::content));
@@ -39,10 +37,10 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
             new Train(
                             resultXmlPath,
                             sample.dir(),
-                            new TrainOptions(
-                                    false,
-                                    sample.options().reverseTransformation(),
-                                    sample.options().camelMethodName()))
+                            ImmutableTrainOptions.builder()
+                                    .reverseTransformation(sample.options().reverseTransformation())
+                                    .camelCaseMethodName(sample.options().camelMethodName())
+                                    .build())
                     .run();
 
             for (var source : sample.sources()) {

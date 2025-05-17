@@ -3,8 +3,7 @@ package com.varlanv.testkonvence.gradle.plugin;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 final class SnakeMethodNameFromDisplayName implements EnforceCandidate {
 
@@ -24,10 +23,7 @@ final class SnakeMethodNameFromDisplayName implements EnforceCandidate {
             // 7. Remove leading and trailing underscores once more in case numbers were at the start
             in -> in.replaceAll("^_|_$", ""));
 
-    @Getter
     private final String displayName;
-
-    @Getter
     private final String originalName;
 
     @Nullable String newName;
@@ -35,6 +31,16 @@ final class SnakeMethodNameFromDisplayName implements EnforceCandidate {
     SnakeMethodNameFromDisplayName(String displayName, String originalName) {
         this.displayName = displayName;
         this.originalName = originalName;
+    }
+
+    @Override
+    public String displayName() {
+        return displayName;
+    }
+
+    @Override
+    public String originalName() {
+        return originalName;
     }
 
     @Override

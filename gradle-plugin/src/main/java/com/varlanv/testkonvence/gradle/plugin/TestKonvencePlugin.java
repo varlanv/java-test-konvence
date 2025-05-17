@@ -1,7 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.Constants;
-import lombok.val;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.jvm.JvmTestSuite;
@@ -14,43 +13,43 @@ public class TestKonvencePlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        val testKonvenceTaskGroup = "test konvence";
-        val testKonvenceEnforceAllTaskName = "testKonvenceEnforceAll";
-        val testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
-        val extensions = project.getExtensions();
-        val dependencies = project.getDependencies();
-        val testKonvenceExtension = (TestKonvenceExtension) extensions.create(
+        var testKonvenceTaskGroup = "test konvence";
+        var testKonvenceEnforceAllTaskName = "testKonvenceEnforceAll";
+        var testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
+        var extensions = project.getExtensions();
+        var dependencies = project.getDependencies();
+        var testKonvenceExtension = (TestKonvenceExtension) extensions.create(
                 TestKonvenceExtensionView.class, TestKonvenceExtensionView.name(), TestKonvenceExtension.class);
-        val tasks = project.getTasks();
-        val providers = project.getProviders();
+        var tasks = project.getTasks();
+        var providers = project.getProviders();
 
         project.afterEvaluate(p -> {
             project.getPlugins().withId("java", javaPlugin -> {
                 if (testKonvenceExtension.getEnabled().get()) {
-                    val testKonvenceEnforceAllTask =
+                    var testKonvenceEnforceAllTask =
                             tasks.register(testKonvenceEnforceAllTaskName, testKonvenceEnforceAll -> {
                                 testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
                                 testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
                                 testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
                             });
-                    val testKonvenceDryEnforceWithFailingTask =
+                    var testKonvenceDryEnforceWithFailingTask =
                             tasks.register(testKonvenceDryEnforceWithFailingTaskName, testKonvenceEnforceAll -> {
                                 testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
                                 testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
                                 testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
                             });
 
-                    val log = project.getLogger();
-                    val objects = project.getObjects();
-                    val layout = project.getLayout();
-                    val buildDirectory = layout.getBuildDirectory();
-                    val testing = (TestingExtension) extensions.getByName("testing");
-                    val annotationProcessorTargetPathProvider = buildDirectory.map(dir -> dir.getAsFile()
+                    var log = project.getLogger();
+                    var objects = project.getObjects();
+                    var layout = project.getLayout();
+                    var buildDirectory = layout.getBuildDirectory();
+                    var testing = (TestingExtension) extensions.getByName("testing");
+                    var annotationProcessorTargetPathProvider = buildDirectory.map(dir -> dir.getAsFile()
                             .toPath()
                             .resolve("tmp")
                             .resolve("testkonvenceplugin")
                             .resolve(Constants.PROCESSOR_JAR));
-                    val setupAnnotationProcessorTaskProvider =
+                    var setupAnnotationProcessorTaskProvider =
                             tasks.register("setupTestKonvenceAnnotationProcessor", task -> {
                                 task.doLast(
                                         new ConfigureOnBeforeCompileTestStart(annotationProcessorTargetPathProvider));
@@ -59,32 +58,32 @@ public class TestKonvencePlugin implements Plugin<Project> {
 
                     testing.getSuites().configureEach(testSuite -> {
                         if (testSuite instanceof JvmTestSuite) {
-                            val jvmTestSuite = (JvmTestSuite) testSuite;
-                            val testSourceSet = jvmTestSuite.getSources();
+                            var jvmTestSuite = (JvmTestSuite) testSuite;
+                            var testSourceSet = jvmTestSuite.getSources();
                             // configure compile task to use annotation processor
                             tasks.named(testSourceSet.getCompileJavaTaskName(), JavaCompile.class)
                                     .configure(compileTestJava -> {
                                         compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
                                         compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
                                     });
-                            val name = testSuite.getName();
-                            val processorJar =
+                            var name = testSuite.getName();
+                            var processorJar =
                                     buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
                             dependencies.add(name + "AnnotationProcessor", processorJar);
 
                             jvmTestSuite.getTargets().configureEach(testTarget -> {
-                                val testTask = testTarget.getTestTask();
+                                var testTask = testTarget.getTestTask();
                                 log.debug("Configuring test task [{}]", testTask.getName());
-                                val enforceFilesCollection = objects.fileCollection();
+                                var enforceFilesCollection = objects.fileCollection();
                                 enforceFilesCollection.setFrom(
                                         buildDirectory.map(
                                                 buildDir -> buildDir.getAsFileTree()
                                                         .matching(
                                                                 pattern -> pattern.include(
                                                                         "generated/sources/annotationProcessor/**/testkonvence_enforcements.xml"))));
-                                val compileClasspath = objects.fileCollection();
+                                var compileClasspath = objects.fileCollection();
                                 compileClasspath.setFrom(testSourceSet.getCompileClasspath());
-                                val testNameEnforceAction = new TestNameEnforceAction(
+                                var testNameEnforceAction = new TestNameEnforceAction(
                                         objects.fileCollection().from(project.provider(() -> testSourceSet
                                                 .getJava()
                                                 .getSrcDirs()
@@ -98,7 +97,7 @@ public class TestKonvencePlugin implements Plugin<Project> {
                                                 .getReverseTransformation()
                                                 .get()
                                                 .getEnabled());
-                                val enforceTaskProvider = tasks.register(
+                                var enforceTaskProvider = tasks.register(
                                         TestNameEnforceTask.name(testTask.getName()),
                                         TestNameEnforceTask.class,
                                         enforceTask -> {

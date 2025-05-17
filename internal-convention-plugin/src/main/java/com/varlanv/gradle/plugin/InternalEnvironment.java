@@ -1,15 +1,17 @@
 package com.varlanv.gradle.plugin;
 
-import lombok.RequiredArgsConstructor;
-
 /**
  * Simple utility for running different configuration base on local/CI/functional-test environments
  */
-@RequiredArgsConstructor
 public class InternalEnvironment {
 
-    boolean isCi;
-    boolean isTest;
+    private final boolean isCi;
+    private final boolean isTest;
+
+    public InternalEnvironment(boolean isCi, boolean isTest) {
+        this.isCi = isCi;
+        this.isTest = isTest;
+    }
 
     public static String name() {
         return "__internal_environment__";

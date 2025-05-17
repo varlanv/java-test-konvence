@@ -2,14 +2,10 @@ package com.varlanv.testkonvence.gradle.plugin;
 
 import java.util.Arrays;
 import java.util.function.IntConsumer;
-import lombok.experimental.NonFinal;
 
 final class IntVector implements ImmutableIntVector {
 
-    @NonFinal
     int[] array;
-
-    @NonFinal
     int index = 0;
 
     IntVector(int initialCapacity) {

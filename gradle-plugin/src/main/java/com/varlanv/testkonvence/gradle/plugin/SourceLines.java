@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import lombok.SneakyThrows;
-import lombok.val;
 
 interface SourceLines {
 
@@ -23,19 +21,18 @@ interface SourceLines {
 
     String joined();
 
-    @SneakyThrows
-    static SourceLines ofPath(Path path) {
-        val originalText = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-        val lineSeparator = LineSeparator.forFile(path, originalText).separator();
-        val lines = originalText.split(lineSeparator, -1);
-        val view = Collections.unmodifiableList(Arrays.asList(lines));
-        val hasChanges = new boolean[] {false};
+    static SourceLines ofPath(Path path) throws Exception {
+        var originalText = Files.readString(path, StandardCharsets.UTF_8);
+        var lineSeparator = LineSeparator.forFile(path, originalText).separator();
+        var lines = originalText.split(lineSeparator, -1);
+        var view = Collections.unmodifiableList(Arrays.asList(lines));
+        var hasChanges = new boolean[] {false};
 
         return new SourceLines() {
 
             @Override
             public SourceLines replaceAt(int idx, Function<String, String> newLine) {
-                val changedLine = newLine.apply(lines[idx]);
+                var changedLine = newLine.apply(lines[idx]);
                 if (!Objects.equals(lines[idx], changedLine)) {
                     lines[idx] = changedLine;
                     hasChanges[0] = true;

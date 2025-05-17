@@ -8,7 +8,7 @@ interface Pair<T1, T2> {
 
     static <T1, T2> Pair<T1, T2> of(T1 left, T2 right) {
 
-        return new Pair<T1, T2>() {
+        return new Pair<>() {
 
             @Override
             public T1 left() {

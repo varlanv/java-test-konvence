@@ -4,8 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import lombok.SneakyThrows;
-import lombok.val;
 
 interface SourceFile {
 
@@ -13,10 +11,10 @@ interface SourceFile {
 
     SourceLines lines();
 
-    void save(SourceLines sourceLines);
+    void save(SourceLines sourceLines) throws Exception;
 
-    static SourceFile ofPath(Path path) {
-        val sourceLines = SourceLines.ofPath(path);
+    static SourceFile ofPath(Path path) throws Exception {
+        var sourceLines = SourceLines.ofPath(path);
         return new SourceFile() {
 
             @Override
@@ -30,8 +28,7 @@ interface SourceFile {
             }
 
             @Override
-            @SneakyThrows
-            public void save(SourceLines sourceLines) {
+            public void save(SourceLines sourceLines) throws Exception {
                 Files.write(
                         path,
                         sourceLines.joined().getBytes(StandardCharsets.UTF_8),

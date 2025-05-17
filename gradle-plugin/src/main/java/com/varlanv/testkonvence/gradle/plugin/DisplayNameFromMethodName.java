@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.val;
 
 class DisplayNameFromMethodName {
 
@@ -15,18 +14,18 @@ class DisplayNameFromMethodName {
     }
 
     public String displayName() {
-        val methodName = preTransform(this.methodName);
+        var methodName = preTransform(this.methodName);
         if (methodName.length() == 1) {
             return methodName;
         }
-        val snakeSplit = methodName.split("_");
-        val isFullCamelCase = snakeSplit.length == 1;
+        var snakeSplit = methodName.split("_");
+        var isFullCamelCase = snakeSplit.length == 1;
         if (isFullCamelCase) {
             return String.join(" ", splitCamelToWords(methodName));
         } else {
             return Arrays.stream(snakeSplit)
                     .map(word -> {
-                        val words = splitCamelToWords(word);
+                        var words = splitCamelToWords(word);
                         if (words.size() > 1) {
                             return "'" + word + "'";
                         }
@@ -37,8 +36,8 @@ class DisplayNameFromMethodName {
     }
 
     private List<String> splitCamelToWords(String input) {
-        val words = new ArrayList<String>();
-        val currentWord = new StringBuilder();
+        var words = new ArrayList<String>();
+        var currentWord = new StringBuilder();
 
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -59,7 +58,7 @@ class DisplayNameFromMethodName {
             return methodName;
         }
 
-        val result = new StringBuilder();
+        var result = new StringBuilder();
         boolean previousUnderscore = false;
 
         for (int i = 0; i < methodName.length(); i++) {

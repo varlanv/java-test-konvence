@@ -1,17 +1,36 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.util.Objects;
 
-@Getter
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class IntObjectPair<T> {
 
     private final int left;
     private final T right;
+
+    private IntObjectPair(int left, T right) {
+        this.left = left;
+        this.right = right;
+    }
+
+    public int left() {
+        return left;
+    }
+
+    public T right() {
+        return right;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof IntObjectPair)) return false;
+        IntObjectPair<?> that = (IntObjectPair<?>) o;
+        return left == that.left && Objects.equals(right, that.right);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(left, right);
+    }
 
     static <T> IntObjectPair<T> of(int left, T right) {
         return new IntObjectPair<T>(left, right);

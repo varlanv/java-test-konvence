@@ -1,7 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.val;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 final class CamelMethodNameFromDisplayName implements EnforceCandidate {
 
@@ -26,10 +25,10 @@ final class CamelMethodNameFromDisplayName implements EnforceCandidate {
     @Override
     public String newName() {
         if (newName == null) {
-            val split = snake.newName().split("_");
-            val result = new StringBuilder();
+            var split = snake.newName().split("_");
+            var result = new StringBuilder();
             for (int i = 0; i < split.length; i++) {
-                val part = split[i];
+                var part = split[i];
                 if (!part.isEmpty()) {
                     if (i == 0) {
                         result.append(split[i]);

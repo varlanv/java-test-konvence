@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.val;
 
 class Train {
 
@@ -20,22 +19,26 @@ class Train {
         this.trainOptions = trainOptions;
     }
 
-    public void run() {
-        val items = new XmlEnforceMeta().items(resultXml);
-        val sourcesRootPath = sourcesRoot.toAbsolutePath().toString();
+    public void run() throws Exception {
+        var items = new XmlEnforceMeta().items(resultXml);
+        var sourcesRootPath = sourcesRoot.toAbsolutePath().toString();
         new SourceReplacementTrain(
                         trainOptions,
                         new EnforcementMeta(items.stream()
                                 .map(item -> {
-                                    val sourceFile = Paths.get(sourcesRootPath + File.separator
+                                    var sourceFile = Paths.get(sourcesRootPath + File.separator
                                             + item.fullEnclosingClassName().replace(".", File.separator) + ".java");
                                     if (Files.isRegularFile(sourceFile)) {
-                                        val classNameParts = item.className().split("\\.");
-                                        val className = classNameParts[classNameParts.length - 1];
-                                        return Optional.of(new EnforcementMeta.Item(
-                                                SourceFile.ofPath(sourceFile.toAbsolutePath()),
-                                                className,
-                                                resolveEnforceCandidate(item, className)));
+                                        var classNameParts = item.className().split("\\.");
+                                        var className = classNameParts[classNameParts.length - 1];
+                                        try {
+                                            return Optional.of(new EnforcementMeta.Item(
+                                                    SourceFile.ofPath(sourceFile.toAbsolutePath()),
+                                                    className,
+                                                    resolveEnforceCandidate(item, className)));
+                                        } catch (Exception e) {
+                                            throw new RuntimeException(e);
+                                        }
                                     }
                                     return Optional.<EnforcementMeta.Item>empty();
                                 })
@@ -49,7 +52,7 @@ class Train {
         if (item.methodName().isEmpty()) {
             return new ClassNameFromDisplayName(item.displayName(), className);
         } else {
-            val snake = new SnakeMethodNameFromDisplayName(item.displayName(), item.methodName());
+            var snake = new SnakeMethodNameFromDisplayName(item.displayName(), item.methodName());
             if (trainOptions.camelCaseMethodName()) {
                 return new CamelMethodNameFromDisplayName(snake);
             } else {

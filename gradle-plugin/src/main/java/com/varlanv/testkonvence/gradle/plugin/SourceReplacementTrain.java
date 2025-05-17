@@ -43,7 +43,11 @@ class SourceReplacementTrain {
                             "[%s] - found test name mismatch in file [%s]",
                             Constants.PLUGIN_NAME, target.path().toAbsolutePath()));
                 } else {
-                    target.save(resultLines);
+                    try {
+                        target.save(resultLines);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });

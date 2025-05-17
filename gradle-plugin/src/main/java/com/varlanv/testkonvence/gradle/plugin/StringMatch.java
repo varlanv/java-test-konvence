@@ -1,7 +1,5 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.val;
-
 class StringMatch {
 
     private final String line;
@@ -16,11 +14,11 @@ class StringMatch {
         if (match.isEmpty() || line.isEmpty()) {
             return IntVector.INSTANCE;
         }
-        int idx = line.indexOf(match);
+        var idx = line.indexOf(match);
         if (idx == -1) {
             return IntVector.INSTANCE;
         }
-        val vector = new IntVector(1).add(idx);
+        var vector = new IntVector(1).add(idx);
         while (idx != -1) {
             idx = line.indexOf(match, idx + 1);
             if (idx != -1) {

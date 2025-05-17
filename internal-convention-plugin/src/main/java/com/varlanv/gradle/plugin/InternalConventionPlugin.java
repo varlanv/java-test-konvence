@@ -193,12 +193,6 @@ public class InternalConventionPlugin implements Plugin<Project> {
                         dependencies.add(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME, internalProperties.getLib("junit-jupiter-api"));
                         dependencies.add(JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME, internalProperties.getLib("junit-platform-launcher"));
 
-                        var lombokDependency = internalProperties.getLib("lombok");
-                        dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, lombokDependency);
-                        dependencies.add(JavaPlugin.ANNOTATION_PROCESSOR_CONFIGURATION_NAME, lombokDependency);
-                        dependencies.add(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, lombokDependency);
-                        dependencies.add(JavaPlugin.TEST_ANNOTATION_PROCESSOR_CONFIGURATION_NAME, lombokDependency);
-
                         var immutablesDependency = internalProperties.getLib("immutables-values");
                         dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, immutablesDependency);
                         dependencies.add(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, immutablesDependency);

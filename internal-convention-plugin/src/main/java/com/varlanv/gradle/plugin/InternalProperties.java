@@ -1,14 +1,16 @@
 package com.varlanv.gradle.plugin;
 
-import lombok.RequiredArgsConstructor;
 import org.gradle.api.artifacts.VersionCatalog;
 import org.gradle.api.artifacts.VersionConstraint;
 import org.gradle.api.provider.Provider;
 
-@RequiredArgsConstructor
 public class InternalProperties {
 
-    VersionCatalog versionCatalog;
+    private final VersionCatalog versionCatalog;
+
+    public InternalProperties(VersionCatalog versionCatalog) {
+        this.versionCatalog = versionCatalog;
+    }
 
     public static String name() {
         return "__internal_convention_properties__";

@@ -40,9 +40,7 @@ dependencies {
     implementation(libs.spotless.plugin)
     implementation(libs.benmanes.version.plugin)
     compileOnly(libs.jetbrains.annotations)
-    compileOnly(libs.lombok)
     compileOnly(libs.junit.platform.launcher)
-    annotationProcessor(libs.lombok)
 }
 
 gradlePlugin {

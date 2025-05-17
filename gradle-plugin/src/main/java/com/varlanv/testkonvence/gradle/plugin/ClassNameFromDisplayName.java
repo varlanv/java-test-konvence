@@ -1,13 +1,24 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.Value;
-import lombok.val;
+final class ClassNameFromDisplayName implements EnforceCandidate {
 
-@Value
-class ClassNameFromDisplayName implements EnforceCandidate {
+    private final String displayName;
+    private final String originalName;
 
-    String displayName;
-    String originalName;
+    ClassNameFromDisplayName(String displayName, String originalName) {
+        this.displayName = displayName;
+        this.originalName = originalName;
+    }
+
+    @Override
+    public String displayName() {
+        return displayName;
+    }
+
+    @Override
+    public String originalName() {
+        return originalName;
+    }
 
     @Override
     public String newName() {
@@ -15,11 +26,11 @@ class ClassNameFromDisplayName implements EnforceCandidate {
             return "";
         }
 
-        val className = new StringBuilder();
+        var className = new StringBuilder();
         boolean capitalizeNext = true;
         boolean hasLetter = false;
 
-        for (val ch : displayName.toCharArray()) {
+        for (var ch : displayName.toCharArray()) {
             if (Character.isLetter(ch) && ch < 128) {
                 hasLetter = true;
                 if (capitalizeNext) {

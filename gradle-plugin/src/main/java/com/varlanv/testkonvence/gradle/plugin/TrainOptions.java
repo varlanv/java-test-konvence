@@ -1,20 +1,22 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import org.immutables.value.Value;
 
-@Getter
-@Builder
-@AllArgsConstructor
-final class TrainOptions {
+@Value.Immutable
+interface TrainOptions {
 
-    @Builder.Default
-    Boolean dryWithFailing = false;
+    @Value.Default
+    default boolean dryWithFailing() {
+        return false;
+    }
 
-    @Builder.Default
-    Boolean reverseTransformation = false;
+    @Value.Default
+    default boolean reverseTransformation() {
+        return false;
+    }
 
-    @Builder.Default
-    Boolean camelCaseMethodName = false;
+    @Value.Default
+    default boolean camelCaseMethodName() {
+        return false;
+    }
 }
