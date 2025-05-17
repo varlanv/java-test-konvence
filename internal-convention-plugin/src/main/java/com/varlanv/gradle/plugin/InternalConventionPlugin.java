@@ -84,7 +84,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
         internalConventionExtension.getIntegrationTestName().convention("integrationTest");
         internalConventionExtension.getInternalModule().convention(false);
         var isGradlePlugin = projectName.endsWith("plugin");
-        var javaVersion = 8;
+        var javaVersion = 11;
         var jdkVersion = 17;
         var internalJavaVersion = 17;
         var jvmVendor = JvmVendorSpec.AZUL;
@@ -198,6 +198,12 @@ public class InternalConventionPlugin implements Plugin<Project> {
                         dependencies.add(JavaPlugin.ANNOTATION_PROCESSOR_CONFIGURATION_NAME, lombokDependency);
                         dependencies.add(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, lombokDependency);
                         dependencies.add(JavaPlugin.TEST_ANNOTATION_PROCESSOR_CONFIGURATION_NAME, lombokDependency);
+
+                        var immutablesDependency = internalProperties.getLib("immutables-values");
+                        dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, immutablesDependency);
+                        dependencies.add(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, immutablesDependency);
+                        dependencies.add(JavaPlugin.ANNOTATION_PROCESSOR_CONFIGURATION_NAME, immutablesDependency);
+                        dependencies.add(JavaPlugin.TEST_ANNOTATION_PROCESSOR_CONFIGURATION_NAME, immutablesDependency);
 
                         if (!internalEnvironment.isTest() && !projectPath.equals(":common-test")) {
                             dependencies.add(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME, dependencies.project(Collections.singletonMap("path", ":common-test")));
