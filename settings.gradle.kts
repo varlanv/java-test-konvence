@@ -33,6 +33,7 @@ includeBuild("internal-convention-plugin")
 
 include(
     "constants",
+    "shared-util",
     "annotation-processor",
     "gradle-plugin",
     "common-test",
