@@ -2,9 +2,10 @@ package com.varlanv.testkonvence.commontest;
 
 import java.util.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class ImmutableList<T> {
+public final class ImmutableList<T> implements Iterable<@NonNull T> {
 
     private final List<@NonNull T> value;
 
@@ -48,5 +49,10 @@ public final class ImmutableList<T> {
     @Override
     public int hashCode() {
         return Objects.hashCode(value);
+    }
+
+    @Override
+    public @NotNull Iterator<@NonNull T> iterator() {
+        return value.iterator();
     }
 }

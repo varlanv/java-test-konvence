@@ -1,20 +1,26 @@
 package com.varlanv.testkonvence.commontest.sample;
 
+import com.varlanv.testkonvence.commontest.ImmutableList;
 import java.nio.file.Path;
-import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.immutables.value.Value;
 
-@Getter
-@RequiredArgsConstructor
-public class ConsumableSample {
+@Value.Immutable(builder = false)
+public interface ConsumableSample {
 
-    private final String description;
-    private final Path dir;
-    private final List<SampleSourceFile> sources;
-    private final SampleOptions options;
+    @Value.Parameter
+    String description();
 
-    public SampleSourceFile sourceFile() {
+    @Value.Parameter
+    Path dir();
+
+    @Value.Parameter
+    ImmutableList<SampleSourceFile> sources();
+
+    @Value.Parameter
+    SampleOptions options();
+
+    default SampleSourceFile sourceFile() {
+        var sources = sources().value();
         if (sources.size() > 1) {
             throw new IllegalStateException("More than one source file available");
         } else if (sources.isEmpty()) {

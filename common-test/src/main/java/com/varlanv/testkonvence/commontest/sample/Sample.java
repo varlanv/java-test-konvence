@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.commontest.sample;
 
 import com.varlanv.testkonvence.commontest.BaseTest;
+import com.varlanv.testkonvence.commontest.ImmutableList;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -29,7 +30,7 @@ public class Sample {
             test.add(toFileSample(source, dir));
         }
         try {
-            var consumableSample = new ConsumableSample(description, dir, test, options);
+            var consumableSample = ImmutableConsumableSample.of(description, dir, ImmutableList.copyOf(test), options);
             consumer.accept(consumableSample);
             for (var extraAssertion : extraAssertions) {
                 extraAssertion.accept(consumableSample);

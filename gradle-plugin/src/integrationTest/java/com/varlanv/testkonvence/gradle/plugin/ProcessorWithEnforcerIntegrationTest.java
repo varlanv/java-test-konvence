@@ -31,7 +31,7 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
 
     @SneakyThrows
     void spec(ConsumableSample sample) {
-        var sources = sample.sources().stream()
+        var sources = sample.sources().value().stream()
                 .collect(Collectors.toMap(SampleSourceFile::outerClassName, SampleSourceFile::content));
         var resultXml = runAnnotationProcessor(sources);
         consumeTempFile(resultXmlPath -> {
