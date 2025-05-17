@@ -4,21 +4,22 @@ import java.util.function.Consumer;
 
 public interface UnsafeAction<E extends Exception> {
 
-    void onSuccess(Runnable onSuccessAction);
+    UnsafeAction<E> onSuccess(Runnable onSuccessAction);
 
-    void onFail(Consumer<E> exceptionConsumer);
+    UnsafeAction<E> onFail(Consumer<E> exceptionConsumer);
 
     static <E extends Exception> UnsafeAction<E> success() {
         return new UnsafeAction<>() {
 
             @Override
-            public void onSuccess(Runnable onSuccessAction) {
+            public UnsafeAction<E> onSuccess(Runnable onSuccessAction) {
                 onSuccessAction.run();
+                return this;
             }
 
             @Override
-            public void onFail(Consumer<E> exceptionConsumer) {
-                // no-op
+            public UnsafeAction<E> onFail(Consumer<E> exceptionConsumer) {
+                return this;
             }
         };
     }
@@ -27,13 +28,14 @@ public interface UnsafeAction<E extends Exception> {
         return new UnsafeAction<E>() {
 
             @Override
-            public void onSuccess(Runnable onSuccessAction) {
-                // no-op
+            public UnsafeAction<E> onSuccess(Runnable onSuccessAction) {
+                return this;
             }
 
             @Override
-            public void onFail(Consumer<E> exceptionConsumer) {
+            public UnsafeAction<E> onFail(Consumer<E> exceptionConsumer) {
                 exceptionConsumer.accept(exception);
+                return this;
             }
         };
     }

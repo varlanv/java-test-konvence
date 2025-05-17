@@ -10,13 +10,15 @@ public interface Unsafe<T, E extends Exception> {
 
     Optional<T> valueOptional();
 
-    void onSuccess(Consumer<T> successConsumer);
+    Unsafe<T, E> doOnSuccess(Consumer<T> successConsumer);
+
+    <R> Unsafe<R, E> mapOnSuccess(Function<T, @NonNull R> successMapper);
 
     T unwrap(Function<E, ? extends RuntimeException> exceptionConsumer);
 
     T orElse(Supplier<T> defaultSupplier);
 
-    void onFail(Consumer<E> exceptionConsumer);
+    Unsafe<T, E> onFail(Consumer<E> exceptionConsumer);
 
     static <T, E extends Exception> Unsafe<T, E> success(@NonNull T value) {
         Optional<@NonNull T> option = Optional.of(value);
@@ -27,8 +29,15 @@ public interface Unsafe<T, E extends Exception> {
             }
 
             @Override
-            public void onSuccess(Consumer<T> successConsumer) {
+            public Unsafe<T, E> doOnSuccess(Consumer<T> successConsumer) {
                 successConsumer.accept(value);
+                return this;
+            }
+
+            @Override
+            public <R> Unsafe<R, E> mapOnSuccess(Function<T, @NonNull R> successMapper) {
+                R result = successMapper.apply(value);
+                return Unsafe.<R, E>success(result);
             }
 
             @Override
@@ -42,8 +51,8 @@ public interface Unsafe<T, E extends Exception> {
             }
 
             @Override
-            public void onFail(Consumer<E> exceptionConsumer) {
-                // no-op
+            public Unsafe<T, E> onFail(Consumer<E> exceptionConsumer) {
+                return this;
             }
         };
     }
@@ -56,7 +65,14 @@ public interface Unsafe<T, E extends Exception> {
             }
 
             @Override
-            public void onSuccess(Consumer<T> successConsumer) {}
+            public Unsafe<T, E> doOnSuccess(Consumer<T> successConsumer) {
+                return this;
+            }
+
+            @Override
+            public <R> Unsafe<R, E> mapOnSuccess(Function<T, R> successMapper) {
+                return fail(exception);
+            }
 
             @Override
             public T unwrap(Function<E, ? extends RuntimeException> exceptionConsumer) {
@@ -69,8 +85,9 @@ public interface Unsafe<T, E extends Exception> {
             }
 
             @Override
-            public void onFail(Consumer<E> exceptionConsumer) {
+            public Unsafe<T, E> onFail(Consumer<E> exceptionConsumer) {
                 exceptionConsumer.accept(exception);
+                return this;
             }
         };
     }
