@@ -7,50 +7,57 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 
-@Getter
-@RequiredArgsConstructor
-public class Sample {
+@Value.Immutable(builder = false)
+public interface Sample {
 
-    private final String description;
-    private final List<SampleSources> sources;
-    private final List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions;
-    private final SampleOptions options;
+    @Value.Parameter
+    String description();
 
-    @SneakyThrows
-    public void consume(BaseTest.ThrowingConsumer<ConsumableSample> consumer) {
-        var dir = Files.createTempDirectory("test-konvence-sample");
-        var test = new ArrayList<SampleSourceFile>(this.sources.size());
-        for (var source : sources) {
-            test.add(toFileSample(source, dir));
-        }
-        try {
-            var consumableSample = ImmutableConsumableSample.of(description, dir, ImmutableList.copyOf(test), options);
-            consumer.accept(consumableSample);
-            for (var extraAssertion : extraAssertions) {
-                extraAssertion.accept(consumableSample);
+    @Value.Parameter
+    ImmutableList<SampleSources> sources();
+
+    @Value.Parameter
+    ImmutableList<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions();
+
+    @Value.Parameter
+    SampleOptions options();
+
+    default void consume(BaseTest.ThrowingConsumer<ConsumableSample> consumer) {
+        BaseTest.runQuiet(() -> {
+            var dir = Files.createTempDirectory("test-konvence-sample");
+            var sources = this.sources().value();
+            var test = new ArrayList<SampleSourceFile>(sources.size());
+            for (var source : sources) {
+                test.add(toFileSample(source, dir));
             }
-        } finally {
-            Files.walkFileTree(dir, new SimpleFileVisitor<>() {
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir);
-                    return FileVisitResult.CONTINUE;
+            try {
+                var consumableSample =
+                        ImmutableConsumableSample.of(description(), dir, ImmutableList.copyOf(test), options());
+                consumer.accept(consumableSample);
+                for (var extraAssertion : extraAssertions()) {
+                    extraAssertion.accept(consumableSample);
                 }
+            } finally {
+                Files.walkFileTree(dir, new SimpleFileVisitor<>() {
 
-                @Override
-                public FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        }
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            }
+        });
     }
 
     @SneakyThrows

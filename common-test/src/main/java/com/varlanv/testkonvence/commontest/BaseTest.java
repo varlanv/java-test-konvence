@@ -89,6 +89,16 @@ public interface BaseTest {
 
     interface ThrowingRunnable {
         void run() throws Exception;
+
+        default Runnable toUnchecked() {
+            return () -> {
+                try {
+                    run();
+                } catch (Exception e) {
+                    BaseTest.hide(e);
+                }
+            };
+        }
     }
 
     interface ThrowingSupplier<T> {
@@ -134,5 +144,9 @@ public interface BaseTest {
 
     static <T> T supplyQuiet(ThrowingSupplier<T> supplier) {
         return supplier.toUnchecked().get();
+    }
+
+    static void runQuiet(ThrowingRunnable runnable) {
+        runnable.toUnchecked().run();
     }
 }
