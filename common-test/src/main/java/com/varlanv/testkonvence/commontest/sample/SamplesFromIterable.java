@@ -1,6 +1,5 @@
 package com.varlanv.testkonvence.commontest.sample;
 
-import com.varlanv.testkonvence.commontest.ImmutableList;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -26,10 +25,7 @@ class SamplesFromIterable implements Samples {
         }
         var resultSpec = specConsumer.apply(new SampleSpec()).toSpec();
         samples.add(ImmutableSample.of(
-                description,
-                ImmutableList.copyOf(resultSpec.sources()),
-                ImmutableList.copyOf(resultSpec.extraAssertions()),
-                resultSpec.options()));
+                description, resultSpec.sources(), resultSpec.extraAssertions(), resultSpec.options()));
         return this;
     }
 
@@ -39,10 +35,7 @@ class SamplesFromIterable implements Samples {
         specConsumers.forEach(specEntry -> {
             var resultSpec = specEntry.getValue().apply(new SampleSpec()).toSpec();
             samples.add(ImmutableSample.of(
-                    specEntry.getKey(),
-                    ImmutableList.copyOf(resultSpec.sources()),
-                    ImmutableList.copyOf(resultSpec.extraAssertions()),
-                    resultSpec.options()));
+                    specEntry.getKey(), resultSpec.sources(), resultSpec.extraAssertions(), resultSpec.options()));
         });
         return this;
     }
