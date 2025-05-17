@@ -6,6 +6,7 @@ import com.diffplug.spotless.LineEnding;
 import com.github.benmanes.gradle.versions.VersionsPlugin;
 import com.github.spotbugs.snom.SpotBugsExtension;
 import com.github.spotbugs.snom.SpotBugsPlugin;
+import org.checkerframework.gradle.plugin.CheckerFrameworkExtension;
 import org.checkerframework.gradle.plugin.CheckerFrameworkPlugin;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
@@ -135,12 +136,12 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     }));
                 pluginManager.apply(CheckerFrameworkPlugin.class);
 
-                if (!projectName.equals("common-test")) {
-//                    extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> checkerFramework
-//                        .setCheckers(List.of(
-//                            "org.checkerframework.checker.nullness.NullnessChecker"
-//                        ))
-//                    );
+                if (projectName.equals("annotation-processor")) {
+                    extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> checkerFramework
+                        .setCheckers(List.of(
+                            "org.checkerframework.checker.nullness.NullnessChecker"
+                        ))
+                    );
                 }
             }
         );
@@ -192,6 +193,10 @@ public class InternalConventionPlugin implements Plugin<Project> {
                         dependencies.add(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME, internalProperties.getLib("assertj-core"));
                         dependencies.add(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME, internalProperties.getLib("junit-jupiter-api"));
                         dependencies.add(JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME, internalProperties.getLib("junit-platform-launcher"));
+
+                        var jSpecify = internalProperties.getLib("jSpecify");
+                        dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, jSpecify);
+                        dependencies.add(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, jSpecify);
 
                         var immutablesDependency = internalProperties.getLib("immutables-values");
                         dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, immutablesDependency);

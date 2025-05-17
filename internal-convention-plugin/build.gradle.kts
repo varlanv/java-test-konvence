@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.spotless.plugin)
     implementation(libs.benmanes.version.plugin)
     compileOnly(libs.jetbrains.annotations)
+    compileOnly(libs.jSpecify)
     compileOnly(libs.junit.platform.launcher)
 }
 

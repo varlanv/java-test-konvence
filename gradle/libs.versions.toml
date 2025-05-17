@@ -13,6 +13,7 @@ spotbugsVersion = "6.1.11"
 spotlessVersion = "7.0.3"
 checkerFrameworkVersion = "0.6.53"
 immutablesVersion = "2.7.3"
+jSpecifyVersion = "1.0.0"
 
 [libraries]
 assertj-core = { group = "org.assertj", name = "assertj-core", version.ref = "assertJ" }
@@ -28,6 +29,7 @@ spotbugs-plugin = { group = "com.github.spotbugs.snom", name = "spotbugs-gradle-
 spotless-plugin = { group = "com.diffplug.gradle.spotless", name = "com.diffplug.gradle.spotless.gradle.plugin", version.ref = "spotlessVersion" }
 checkerFramework-plugin = { group = "org.checkerframework", name = "org.checkerframework.gradle.plugin", version.ref = "checkerFrameworkVersion" }
 immutables-values = { group = "org.immutables", name = "value", version.ref = "immutablesVersion" }
+jSpecify = { group = "org.jspecify", name = "jspecify", version.ref = "jSpecifyVersion" }
 
 [plugins]
 internalConvention = { id = "com.varlanv.testkonvence.gradle.internal-gradle-convention-plugin" }

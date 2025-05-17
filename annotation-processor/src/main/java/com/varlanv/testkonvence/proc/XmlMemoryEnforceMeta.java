@@ -1,6 +1,5 @@
 package com.varlanv.testkonvence.proc;
 
-import java.io.StringWriter;
 import java.io.Writer;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -58,16 +57,5 @@ class XmlMemoryEnforceMeta {
         var displayName = document.createElement(name);
         displayName.setTextContent(value);
         target.appendChild(displayName);
-    }
-
-    @Override
-    public String toString() {
-        try {
-            var stringWriter = new StringWriter();
-            write(stringWriter, true);
-            return stringWriter.toString();
-        } catch (Exception e) {
-            return InternalUtils.hide(e);
-        }
     }
 }

@@ -1,4 +1,4 @@
 @NullMarked
-package com.varlanv.gradle.plugin;
+package com.varlanv.testkonvence.proc;
 
 import org.jspecify.annotations.NullMarked;

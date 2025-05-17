@@ -7,17 +7,14 @@ import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.tools.StandardLocation;
 
 public class TestKonvenceAP extends AbstractProcessor {
 
-    public static final String enforcementsXmlPackage = "com.varlanv.testkonvence";
-    public static final String enforcementsXmlName = "testkonvence_enforcements.xml";
-    public static final String indentXmlOption = "com.varlanv.testkonvence.indentXml";
+    static final String enforcementsXmlPackage = "com.varlanv.testkonvence";
+    static final String enforcementsXmlName = "testkonvence_enforcements.xml";
+    static final String indentXmlOption = "com.varlanv.testkonvence.indentXml";
 
     private final BiFunction<RoundEnvironment, TypeElement, List<APEnforcementMeta.Item>> testAnnotationFn =
             (roundEnv, annotation) -> {
@@ -129,7 +126,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                             Stream.of(ImmutablePair.of("org.junit.jupiter.api.DisplayName", displayNameAnnotationFn)))
                     .collect(Collectors.toMap(ImmutablePair::left, ImmutablePair::right));
 
-    private String findTopLevelClassName(Element start) {
+    private static String findTopLevelClassName(Element start) {
         String topLevelClassName;
         Element enclosingElement = start;
         while (true) {
@@ -185,7 +182,7 @@ public class TestKonvenceAP extends AbstractProcessor {
                 }
             }
         } catch (Exception e) {
-            InternalUtils.hide(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -204,14 +201,16 @@ public class TestKonvenceAP extends AbstractProcessor {
         return Collections.singleton(indentXmlOption);
     }
 
-    private Optional<String> findDisplayNameAnnotationValue(Element element) {
+    private static Optional<String> findDisplayNameAnnotationValue(Element element) {
         return element.getAnnotationMirrors().stream()
                 .flatMap(mirror -> {
                     var typeElement = (TypeElement) mirror.getAnnotationType().asElement();
                     if (!typeElement.getQualifiedName().contentEquals("org.junit.jupiter.api.DisplayName")) {
-                        return Stream.empty();
+                        return Stream.<String>empty();
                     }
-                    return mirror.getElementValues().entrySet().stream()
+                    Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues =
+                            mirror.getElementValues();
+                    return elementValues.entrySet().stream()
                             .filter(entry -> entry.getKey().getSimpleName().contentEquals("value"))
                             .map(entry -> String.valueOf(entry.getValue().getValue()));
                 })

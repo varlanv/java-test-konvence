@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import javax.tools.StandardLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -309,11 +310,11 @@ class TestKonvenceAPTest implements UnitTest {
     }
 
     void expectTransformation(
-            String className, @Language("Java") String sources, @Language("XML") String expectedOutput) {
+            String className, @Language("Java") String sources, @Language("XML") @Nullable String expectedOutput) {
         expectTransformation(Map.of(className, sources), expectedOutput);
     }
 
-    void expectTransformation(Map<String, String> sources, @Language("XML") String expectedOutput) {
+    void expectTransformation(Map<String, String> sources, @Language("XML") @Nullable String expectedOutput) {
         var iterator = sources.entrySet().iterator();
         var first = iterator.next();
         var cute = this.cute.andSourceFile(first.getKey(), first.getValue());
@@ -334,7 +335,7 @@ class TestKonvenceAPTest implements UnitTest {
                 .executeTest();
     }
 
-    private GeneratedFileObjectMatcher contentMatcher(String content) {
+    private GeneratedFileObjectMatcher contentMatcher(@Nullable String content) {
         return fileObject -> {
             try (var inputStream = fileObject.openInputStream()) {
                 var actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
