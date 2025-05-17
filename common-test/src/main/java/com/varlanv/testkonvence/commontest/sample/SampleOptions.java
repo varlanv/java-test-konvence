@@ -1,20 +1,22 @@
 package com.varlanv.testkonvence.commontest.sample;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import org.immutables.value.Value;
 
-@Getter
-@Builder
-@AllArgsConstructor
-public class SampleOptions {
+@Value.Immutable
+public interface SampleOptions {
 
-    @Builder.Default
-    Boolean camelMethodName = false;
+    @Value.Default
+    default boolean camelMethodName() {
+        return false;
+    }
 
-    @Builder.Default
-    Boolean reverseTransformation = false;
+    @Value.Default
+    default boolean reverseTransformation() {
+        return false;
+    }
 
-    @Builder.Default
-    Boolean applyAutomaticallyAfterTestTask = true;
+    @Value.Default
+    default boolean applyAutomaticallyAfterTestTask() {
+        return true;
+    }
 }

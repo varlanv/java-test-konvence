@@ -19,7 +19,7 @@ public class SampleSpec {
     private final SampleOptions options;
 
     public SampleSpec() {
-        this(List.of(), List.of(), SampleOptions.builder().build());
+        this(List.of(), List.of(), ImmutableSampleOptions.builder().build());
     }
 
     public SampleSpecFileStep withClass(String fullyQualifiedClassName) {
@@ -64,7 +64,7 @@ public class SampleSpec {
         private final SampleSpecSourceStep parent;
         private final String expectedTransformation;
         List<BaseTest.ThrowingConsumer<ConsumableSample>> extraAssertions = new ArrayList<>(1);
-        SampleOptions.SampleOptionsBuilder optionsBuilder = SampleOptions.builder();
+        ImmutableSampleOptions.Builder optionsBuilder = ImmutableSampleOptions.builder();
 
         SampleSpec toSpec() {
             return new SampleSpec(
@@ -86,7 +86,7 @@ public class SampleSpec {
             return this;
         }
 
-        public SampleSpecFinish withOptions(Consumer<SampleOptions.SampleOptionsBuilder> action) {
+        public SampleSpecFinish withOptions(Consumer<ImmutableSampleOptions.Builder> action) {
             action.accept(optionsBuilder);
             return this;
         }
