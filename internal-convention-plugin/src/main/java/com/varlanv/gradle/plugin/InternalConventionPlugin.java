@@ -136,7 +136,7 @@ public class InternalConventionPlugin implements Plugin<Project> {
                     }));
                 pluginManager.apply(CheckerFrameworkPlugin.class);
 
-                if (projectName.equals("annotation-processor")) {
+                if (Set.of("annotation-processor", "constants").contains(projectName)) {
                     extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> checkerFramework
                         .setCheckers(List.of(
                             "org.checkerframework.checker.nullness.NullnessChecker"
