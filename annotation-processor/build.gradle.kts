@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    compileOnly(projects.constants)
     compileOnly(projects.sharedUtil)
     testImplementation(libs.toolisticon.cute)
     testImplementation(libs.junit.jupiter.api)

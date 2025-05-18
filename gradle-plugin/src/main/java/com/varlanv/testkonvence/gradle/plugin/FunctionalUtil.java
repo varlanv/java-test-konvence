@@ -8,7 +8,7 @@ final class FunctionalUtil {
 
     public static <T> BinaryOperator<T> throwingCombiner() {
         return (t1, t2) -> {
-            throw new IllegalStateException("Parallel streams are not supported");
+            throw new UnsupportedOperationException("Action not supported");
         };
     }
 }

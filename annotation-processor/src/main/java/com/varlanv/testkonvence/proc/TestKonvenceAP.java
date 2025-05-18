@@ -1,9 +1,6 @@
 package com.varlanv.testkonvence.proc;
 
-import com.varlanv.testkonvence.APEnforcementMetaItem;
-import com.varlanv.testkonvence.ImmutableAPEnforcementMetaItem;
-import com.varlanv.testkonvence.ImmutableList;
-import com.varlanv.testkonvence.Pair;
+import com.varlanv.testkonvence.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -12,6 +9,7 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
 
 public final class TestKonvenceAP extends AbstractProcessor {
@@ -150,7 +148,20 @@ public final class TestKonvenceAP extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (roundEnv.processingOver()) {
-            writeResult();
+            if (!output.isEmpty()) {
+                try {
+                    writeResult();
+                } catch (Exception e) {
+                    processingEnv
+                            .getMessager()
+                            .printMessage(
+                                    Diagnostic.Kind.WARNING,
+                                    String.format(
+                                            "Failed to apply annotation processor for Gradle plugin [%s], "
+                                                    + "plugin logic will not be applied. Internal error message: %s",
+                                            Constants.PLUGIN_NAME, e.getMessage()));
+                }
+            }
         } else {
             for (var annotation : annotations) {
                 var fn = strategy.get(annotation.getQualifiedName().toString());
@@ -162,32 +173,28 @@ public final class TestKonvenceAP extends AbstractProcessor {
         return false;
     }
 
-    private void writeResult() {
-        try {
-            var filer = processingEnv.getFiler();
-            var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(ImmutableList.copyOfNonNull(output.stream()
-                    .sorted(Comparator.comparing(APEnforcementMetaItem::fullEnclosingClassName)
-                            .thenComparing(APEnforcementMetaItem::className)
-                            .thenComparing(APEnforcementMetaItem::displayName)
-                            .thenComparing(APEnforcementMetaItem::methodName))
-                    .collect(Collectors.toList())));
-            var resource =
-                    filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
-            try (var writer = resource.openWriter()) {
-                if (output.isEmpty()) {
-                    writer.write("");
-                    writer.flush();
+    private void writeResult() throws Exception {
+        var filer = processingEnv.getFiler();
+        var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(ImmutableList.copyOfNonNull(output.stream()
+                .sorted(Comparator.comparing(APEnforcementMetaItem::fullEnclosingClassName)
+                        .thenComparing(APEnforcementMetaItem::className)
+                        .thenComparing(APEnforcementMetaItem::displayName)
+                        .thenComparing(APEnforcementMetaItem::methodName))
+                .collect(Collectors.toList())));
+        var resource =
+                filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
+        try (var writer = resource.openWriter()) {
+            if (output.isEmpty()) {
+                writer.write("");
+                writer.flush();
+            } else {
+                var xmlOption = processingEnv.getOptions().get(indentXmlOption);
+                if ("true".equals(xmlOption)) {
+                    xmlMemoryEnforceMeta.indentWriteTo(writer);
                 } else {
-                    var xmlOption = processingEnv.getOptions().get(indentXmlOption);
-                    if ("true".equals(xmlOption)) {
-                        xmlMemoryEnforceMeta.indentWriteTo(writer);
-                    } else {
-                        xmlMemoryEnforceMeta.writeTo(writer);
-                    }
+                    xmlMemoryEnforceMeta.writeTo(writer);
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 

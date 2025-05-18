@@ -1,5 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import com.varlanv.testkonvence.Constants;
+import com.varlanv.testkonvence.TrustedException;
 import java.nio.file.Files;
 import org.gradle.api.Action;
 import org.gradle.api.Task;
@@ -59,6 +61,22 @@ class TestNameEnforceAction implements Action<Task> {
 
     @Override
     public void execute(Task task) {
+        try {
+            apply();
+        } catch (TrustedException e) {
+            throw new IllegalStateException(e.getMessage());
+        } catch (Exception e) {
+            var message = e.getMessage();
+            log.error(
+                    "Failed to apply Gradle plugin [{}], "
+                            + "Build will not be failed, but plugin logic might not have been applied. "
+                            + "Internal error message is: {}",
+                    Constants.PLUGIN_NAME,
+                    message == null || message.isBlank() ? "<no message>" : message);
+        }
+    }
+
+    private void apply() throws Exception {
         var sourcesRoots = sourcesRootProp.getFiles();
         if (sourcesRoots.isEmpty()) {
             log.debug("Source root is empty");
@@ -76,20 +94,16 @@ class TestNameEnforceAction implements Action<Task> {
                     if (Files.notExists(enforceFile.toPath())) {
                         throw new IllegalStateException("Enforce file does not exist: " + enforceFile);
                     }
-                    try {
-                        new Train(
-                                        log,
-                                        enforceFile.toPath(),
-                                        sourcesRoot,
-                                        ImmutableTrainOptions.builder()
-                                                .dryWithFailing(dryWithFailingProvider.get())
-                                                .reverseTransformation(enableReverseTransformation.get())
-                                                .camelCaseMethodName(camelCaseMethodNameProvider.get())
-                                                .build())
-                                .run();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    new Train(
+                                    log,
+                                    enforceFile.toPath(),
+                                    sourcesRoot,
+                                    ImmutableTrainOptions.builder()
+                                            .dryWithFailing(dryWithFailingProvider.get())
+                                            .reverseTransformation(enableReverseTransformation.get())
+                                            .camelCaseMethodName(camelCaseMethodNameProvider.get())
+                                            .build())
+                            .run();
                 }
             }
         }
