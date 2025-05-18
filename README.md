@@ -127,7 +127,7 @@ In `build.gradle(.kts)`
 
 ```kotlin
 testKonvence {
-    enabled(false)
+    enabled(true)
     applyAutomaticallyAfterTestTask(true)
     useCamelCaseForMethodNames(false)
     reverseTransformation {
