@@ -31,7 +31,7 @@ Consider following test class:
 class StringTest {
 
     @Test
-    void should_equal_hello_has_length_5() {
+    void should_contain_5_chars_in_word_hello() {
         Assertions.assertEquals(5, "hello".length());
     }
 }
@@ -39,7 +39,7 @@ class StringTest {
 
 After running `test` task, or running `testKonvenceEnforceAll` task, two things will be added:
 
-1. If not already present, `import org.junit.jupiter.api.DisplayName` dependency will be added
+1. If not already present, `import org.junit.jupiter.api.DisplayName` import will be added
 2. `@DisplayName` will be generated from test name.
 
 ```java
@@ -50,8 +50,8 @@ import org.junit.jupiter.api.Test;
 class StringTest {
 
     @Test
-    @DisplayName("should contain 2 chars in word hello")
-    void should_contain_2_chars_in_word_hello() {
+    @DisplayName("should contain 5 chars in word hello")
+    void should_contain_5_chars_in_word_hello() {
         Assertions.assertEquals(5, "hello".length());
     }
 }
@@ -67,7 +67,7 @@ import org.junit.jupiter.api.Test;
 class StringTest {
 
     @Test
-    @DisplayName("should contain 2 chars in word 'hello'")
+    @DisplayName("should contain 5 chars in word 'hello'")
     void should_work() {
         Assertions.assertEquals(5, "hello".length());
     }
@@ -86,14 +86,37 @@ import org.junit.jupiter.api.Test;
 class StringTest {
 
     @Test
-    @DisplayName("should contain 2 chars in word 'hello'")
-    void should_contain_2_chars_in_word_hello() {
+    @DisplayName("should contain 5 chars in word 'hello'")
+    void should_contain_5_chars_in_word_hello() {
         Assertions.assertEquals(5, "hello".length());
     }
 }
 ```
 
-## Configuration
+## Usage example for CI/CD pipelines
+
+In `build.gradle(.kts)`:
+
+```kotlin
+plugins {
+    id("com.varlanv.test-konvence") version ("0.0.1")
+}
+
+testKonvence {
+    applyAutomaticallyAfterTestTask(!providers.environmentVariable("CI").isPresent())
+}
+```
+
+Then, somewhere in CI / CD configuration, add a step:
+`./gradlew testKonvenceDryEnforceWithFailing`.
+
+Configuring a plugin like this will make it so that developers will
+have nice developer experience on local machines, with test naming
+enforced on each test run. Meanwhile, the CI / CD pipeline will enforce that
+test naming is always consistent and will fail the build in case a developer forgot to
+apply test naming transformations.
+
+## Configurations
 
 Here is an exhaustive list of available configurations:
 
@@ -120,8 +143,25 @@ testKonvence {
 * **useCamelCaseForMethodNames** - if is to **true**, camel case method names will be used,
   instead of the default snake case. Default is **false**.
 * **reverseTransformation.enabled** - if set to **true**, `@DisplayName` annotation will be
-generated based on test method name. If set to **false**, only method name transformations
-based on existing `@DisplayName` annotations will be applied. Default is **true**.
+  generated based on test method name. If set to **false**, only method name transformations
+  based on existing `@DisplayName` annotations will be applied. Default is **true**.
+
+## Transformations examples
+
+#### `@DisplayName` to snake case method name
+
+* **a_b_c** → _a_b_c_
+* **Some good test name** → _some_good_test_name_
+* **Some good test name, which has comas, dots., question? marks, and exclamation
+  marks!** → _some_good_test_name_which_has_comas_dots_question_marks_and_exclamation_marks_
+* **Some123good456test789name0** → _some123good456test789name0_
+
+#### Snake case method name to `@DisplayName`
+
+* _when_something_then_should_something_ → **when something then should something**
+* _when_call_someMethod_then_should_something_ → **when call 'someMethod' then should something**
+* _someMethod_should_do_something_ → **'someMethod' should do something**
+* ____someMethod___shouldDo___someThing___ → **'someMethod' 'shouldDo' 'someThing'**
 
 ## Gradle optimizations support
 
@@ -135,10 +175,8 @@ The plugin is built to support all the major Gradle optimization features, such 
 ## Known limitations
 
 - Currently, only JUnit 5 is supported
-- Synchronization is possible only by using Junit tags (`org.junit.jupiter.api.Tag`).
-- The plugin was tested with latest Gradle 8x, 7x, 6x versions (8.12.1, 7.6.1, 6.9.4). Any other version is not
-  guaranteed to work. But most likely any version in range 7.x.x - 8.x.x will work, since plugin does not rely on any
-  unstable internal Gradle API.
+- The plugin was tested with the latest Gradle 8x and 7x versions (8.14, 7.6.1). Any other version is not
+  guaranteed to work, but in general, any version in range 7.6.1 - 8.x.x should work.
 
 If you have any issues or feature requests, please don't hesitate to create an issue.
 
