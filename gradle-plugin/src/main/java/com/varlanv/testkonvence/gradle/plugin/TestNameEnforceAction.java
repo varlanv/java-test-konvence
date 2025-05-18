@@ -16,6 +16,7 @@ class TestNameEnforceAction implements Action<Task> {
     private final ConfigurableFileCollection sourcesRootProp;
     private final ConfigurableFileCollection compileClasspath;
     private final ConfigurableFileCollection enforceFiles;
+    private final Provider<Boolean> pluginEnabled;
     private final Provider<Boolean> dryWithFailingProvider;
     private final Provider<Boolean> camelCaseMethodNameProvider;
     private final Provider<Boolean> enableReverseTransformation;
@@ -24,12 +25,14 @@ class TestNameEnforceAction implements Action<Task> {
             ConfigurableFileCollection sourcesRootProp,
             ConfigurableFileCollection compileClasspath,
             ConfigurableFileCollection enforceFiles,
+            Provider<Boolean> pluginEnabled,
             Provider<Boolean> dryWithFailingProvider,
             Provider<Boolean> camelCaseMethodNameProvider,
             Provider<Boolean> enableReverseTransformation) {
         this.sourcesRootProp = sourcesRootProp;
         this.compileClasspath = compileClasspath;
         this.enforceFiles = enforceFiles;
+        this.pluginEnabled = pluginEnabled;
         this.dryWithFailingProvider = dryWithFailingProvider;
         this.camelCaseMethodNameProvider = camelCaseMethodNameProvider;
         this.enableReverseTransformation = enableReverseTransformation;
@@ -61,18 +64,22 @@ class TestNameEnforceAction implements Action<Task> {
 
     @Override
     public void execute(Task task) {
-        try {
-            apply();
-        } catch (TrustedException e) {
-            throw new IllegalStateException(e.getMessage());
-        } catch (Exception e) {
-            var message = e.getMessage();
-            log.error(
-                    "Failed to apply Gradle plugin [{}], "
-                            + "Build will not be failed, but plugin logic might not have been applied. "
-                            + "Internal error message is: {}",
-                    Constants.PLUGIN_NAME,
-                    message == null || message.isBlank() ? "<no message>" : message);
+        if (pluginEnabled.get()) {
+            try {
+                apply();
+            } catch (TrustedException e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            } catch (Exception e) {
+                var message = e.getMessage();
+                log.error(
+                        "Failed to apply Gradle plugin [{}], "
+                                + "Build will not be failed, but plugin logic might not have been applied. "
+                                + "Internal error message is: {}",
+                        Constants.PLUGIN_NAME,
+                        message == null || message.isBlank() ? "<no message>" : message);
+            }
+        } else {
+            log.debug("Gradle plugin [{}] is disabled, ignoring task action.", Constants.PLUGIN_NAME);
         }
     }
 

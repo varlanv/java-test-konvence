@@ -154,7 +154,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
                         Files.move(sampleSourceFile.path(), sourceFile);
 
                         var buildResult = build(fixture.runner(), GradleRunner::buildAndFail);
-                        assertThat(buildResult.getOutput()).contains("found test name mismatch in");
+                        assertThat(buildResult.getOutput()).contains("found test naming mismatch in file");
 
                         var newSourceFileContent = Files.readString(sourceFile);
                         assertThat(newSourceFileContent).isEqualTo(contentBefore);

@@ -28,6 +28,9 @@ public abstract class TestNameEnforceTask extends DefaultTask {
     public abstract Property<Boolean> getDryWithFailing();
 
     @Internal
+    public abstract Property<Boolean> getPluginEnabled();
+
+    @Internal
     public abstract Property<Boolean> getUseCamelCaseMethodName();
 
     @Internal
@@ -39,6 +42,7 @@ public abstract class TestNameEnforceTask extends DefaultTask {
                         getSourcesRootProp(),
                         getCompileClasspath(),
                         getEnforceFiles(),
+                        getPluginEnabled(),
                         getDryWithFailing(),
                         getUseCamelCaseMethodName(),
                         getEnableReverseTransformation())

@@ -44,7 +44,9 @@ final class SourceReplacementTrain {
             if (resultLines.changed()) {
                 if (trainOptions.dryWithFailing()) {
                     throw new TrustedException(String.format(
-                            "[%s] - found test name mismatch in file [%s]",
+                            "[%s] - found test naming mismatch in file [%s]. "
+                                    + "Consider running `testKonvenceEnforceAll` "
+                                    + "Gradle task to apply test naming transformations.",
                             Constants.PLUGIN_NAME, target.path().toAbsolutePath()));
                 } else {
                     try {
