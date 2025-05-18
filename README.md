@@ -222,6 +222,7 @@ The plugin is built to support all the major Gradle optimization features, such 
 
 ## Known limitations
 
+- Java version 11 and above for compiling test sources are supported 
 - Currently, only JUnit 5 is supported
 - The plugin was tested with the latest Gradle 8x and 7x versions (8.14, 7.6.1). Any other version is not
   guaranteed to work, but in general, any version in range 7.6.1 - 8.x.x should work.
