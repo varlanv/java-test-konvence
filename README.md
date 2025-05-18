@@ -4,6 +4,33 @@ A gradle plugin that provides a way to automatically change test method
 names based on `@DisplayName` annotation, as well as doing opposite - automatically generate
 `@DisplayName` based on test method name.
 
+## Motivation
+
+Writing clear, descriptive tests is crucial for maintainable software. Many modern testing frameworks, like those
+commonly found in Scala, JavaScript, or Groovy, allow developers the convenience of defining test names using flexible,
+readable strings. While JUnit 5's `@DisplayName` annotation brings this capability to Java, it can
+introduce a new challenge: keeping the underlying Java method name consistent with the human-readable `@DisplayName`.
+
+This plugin aims to solve several common pain points:
+
+* **Synchronization Headaches:** When you update a test's description in `@DisplayName`, it's easy to overlook renaming
+  the corresponding Java method. This can lead to confusing mismatches where test reports show one name, while the code
+  refers to another. Similarly, if the method name is refactored, the `@DisplayName` can become outdated.
+* **Team Inconsistency:** Without a clear convention, different team members might adopt varying styles for naming tests
+  or utilizing (or neglecting) `@DisplayName`. This can lead to an inconsistent test suite that's harder to navigate and
+  understand.
+* **Focus on Readability, Not Just Rules:** Developers should be empowered to write highly descriptive, sentence-like
+  test names using `@DisplayName`. The concern of manually creating a compliant Java method name, or keeping it
+  synchronized, can be a distraction.
+
+`test-konvence` addresses these issues by automating the synchronization between your test method names and their
+`@DisplayName` annotations. It allows your team to:
+
+* **Enforce a consistent naming strategy** across all JUnit 5 tests.
+* **Treat `@DisplayName` as the primary, human-readable identifier** for your tests.
+* **Forget about manual method name adjustments** – the plugin ensures method names are automatically generated or
+  updated to reflect the `@DisplayName`.
+
 ## Usage
 
 For the most basic use-case, apply the plugin:
@@ -102,7 +129,7 @@ In `build.gradle(.kts)`:
 
 ```kotlin
 plugins {
-    id("com.varlanv.test-konvence") version ("0.0.1")
+    id("com.varlanv.test-konvence") version "0.0.1"
 }
 
 testKonvence {

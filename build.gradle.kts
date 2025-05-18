@@ -26,8 +26,17 @@ abstract class IncrementVersion : DefaultTask() {
         }
 
         listOf(
-            rootProjectPath.resolve("constants").resolve("src").resolve("main").resolve("java").resolve("com").resolve("varlanv").resolve("testkonvence").resolve("Constants.java"),
+            rootProjectPath
+                .resolve("constants")
+                .resolve("src")
+                .resolve("main")
+                .resolve("java")
+                .resolve("com")
+                .resolve("varlanv")
+                .resolve("testkonvence")
+                .resolve("Constants.java"),
             rootProjectPath.resolve("gradle.properties"),
+            rootProjectPath.resolve("README.md")
         ).forEach {
             val text = it.readText(Charsets.UTF_8)
             val newText = text.replace(currentVersion, newVersion)
