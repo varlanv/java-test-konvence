@@ -8,7 +8,7 @@ names based on `@DisplayName` annotation, as well as doing opposite - automatica
 
 For the most basic use-case, apply the plugin:
 
-In `build.gradle(.kts)`
+In `build.gradle(.kts)`:
 
 ```kotlin
 plugins {
@@ -123,7 +123,7 @@ apply test naming transformations.
 
 Here is an exhaustive list of available configurations:
 
-In `build.gradle(.kts)`
+In `build.gradle(.kts)`:
 
 ```kotlin
 testKonvence {
