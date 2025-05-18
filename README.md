@@ -140,8 +140,8 @@ testKonvence {
   tasks `testKonvenceEnforceAll` and `testKonvenceDryEnforceWithFailing`
   will still be created, but will have no-op action. Default is **true**.
 * **applyAutomaticallyAfterTestTask** - if set to **true**, all tests will be
-  automatically renamed after `test` task. If set to **false**,
-  applying test naming tranformations will be available only through `testKonvenceEnforceAll` task.
+  automatically renamed(if needed) after `test` task. If set to **false**,
+  applying test naming transformations will be available only through `testKonvenceEnforceAll` task.
   Default is **true**.
 * **useCamelCaseForMethodNames** - if is to **true**, camel case method names will be used,
   instead of the default snake case. Default is **false**.
