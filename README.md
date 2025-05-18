@@ -28,6 +28,9 @@ The plugin will also configure automatic applying of `testKonvenceEnforceAll` ta
 Consider following test class:
 
 ```java
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 class StringTest {
 
     @Test
