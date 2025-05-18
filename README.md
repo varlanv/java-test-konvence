@@ -193,6 +193,24 @@ testKonvence {
 * _someMethod_should_do_something_ → **'someMethod' should do something**
 * ____someMethod___shouldDo___someThing___ → **'someMethod' 'shouldDo' 'someThing'**
 
+## Implementation details
+
+The plugin is working by adding an annotation processor that looks for JUnit annotations,
+such as `@Test` `@ParameterizedTest`, `@DisplayName`, etc.
+
+Information collected by the annotation processor is later used to enforce test naming
+convention by looking for corresponding tests source files, looking for corresponding test
+methods in source files, and applying necessary changes(if any).
+
+Such implementation has two key points as a result:
+
+1. The overhead added by running `testKonvenceEnforceAll` after each test run is absolutely minimal.
+No additional compilation or AST tree parsing and manipulation is done. If all of your tests
+already have stable test naming, and you introduce a new test method, only this test class and method
+will be processed.
+2. If your test source file is not formatted according to [Java Code Conventions](https://www.oracle.com/docs/tech/java/codeconventions.pdf),
+the consistency and correctness of generated changes is not guaranteed.
+
 ## Gradle optimizations support
 
 The plugin is built to support all the major Gradle optimization features, such as:
@@ -207,8 +225,6 @@ The plugin is built to support all the major Gradle optimization features, such 
 - Currently, only JUnit 5 is supported
 - The plugin was tested with the latest Gradle 8x and 7x versions (8.14, 7.6.1). Any other version is not
   guaranteed to work, but in general, any version in range 7.6.1 - 8.x.x should work.
-
-If you have any issues or feature requests, please don't hesitate to create an issue.
 
 ## License
 
