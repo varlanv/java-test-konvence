@@ -151,7 +151,7 @@ testKonvence {
 
 ## Transformations examples
 
-#### `@DisplayName` to snake case method name
+#### `@DisplayName` to snake case method name:
 
 * **a_b_c** → _a_b_c_
 * **Some good test name** → _some_good_test_name_
@@ -159,7 +159,7 @@ testKonvence {
   marks!** → _some_good_test_name_which_has_comas_dots_question_marks_and_exclamation_marks_
 * **Some123good456test789name0** → _some123good456test789name0_
 
-#### Snake case method name to `@DisplayName`
+#### Snake case method name to `@DisplayName`:
 
 * _when_something_then_should_something_ → **when something then should something**
 * _when_call_someMethod_then_should_something_ → **when call 'someMethod' then should something**
