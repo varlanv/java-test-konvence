@@ -1,21 +1,36 @@
 package com.varlanv.testkonvence.proc;
 
-import com.varlanv.testkonvence.APEnforcementMetaItem;
+import com.varlanv.testkonvence.APEnforcementFull;
+import com.varlanv.testkonvence.APEnforcementMiddle;
+import com.varlanv.testkonvence.APEnforcementTop;
 import com.varlanv.testkonvence.ImmutableList;
-import java.io.Writer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 final class XmlMemoryEnforceMeta {
 
-    private final ImmutableList<APEnforcementMetaItem> entries;
+    private static final String fullEnclosingClassNameProp = "a";
+    private static final String classNameProp = "b";
+    private static final String displayNameProp = "c";
+    private static final String methodNameProp = "d";
+    private static final String newNameProp = "e";
+    private static final String reversedProp = "f";
+    private static final String methodEnforcementsProp = "g";
+    private static final String entriesProp = "h";
+    private final ImmutableList<APEnforcementFull> entries;
 
-    XmlMemoryEnforceMeta(ImmutableList<APEnforcementMetaItem> entries) {
+    XmlMemoryEnforceMeta(ImmutableList<APEnforcementFull> entries) {
         this.entries = entries;
     }
 
@@ -37,13 +52,16 @@ final class XmlMemoryEnforceMeta {
         var document = documentBuilder.newDocument();
         var root = document.createElement("root");
         document.appendChild(root);
+        var documentEnforcement = document.createElement(methodEnforcementsProp);
+        root.appendChild(documentEnforcement);
+
 
         for (var entry : entries.value()) {
             var entryEl = document.createElement("entry");
             appendTo(entryEl, "fullEnclosingClassName", entry.fullEnclosingClassName(), document);
             appendTo(entryEl, "displayName", entry.displayName(), document);
             appendTo(entryEl, "className", entry.className(), document);
-            appendTo(entryEl, "methodName", entry.methodName(), document);
+            appendTo(entryEl, "methodName", entry.originalName(), document);
             root.appendChild(entryEl);
         }
 
@@ -59,5 +77,13 @@ final class XmlMemoryEnforceMeta {
         var displayName = document.createElement(name);
         displayName.setTextContent(value);
         target.appendChild(displayName);
+    }
+
+    private ImmutableList<APEnforcementTop> merge() {
+        Map<String, List<APEnforcementMiddle>> middleMap = new HashMap<>();
+        for (var entry : entries) {
+            middleMap.computeIfAbsent(entry.fullEnclosingClassName(), k -> new ArrayList<>())
+                .add(APEnforcementMiddle);
+        }
     }
 }

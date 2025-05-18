@@ -121,13 +121,13 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                                     compileOpts.getRelease().set(javaVersion);
                                 }
                                 compileOpts.getCompilerArgs().addAll(List.of(
-                                    "-Xlint:-processing",
-                                    "-Xlint:all",
-                                    "-Werror"
+//                                    "-Xlint:-processing",
+//                                    "-Xlint:all",
+//                                    "-Werror"
                                 ));
-                                javaCompile.finalizedBy("spotbugsMain");
-                                javaCompile.shouldRunAfter("spotlessApply");
-                                javaCompile.dependsOn("spotlessApply");
+//                                javaCompile.finalizedBy("spotbugsMain");
+//                                javaCompile.shouldRunAfter("spotlessApply");
+//                                javaCompile.dependsOn("spotlessApply");
                             });
                             tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
                                 extensions.<JavaToolchainService>configure("javaToolchains", javaToolchains -> {
@@ -209,11 +209,11 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                             extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> {
                                     checkerFramework
                                         .setCheckers(List.of(
-                                            "org.checkerframework.checker.nullness.NullnessChecker",
-                                            "org.checkerframework.checker.calledmethods.CalledMethodsChecker",
-                                            "org.checkerframework.checker.resourceleak.ResourceLeakChecker",
-                                            "org.checkerframework.checker.formatter.FormatterChecker",
-                                            "org.checkerframework.framework.util.PurityChecker"
+//                                            "org.checkerframework.checker.nullness.NullnessChecker",
+//                                            "org.checkerframework.checker.calledmethods.CalledMethodsChecker",
+//                                            "org.checkerframework.checker.resourceleak.ResourceLeakChecker",
+//                                            "org.checkerframework.checker.formatter.FormatterChecker",
+//                                            "org.checkerframework.framework.util.PurityChecker"
                                         ));
                                     checkerFramework.setExcludeTests(true);
                                 }

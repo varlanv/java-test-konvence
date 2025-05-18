@@ -3,14 +3,17 @@ package com.varlanv.testkonvence;
 import org.immutables.value.Value;
 
 @Value.Immutable
-@Value.Style(strictBuilder = true)
-public interface APEnforcementMetaItem {
+public interface APEnforcementFull {
 
     String fullEnclosingClassName();
 
-    String displayName();
-
     String className();
 
+    String displayName();
+
     String methodName();
+
+    String newName();
+
+    boolean reversed();
 }

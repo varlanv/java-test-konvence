@@ -1,8 +1,8 @@
-package com.varlanv.testkonvence.gradle.plugin;
+package com.varlanv.testkonvence;
 
 import java.util.function.BinaryOperator;
 
-final class FunctionalUtil {
+public final class FunctionalUtil {
 
     private FunctionalUtil() {}
 

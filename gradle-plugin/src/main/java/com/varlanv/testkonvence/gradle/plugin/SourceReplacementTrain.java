@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.Constants;
+import com.varlanv.testkonvence.FunctionalUtil;
 import com.varlanv.testkonvence.TrustedException;
 import java.util.*;
 import java.util.stream.Collectors;

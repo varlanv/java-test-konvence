@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import com.varlanv.testkonvence.FunctionalUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;

@@ -46,12 +46,12 @@ final class Train {
         if (Files.isRegularFile(sourceFile)) {
             var classNameParts = item.className().split("\\.");
             var className = classNameParts[classNameParts.length - 1];
+            var absolutePath = sourceFile.toAbsolutePath();
             try {
                 return Optional.<EnforcementMeta.Item>of(new EnforcementMeta.Item(
-                        SourceFile.ofPath(sourceFile.toAbsolutePath()),
-                        className,
-                        resolveEnforceCandidate(item, className)));
+                        SourceFile.ofPath(absolutePath), className, resolveEnforceCandidate(item, className)));
             } catch (Exception e) {
+                log.debug("Failed to parse enforcement item [{}], skipping", absolutePath);
                 return Optional.<EnforcementMeta.Item>empty();
             }
         }
@@ -59,10 +59,10 @@ final class Train {
     }
 
     private EnforceCandidate resolveEnforceCandidate(APEnforcementMetaItem item, String className) {
-        if (item.methodName().isEmpty()) {
+        if (item.originalName().isEmpty()) {
             return new ClassNameFromDisplayName(item.displayName(), className);
         } else {
-            var snake = new SnakeMethodNameFromDisplayName(item.displayName(), item.methodName());
+            var snake = new SnakeMethodNameFromDisplayName(item.displayName(), item.originalName());
             if (trainOptions.camelCaseMethodName()) {
                 return new CamelMethodNameFromDisplayName(snake);
             } else {
