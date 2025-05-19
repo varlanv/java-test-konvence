@@ -20,6 +20,9 @@ class SamplesFromIterable implements Samples {
 
     @Override
     public Samples describe(String description, Function<SampleSpec, SampleSpec.SampleSpecFinish> specConsumer) {
+        if (description.isBlank()) {
+            throw new IllegalArgumentException("Description must not be blank");
+        }
         if (!uniqueSamplesDescriptions.add(description)) {
             throw new IllegalArgumentException("Sample [%s] was already added previously".formatted(description));
         }

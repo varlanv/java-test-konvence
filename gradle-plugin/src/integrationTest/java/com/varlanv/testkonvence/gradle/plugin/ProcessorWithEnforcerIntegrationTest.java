@@ -10,9 +10,7 @@ import com.varlanv.testkonvence.commontest.sample.ConsumableSample;
 import com.varlanv.testkonvence.commontest.sample.SampleSourceFile;
 import com.varlanv.testkonvence.proc.TestKonvenceAP;
 import io.toolisticon.cute.Cute;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,15 +53,6 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                     .run();
 
             for (var source : sample.sources()) {
-                var actualReader = new BufferedReader(new StringReader(source.content()));
-                var expectedReader = new BufferedReader(new StringReader(source.expectedTransformation()));
-                var lineCount = 0;
-                String actualLine;
-                while ((actualLine = actualReader.readLine()) != null) {
-                    var expectedLine = expectedReader.readLine();
-                    assertThat(actualLine).as("Line number [%d]", lineCount).isEqualTo(expectedLine);
-                    lineCount++;
-                }
                 assertThat(source.content()).isEqualToIgnoringWhitespace(source.expectedTransformation());
                 assertThat(source.content()).isEqualTo(source.expectedTransformation());
             }

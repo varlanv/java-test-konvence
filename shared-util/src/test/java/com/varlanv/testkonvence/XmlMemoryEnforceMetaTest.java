@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.TreeSet;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class XmlMemoryEnforceMetaTest implements BaseTest {
@@ -28,6 +29,7 @@ class XmlMemoryEnforceMetaTest implements BaseTest {
     }
 
     @Test
+    @DisplayName("should create correct xml string")
     void should_create_correct_xml_string() throws Exception {
         var writer = new StringWriter();
 
@@ -75,6 +77,7 @@ class XmlMemoryEnforceMetaTest implements BaseTest {
     }
 
     @Test
+    @DisplayName("should equal to self when write to and then read from xml")
     void should_equal_to_self_when_write_to_and_then_read_from_xml() throws Exception {
         var writer = new StringWriter();
 

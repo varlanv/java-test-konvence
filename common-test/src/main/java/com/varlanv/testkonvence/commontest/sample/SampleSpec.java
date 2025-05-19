@@ -40,6 +40,9 @@ public class SampleSpec {
     }
 
     public SampleSpecFileStep withClass(String fullyQualifiedClassName) {
+        if (fullyQualifiedClassName.isBlank()) {
+            throw new IllegalArgumentException("Fully qualified class name must not be blank");
+        }
         var packageParts = fullyQualifiedClassName.split("\\.");
         if (packageParts.length == 0) {
             return new SampleSpecFileStep(this, fullyQualifiedClassName, "");

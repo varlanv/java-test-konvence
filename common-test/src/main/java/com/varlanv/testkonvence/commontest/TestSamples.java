@@ -921,6 +921,52 @@ public final class TestSamples {
                             }
                         }
                         """)
+                                .withOptions(options -> options.reverseTransformation(true)))
+                .describe(
+                        "Should generate display name when class extends some Serializable interface",
+                        spec -> spec.withClass("testcases.TestKonvenceAPTest")
+                                .withJavaSources(
+                                        """
+                        package testcases;
+
+                        import org.junit.jupiter.api.Nested;
+                        import org.junit.jupiter.api.Test;
+
+                        import java.io.Serializable;
+
+                        class APTest implements Serializable {
+
+                            @Nested
+                            class EmptyOutputFile implements Serializable {
+
+                                @Test
+                                void when_doesnt_find_annotation__then_write_empty_file() {
+                                }
+                            }
+                        }
+    """)
+                                .withExpectedTransformation(
+                                        """
+                        package testcases;
+
+                        import org.junit.jupiter.api.DisplayName;
+                        import org.junit.jupiter.api.Nested;
+                        import org.junit.jupiter.api.Test;
+
+                        import java.io.Serializable;
+
+                        class APTest implements Serializable {
+
+                            @Nested
+                            class EmptyOutputFile implements Serializable {
+
+                                @Test
+                                @DisplayName("when doesnt find annotation then write empty file")
+                                void when_doesnt_find_annotation__then_write_empty_file() {
+                                }
+                            }
+                        }
+                        """)
                                 .withOptions(options -> options.reverseTransformation(true)));
     }
 
