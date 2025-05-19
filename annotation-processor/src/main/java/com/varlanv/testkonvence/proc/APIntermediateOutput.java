@@ -40,9 +40,9 @@ final class APIntermediateOutput {
                 enforcementsRecord.classMap.put(className, itemsList);
                 var middleItem = ImmutableAPEnforcementMiddle.of(className, itemsList.immutableSet());
                 enforcementsRecord.classSet.add(middleItem);
+                itemsList.add(buildItem(fullItem));
             } else {
-                var item = buildItem(fullItem);
-                itemsList.add(item);
+                itemsList.add(buildItem(fullItem));
             }
         }
     }
@@ -72,7 +72,7 @@ final class APIntermediateOutput {
     private static APEnforcementItem buildItem(APEnforcementFull fullItem) {
         return ImmutableAPEnforcementItem.builder()
             .displayName(fullItem.displayName())
-            .originalName(fullItem.methodName())
+            .originalName(fullItem.originalName())
             .newName(fullItem.newName())
             .build();
     }

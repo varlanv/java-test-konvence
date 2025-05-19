@@ -6,6 +6,7 @@ plugins {
 dependencies {
     compileOnly(projects.constants)
     compileOnly(projects.sharedUtil)
+    testCompileOnly(projects.constants)
     testImplementation(libs.toolisticon.cute)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.platform.launcher)

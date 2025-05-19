@@ -3,6 +3,7 @@ package com.varlanv.testkonvence;
 import org.immutables.value.Value;
 
 @Value.Immutable
+@Value.Style(strictBuilder = true)
 public interface APEnforcementFull {
 
     String fullEnclosingClassName();
@@ -11,9 +12,7 @@ public interface APEnforcementFull {
 
     String displayName();
 
-    String methodName();
+    String originalName();
 
     String newName();
-
-    boolean reversed();
 }

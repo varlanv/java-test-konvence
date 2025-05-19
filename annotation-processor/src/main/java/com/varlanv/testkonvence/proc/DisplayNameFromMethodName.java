@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class DisplayNameFromMethodName {
+final class DisplayNameFromMethodName {
 
-    public static String convert(String originalMethodName) {
+    static String convert(String originalMethodName) {
         var methodName = preTransform(originalMethodName);
         if (methodName.length() == 1) {
             return methodName;

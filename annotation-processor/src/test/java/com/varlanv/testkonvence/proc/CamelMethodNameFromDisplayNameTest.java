@@ -1,12 +1,13 @@
-package com.varlanv.testkonvence.gradle.plugin;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package com.varlanv.testkonvence.proc;
 
 import com.varlanv.testkonvence.commontest.UnitTest;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CamelMethodNameFromDisplayNameTest implements UnitTest {
 
@@ -41,9 +42,7 @@ class CamelMethodNameFromDisplayNameTest implements UnitTest {
                         () -> {
                             var expectedMethodName = entry.getValue();
                             var displayName = entry.getKey();
-                            var actualMethodName = new CamelMethodNameFromDisplayName(
-                                            new SnakeMethodNameFromDisplayName(displayName, "anyOriginalMethodName"))
-                                    .newName();
+                            var actualMethodName = CamelMethodNameFromDisplayName.convert(displayName);
                             assertThat(actualMethodName).isEqualTo(expectedMethodName);
                         }));
     }

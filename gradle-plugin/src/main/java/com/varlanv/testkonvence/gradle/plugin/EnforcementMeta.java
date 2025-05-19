@@ -1,8 +1,10 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import com.varlanv.testkonvence.APEnforcementFull;
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 import java.util.Objects;
-import org.jspecify.annotations.Nullable;
 
 final class EnforcementMeta {
 
@@ -34,9 +36,9 @@ final class EnforcementMeta {
 
         private final SourceFile sourceFile;
         private final String immediateClassName;
-        private final EnforceCandidate candidate;
+        private final APEnforcementFull candidate;
 
-        public Item(SourceFile sourceFile, String immediateClassName, EnforceCandidate candidate) {
+        public Item(SourceFile sourceFile, String immediateClassName, APEnforcementFull candidate) {
             this.sourceFile = sourceFile;
             this.immediateClassName = immediateClassName;
             this.candidate = candidate;
@@ -50,7 +52,7 @@ final class EnforcementMeta {
             return immediateClassName;
         }
 
-        public EnforceCandidate candidate() {
+        public APEnforcementFull candidate() {
             return candidate;
         }
 
