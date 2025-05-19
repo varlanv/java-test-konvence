@@ -1,7 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import java.util.function.IntConsumer;
-import org.checkerframework.common.value.qual.IntRange;
 
 interface ImmutableIntVector {
 
@@ -30,7 +29,7 @@ interface ImmutableIntVector {
 
     void forEach(IntConsumer action);
 
-    @IntRange(from = 0, to = Integer.MAX_VALUE) int size();
+    int size();
 
     default boolean empty() {
         return size() == 0;
@@ -40,7 +39,7 @@ interface ImmutableIntVector {
         return !empty();
     }
 
-    int get(@IntRange(from = 0, to = Integer.MAX_VALUE) int index);
+    int get(int index);
 
     int first();
 }

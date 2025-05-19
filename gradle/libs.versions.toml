@@ -11,8 +11,6 @@ cuteToolisticon = "1.7.0"
 benmanesVersion = "0.52.0"
 spotbugsVersion = "6.1.11"
 spotlessVersion = "7.0.3"
-checkerFrameworkPluginVersion = "0.6.53"
-checkerFrameworkVersion = "3.49.3"
 immutablesVersion = "2.7.3"
 jSpecifyVersion = "1.0.0"
 
@@ -28,9 +26,6 @@ toolisticon-cute = { group = "io.toolisticon.cute", name = "cute", version.ref =
 benmanes-version-plugin = { group = "com.github.ben-manes.versions", name = "com.github.ben-manes.versions.gradle.plugin", version.ref = "benmanesVersion" }
 spotbugs-plugin = { group = "com.github.spotbugs.snom", name = "spotbugs-gradle-plugin", version.ref = "spotbugsVersion" }
 spotless-plugin = { group = "com.diffplug.gradle.spotless", name = "com.diffplug.gradle.spotless.gradle.plugin", version.ref = "spotlessVersion" }
-checkerFramework-plugin = { group = "org.checkerframework", name = "org.checkerframework.gradle.plugin", version.ref = "checkerFrameworkPluginVersion" }
-checkerFramework-qual = { group = "org.checkerframework", name = "checker-qual", version.ref = "checkerFrameworkVersion" }
-checkerFramework-checker = { group = "org.checkerframework", name = "checker", version.ref = "checkerFrameworkVersion" }
 immutables-values = { group = "org.immutables", name = "value", version.ref = "immutablesVersion" }
 jSpecify = { group = "org.jspecify", name = "jspecify", version.ref = "jSpecifyVersion" }
 

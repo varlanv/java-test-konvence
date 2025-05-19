@@ -4,13 +4,15 @@ import org.immutables.value.Value;
 
 @Value.Immutable
 @Value.Style(strictBuilder = true)
-public interface APEnforcementMetaItem {
+public interface APEnforcementFull {
 
     String fullEnclosingClassName();
 
-    String displayName();
-
     String className();
 
-    String methodName();
+    String displayName();
+
+    String originalName();
+
+    String newName();
 }

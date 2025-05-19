@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence.gradle.plugin;
+package com.varlanv.testkonvence.proc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-class CamelMethodNameFromDisplayNameTest implements UnitTest {
+class SnakeMethodNameFromDisplayNameTest implements UnitTest {
 
     @TestFactory
     Stream<DynamicTest> defaultDataTable() {
@@ -19,31 +19,29 @@ class CamelMethodNameFromDisplayNameTest implements UnitTest {
                         Map.entry("12345", ""),
                         Map.entry("_123_", ""),
                         Map.entry("___", ""),
-                        Map.entry("Some good test name", "someGoodTestName"),
+                        Map.entry("Some good test name", "some_good_test_name"),
                         Map.entry(
                                 "Some good test name, which has comas, dots., question? marks, and exclamation marks!",
-                                "someGoodTestNameWhichHasComasDotsQuestionMarksAndExclamationMarks"),
+                                "some_good_test_name_which_has_comas_dots_question_marks_and_exclamation_marks"),
                         Map.entry("Some123good456test789name0", "some123good456test789name0"),
                         Map.entry("Слава Україні", ""),
                         Map.entry("qwe", "qwe"),
                         Map.entry("___abc___", "abc"),
-                        Map.entry("a_b_c_", "aBC"),
-                        Map.entry("a_b_c", "aBC"),
-                        Map.entry("-a_b_c-", "aBC"),
-                        Map.entry("a_b_c-", "aBC"),
-                        Map.entry("-a_b_c", "aBC"),
+                        Map.entry("a_b_c_", "a_b_c"),
+                        Map.entry("a_b_c", "a_b_c"),
+                        Map.entry("-a_b_c-", "a_b_c"),
+                        Map.entry("a_b_c-", "a_b_c"),
+                        Map.entry("-a_b_c", "a_b_c"),
                         Map.entry(
                                 "Some good\n multiline   test\n name, which also has multiple whitespaces and_underscores   ",
-                                "someGoodMultilineTestNameWhichAlsoHasMultipleWhitespacesAndUnderscores"))
+                                "some_good_multiline_test_name_which_also_has_multiple_whitespaces_and_underscores"))
                 .map(entry -> DynamicTest.dynamicTest(
-                        "Display name \"%s\" should be converted to camel method name \"%s\""
+                        "Display name \"%s\" should be converted to method name \"%s\""
                                 .formatted(entry.getKey(), entry.getValue()),
                         () -> {
                             var expectedMethodName = entry.getValue();
                             var displayName = entry.getKey();
-                            var actualMethodName = new CamelMethodNameFromDisplayName(
-                                            new SnakeMethodNameFromDisplayName(displayName, "anyOriginalMethodName"))
-                                    .newName();
+                            var actualMethodName = SnakeMethodNameFromDisplayName.convert(displayName);
                             assertThat(actualMethodName).isEqualTo(expectedMethodName);
                         }));
     }

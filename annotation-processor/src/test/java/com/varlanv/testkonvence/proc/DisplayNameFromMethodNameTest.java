@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence.gradle.plugin;
+package com.varlanv.testkonvence.proc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +34,7 @@ class DisplayNameFromMethodNameTest implements UnitTest {
                         () -> {
                             var expectedDisplayName = entry.getValue();
                             var methodName = entry.getKey();
-                            var actualDisplayName = new DisplayNameFromMethodName(methodName).displayName();
+                            var actualDisplayName = DisplayNameFromMethodName.convert(methodName);
                             assertThat(actualDisplayName).isEqualTo(expectedDisplayName);
                         }));
     }

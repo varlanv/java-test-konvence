@@ -108,7 +108,6 @@ class TestNameEnforceAction implements Action<Task> {
                                     ImmutableTrainOptions.builder()
                                             .dryWithFailing(dryWithFailingProvider.get())
                                             .reverseTransformation(enableReverseTransformation.get())
-                                            .camelCaseMethodName(camelCaseMethodNameProvider.get())
                                             .build())
                             .run();
                 }

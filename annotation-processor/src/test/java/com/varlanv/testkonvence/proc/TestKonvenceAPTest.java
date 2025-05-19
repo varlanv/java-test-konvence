@@ -3,6 +3,7 @@ package com.varlanv.testkonvence.proc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.varlanv.testkonvence.Constants;
 import com.varlanv.testkonvence.commontest.UnitTest;
 import io.toolisticon.cute.Cute;
 import io.toolisticon.cute.CuteApi;
@@ -10,6 +11,7 @@ import io.toolisticon.cute.GeneratedFileObjectMatcher;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.tools.StandardLocation;
 import org.intellij.lang.annotations.Language;
 import org.jspecify.annotations.Nullable;
@@ -54,22 +56,34 @@ class TestKonvenceAPTest implements UnitTest {
 
                     public class SomeTest {
 
-                        @DisplayName("Some cool test name")
                         @Test
+                        @DisplayName("Some cool test name")
                         void test() {
                         }
                     }
                     """,
                     """
-                    <root>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name</displayName>
-                              <className>SomeTest</className>
-                              <methodName>test</methodName>
-                          </entry>
-                      </root>
-                    """);
+                        <root>
+                            <q>
+                                <w>
+                                    <e>
+                                        <o>testcases.SomeTest</o>
+                                        <r>
+                                            <t>
+                                                <i>SomeTest</i>
+                                                <y>
+                                                    <u>
+                                                        <p>Some cool test name</p>
+                                                        <a>test</a>
+                                                        <s>some_cool_test_name</s>
+                                                    </u>
+                                                </y>
+                                            </t>
+                                        </r>
+                                    </e>
+                                </w>
+                            </q>
+                        </root>""");
         }
 
         @Test
@@ -91,15 +105,27 @@ class TestKonvenceAPTest implements UnitTest {
                     }
                     """,
                     """
-                    <root>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name</displayName>
-                              <className>SomeTest</className>
-                              <methodName>test</methodName>
-                          </entry>
-                      </root>
-                    """);
+                        <root>
+                            <q>
+                                <w>
+                                    <e>
+                                        <o>testcases.SomeTest</o>
+                                        <r>
+                                            <t>
+                                                <i>SomeTest</i>
+                                                <y>
+                                                    <u>
+                                                        <p>Some cool test name</p>
+                                                        <a>test</a>
+                                                        <s>some_cool_test_name</s>
+                                                    </u>
+                                                </y>
+                                            </t>
+                                        </r>
+                                    </e>
+                                </w>
+                            </q>
+                        </root>""");
         }
 
         @Test
@@ -120,15 +146,27 @@ class TestKonvenceAPTest implements UnitTest {
                     }
                     """,
                     """
-                    <root>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName/>
-                              <className>SomeTest</className>
-                              <methodName>test</methodName>
-                          </entry>
-                    </root>
-                    """);
+                        <root>
+                            <q>
+                                <w>
+                                    <e>
+                                        <o>testcases.SomeTest</o>
+                                        <r>
+                                            <t>
+                                                <i>SomeTest</i>
+                                                <y>
+                                                    <u>
+                                                        <p>test</p>
+                                                        <a>test</a>
+                                                        <s/>
+                                                    </u>
+                                                </y>
+                                            </t>
+                                        </r>
+                                    </e>
+                                </w>
+                            </q>
+                        </root>""");
         }
 
         @Test
@@ -150,21 +188,27 @@ class TestKonvenceAPTest implements UnitTest {
                     }
                     """,
                     """
-                    <root>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName/>
-                              <className>SomeTest</className>
-                              <methodName>test</methodName>
-                          </entry>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test class</displayName>
-                              <className>testcases.SomeTest</className>
-                              <methodName/>
-                          </entry>
-                    </root>
-                    """);
+                        <root>
+                            <q>
+                                <w>
+                                    <e>
+                                        <o>testcases.SomeTest</o>
+                                        <r>
+                                            <t>
+                                                <i>SomeTest</i>
+                                                <y>
+                                                    <u>
+                                                        <p>test</p>
+                                                        <a>test</a>
+                                                        <s/>
+                                                    </u>
+                                                </y>
+                                            </t>
+                                        </r>
+                                    </e>
+                                </w>
+                            </q>
+                        </root>""");
         }
 
         @Test
@@ -187,14 +231,26 @@ class TestKonvenceAPTest implements UnitTest {
                     """,
                     """
                     <root>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName/>
-                              <className>SomeTest</className>
-                              <methodName>test</methodName>
-                          </entry>
-                    </root>
-                    """);
+                        <q>
+                            <w>
+                                <e>
+                                    <o>testcases.SomeTest</o>
+                                    <r>
+                                        <t>
+                                            <i>SomeTest</i>
+                                            <y>
+                                                <u>
+                                                    <p>test</p>
+                                                    <a>test</a>
+                                                    <s/>
+                                                </u>
+                                            </y>
+                                        </t>
+                                    </r>
+                                </e>
+                            </w>
+                        </q>
+                    </root>""");
         }
     }
 
@@ -230,27 +286,37 @@ class TestKonvenceAPTest implements UnitTest {
                     }
                     """,
                     """
-                    <root>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name 1</displayName>
-                              <className>SomeTest</className>
-                              <methodName>test1</methodName>
-                          </entry>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name 2</displayName>
-                              <className>SomeTest</className>
-                              <methodName>test2</methodName>
-                          </entry>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name 3</displayName>
-                              <className>SomeTest</className>
-                              <methodName>test3</methodName>
-                          </entry>
-                      </root>
-                    """);
+                        <root>
+                            <q>
+                                <w>
+                                    <e>
+                                        <o>testcases.SomeTest</o>
+                                        <r>
+                                            <t>
+                                                <i>SomeTest</i>
+                                                <y>
+                                                    <u>
+                                                        <p>Some cool test name 1</p>
+                                                        <a>test1</a>
+                                                        <s>some_cool_test_name_1</s>
+                                                    </u>
+                                                    <u>
+                                                        <p>Some cool test name 2</p>
+                                                        <a>test2</a>
+                                                        <s>some_cool_test_name_2</s>
+                                                    </u>
+                                                    <u>
+                                                        <p>Some cool test name 3</p>
+                                                        <a>test3</a>
+                                                        <s>some_cool_test_name_3</s>
+                                                    </u>
+                                                </y>
+                                            </t>
+                                        </r>
+                                    </e>
+                                </w>
+                            </q>
+                        </root>""");
         }
 
         @Test
@@ -280,27 +346,37 @@ class TestKonvenceAPTest implements UnitTest {
                     }
                     """,
                     """
-                    <root>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName/>
-                              <className>SomeTest</className>
-                              <methodName>test1</methodName>
-                          </entry>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName/>
-                              <className>SomeTest</className>
-                              <methodName>test3</methodName>
-                          </entry>
-                          <entry>
-                              <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
-                              <displayName>Some cool test name 2</displayName>
-                              <className>SomeTest</className>
-                              <methodName>test2</methodName>
-                          </entry>
-                      </root>
-                    """);
+                        <root>
+                            <q>
+                                <w>
+                                    <e>
+                                        <o>testcases.SomeTest</o>
+                                        <r>
+                                            <t>
+                                                <i>SomeTest</i>
+                                                <y>
+                                                    <u>
+                                                        <p>test1</p>
+                                                        <a>test1</a>
+                                                        <s/>
+                                                    </u>
+                                                    <u>
+                                                        <p>Some cool test name 2</p>
+                                                        <a>test2</a>
+                                                        <s>some_cool_test_name_2</s>
+                                                    </u>
+                                                    <u>
+                                                        <p>test3</p>
+                                                        <a>test3</a>
+                                                        <s/>
+                                                    </u>
+                                                </y>
+                                            </t>
+                                        </r>
+                                    </e>
+                                </w>
+                            </q>
+                        </root>""");
         }
     }
 
@@ -322,15 +398,15 @@ class TestKonvenceAPTest implements UnitTest {
             var next = iterator.next();
             cute = cute.andSourceFile(next.getKey(), next.getValue());
         }
-        cute.andUseCompilerOptions("-A" + TestKonvenceAP.indentXmlOption + "=true")
+        cute.andUseCompilerOptions("-A" + Constants.apIndentXmlOption + "=true")
                 .whenCompiled()
                 .thenExpectThat()
                 .compilationSucceeds()
                 .andThat()
                 .fileObject(
                         StandardLocation.SOURCE_OUTPUT,
-                        TestKonvenceAP.enforcementsXmlPackage,
-                        TestKonvenceAP.enforcementsXmlName)
+                        Constants.apEnforcementsXmlPackage,
+                        Constants.apEnforcementsXmlName)
                 .matches(contentMatcher(expectedOutput))
                 .executeTest();
     }
@@ -343,12 +419,11 @@ class TestKonvenceAPTest implements UnitTest {
                     assertThat(actual).isEmpty();
                 } else {
                     assertThat(actual).isNotBlank();
-                    assertThat(Arrays.stream(actual.split("\n"))
-                                    .map(String::trim)
-                                    .toList())
-                            .isEqualTo(Arrays.stream(content.split("\n"))
-                                    .map(String::trim)
-                                    .toList());
+                    var actualString =
+                            Arrays.stream(actual.split("\n")).map(String::trim).collect(Collectors.joining());
+                    var expectedString =
+                            Arrays.stream(content.split("\n")).map(String::trim).collect(Collectors.joining());
+                    assertThat(actualString).isEqualTo(expectedString);
                 }
             }
             return true;

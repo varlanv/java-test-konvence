@@ -6,8 +6,6 @@ import com.diffplug.spotless.LineEnding;
 import com.github.benmanes.gradle.versions.VersionsPlugin;
 import com.github.spotbugs.snom.SpotBugsExtension;
 import com.github.spotbugs.snom.SpotBugsPlugin;
-import org.checkerframework.gradle.plugin.CheckerFrameworkExtension;
-import org.checkerframework.gradle.plugin.CheckerFrameworkPlugin;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -125,9 +123,6 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                                     "-Xlint:all",
                                     "-Werror"
                                 ));
-                                javaCompile.finalizedBy("spotbugsMain");
-                                javaCompile.shouldRunAfter("spotlessApply");
-                                javaCompile.dependsOn("spotlessApply");
                             });
                             tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
                                 extensions.<JavaToolchainService>configure("javaToolchains", javaToolchains -> {
@@ -198,27 +193,6 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                                 spotlessJava.cleanthat();
                             }));
 
-                        if (!projectName.equals("common-test")) {
-                            pluginManager.apply(CheckerFrameworkPlugin.class);
-                            var checkerFrameworkQualDependency = internalProperties.getLib("checkerFramework-qual");
-                            var checkerFrameworkCheckerDependency = internalProperties.getLib("checkerFramework-checker");
-                            dependencies.add(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME, checkerFrameworkQualDependency);
-                            dependencies.add(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, checkerFrameworkQualDependency);
-                            dependencies.add("checkerFramework", checkerFrameworkCheckerDependency);
-
-                            extensions.<CheckerFrameworkExtension>configure("checkerFramework", checkerFramework -> {
-                                    checkerFramework
-                                        .setCheckers(List.of(
-                                            "org.checkerframework.checker.nullness.NullnessChecker",
-                                            "org.checkerframework.checker.calledmethods.CalledMethodsChecker",
-                                            "org.checkerframework.checker.resourceleak.ResourceLeakChecker",
-                                            "org.checkerframework.checker.formatter.FormatterChecker",
-                                            "org.checkerframework.framework.util.PurityChecker"
-                                        ));
-                                    checkerFramework.setExcludeTests(true);
-                                }
-                            );
-                        }
                         // -------------------- Apply common plugins end --------------------
                     }
                 );
@@ -268,6 +242,22 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                 }
                 // -------------------- Configure publishing end --------------------
 
+            // Prepare aggregate static analysis tasks for future configuration
+            var staticAnalyseMain = tasks.register(
+                "staticAnalyseMain",
+                task -> {
+                    task.setGroup("static analysis");
+                    task.setDescription("Run static analysis on main sources");
+                    task.dependsOn("spotbugsMain");
+                }
+            );
+            var staticAnalyseTest = tasks.register(
+                "staticAnalyseTest",
+                task -> {
+                    task.setGroup("static analysis");
+                    task.setDescription("Run static analysis on test sources");
+                }
+            );
                 // -------------------- Configure tests start --------------------
                 pluginManager.withPlugin(
                     "java",
@@ -282,6 +272,7 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                         suites.configureEach(
                             suite -> {
                                 if (suite instanceof JvmTestSuite jvmTestSuite) {
+                                    staticAnalyseTest.configure(task -> task.dependsOn("spotbugs" + capitalize(suite.getName())));
                                     jvmTestSuite.useJUnitJupiter();
                                     jvmTestSuite.dependencies(
                                         jvmComponentDependencies -> {
@@ -351,103 +342,88 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                             integrationTestTaskName + "RuntimeOnly",
                             configuration -> configuration.extendsFrom(configurations.getByName(JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME))
                         );
-                    }
-                );
-                // -------------------- Configure tests start --------------------
+                        // -------------------- Configure tests end --------------------
 
-                // -------------------- Configure static analysis start --------------------
 
-                // Configure aggregate static analysis tasks
-                var staticAnalyseMain = tasks.register(
-                    "staticAnalyseMain",
-                    task -> {
-                        task.setGroup("static analysis");
-                        task.setDescription("Run static analysis on main sources");
-                    }
-                );
-                var staticAnalyseTest = tasks.register(
-                    "staticAnalyseTest",
-                    task -> {
-                        task.setGroup("static analysis");
-                        task.setDescription("Run static analysis on test sources");
-                    }
-                );
-                tasks.register(
-                    "staticAnalyseFull",
-                    task -> {
-                        task.setGroup("static analysis");
-                        task.setDescription("Run static analysis on all sources");
-                        task.dependsOn(staticAnalyseMain, staticAnalyseTest);
-                    }
-                );
-
-                tasks.named(
-                    "check",
-                    task -> {
-                        task.dependsOn(staticAnalyseMain);
-                    }
-                );
-
-                // Configure pmd
-                pluginManager.withPlugin(
-                    "pmd",
-                    pmd -> {
-                        var pmdExtension = (PmdExtension) extensions.getByName("pmd");
-                        pmdExtension.setRuleSetFiles(
-                            projectLayout.files(
-                                staticAnalyseFolder.resolve("pmd.xml")
-                            )
+                        // -------------------- Configure static analysis start --------------------
+                        tasks.register(
+                            "staticAnalyseFull",
+                            task -> {
+                                task.setGroup("static analysis");
+                                task.setDescription("Run static analysis on all sources");
+                                task.dependsOn(staticAnalyseMain, staticAnalyseTest, "spotlessCheck");
+                            }
                         );
-                        pmdExtension.setToolVersion(internalProperties.getVersion("pmdTool"));
-                        var pmdMainTask = tasks.named(
-                            "pmdMain",
-                            Pmd.class,
-                            pmdTask -> pmdTask.setRuleSetFiles(
-                                projectLayout.files(
-                                    staticAnalyseFolder.resolve("pmd.xml")
-                                )
-                            )
+
+                        tasks.named(
+                            "check",
+                            task -> {
+                                task.dependsOn(staticAnalyseMain);
+                            }
                         );
-                        var pmdTestTasks = Stream.of(JavaPlugin.TEST_TASK_NAME, internalConventionExtension.getIntegrationTestName().get())
-                            .map(testTaskName -> "pmd" + capitalize(testTaskName))
-                            .map(
-                                taskName -> tasks.named(
-                                    taskName,
+
+                        // Configure pmd
+                        pluginManager.withPlugin(
+                            "pmd",
+                            pmd -> {
+                                var pmdExtension = (PmdExtension) extensions.getByName("pmd");
+                                pmdExtension.setRuleSetFiles(
+                                    projectLayout.files(
+                                        staticAnalyseFolder.resolve("pmd.xml")
+                                    )
+                                );
+                                pmdExtension.setToolVersion(internalProperties.getVersion("pmdTool"));
+                                var pmdMainTask = tasks.named(
+                                    "pmdMain",
                                     Pmd.class,
                                     pmdTask -> pmdTask.setRuleSetFiles(
                                         projectLayout.files(
-                                            staticAnalyseFolder.resolve("pmd-test.xml")
+                                            staticAnalyseFolder.resolve("pmd.xml")
                                         )
                                     )
-                                )
-                            )
-                            .toList();
-                        staticAnalyseMain.configure(task -> task.dependsOn(pmdMainTask));
-                        staticAnalyseTest.configure(task -> task.dependsOn(pmdTestTasks));
+                                );
+                                var pmdTestTasks = Stream.of(JavaPlugin.TEST_TASK_NAME, internalConventionExtension.getIntegrationTestName().get())
+                                    .map(testTaskName -> "pmd" + capitalize(testTaskName))
+                                    .map(
+                                        taskName -> tasks.named(
+                                            taskName,
+                                            Pmd.class,
+                                            pmdTask -> pmdTask.setRuleSetFiles(
+                                                projectLayout.files(
+                                                    staticAnalyseFolder.resolve("pmd-test.xml")
+                                                )
+                                            )
+                                        )
+                                    )
+                                    .toList();
+                                staticAnalyseMain.configure(task -> task.dependsOn(pmdMainTask));
+                                staticAnalyseTest.configure(task -> task.dependsOn(pmdTestTasks));
+                            }
+                        );
+
+                        // Configure checkstyle
+                        pluginManager.withPlugin(
+                            "checkstyle",
+                            checkstyle -> {
+                                var checkstyleExtension = extensions.getByType(CheckstyleExtension.class);
+                                checkstyleExtension.setToolVersion(internalProperties.getVersion("checkstyleTool"));
+                                checkstyleExtension.setMaxWarnings(0);
+                                checkstyleExtension.setMaxErrors(0);
+                                checkstyleExtension.setConfigFile(staticAnalyseFolder.resolve("checkstyle.xml").toFile());
+
+                                var checkstyleMainTask = tasks.named("checkstyleMain");
+                                var checkstyleTestTasks = Stream.of("test", internalConventionExtension.getIntegrationTestName().get())
+                                    .map(string -> "checkstyle" + string.substring(0, 1).toUpperCase() + string.substring(1))
+                                    .map(taskName -> tasks.named(taskName, Task.class))
+                                    .collect(Collectors.toList());
+
+                                staticAnalyseMain.configure(task -> task.dependsOn(checkstyleMainTask));
+                                staticAnalyseTest.configure(task -> task.dependsOn(checkstyleTestTasks));
+                            }
+                        );
+                        // -------------------- Configure static analysis end --------------------
                     }
                 );
-
-                // Configure checkstyle
-                pluginManager.withPlugin(
-                    "checkstyle",
-                    checkstyle -> {
-                        var checkstyleExtension = extensions.getByType(CheckstyleExtension.class);
-                        checkstyleExtension.setToolVersion(internalProperties.getVersion("checkstyleTool"));
-                        checkstyleExtension.setMaxWarnings(0);
-                        checkstyleExtension.setMaxErrors(0);
-                        checkstyleExtension.setConfigFile(staticAnalyseFolder.resolve("checkstyle.xml").toFile());
-
-                        var checkstyleMainTask = tasks.named("checkstyleMain");
-                        var checkstyleTestTasks = Stream.of("test", internalConventionExtension.getIntegrationTestName().get())
-                            .map(string -> "checkstyle" + string.substring(0, 1).toUpperCase() + string.substring(1))
-                            .map(taskName -> tasks.named(taskName, Task.class))
-                            .collect(Collectors.toList());
-
-                        staticAnalyseMain.configure(task -> task.dependsOn(checkstyleMainTask));
-                        staticAnalyseTest.configure(task -> task.dependsOn(checkstyleTestTasks));
-                    }
-                );
-                // -------------------- Configure static analysis end --------------------
             }
         );
     }

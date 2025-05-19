@@ -1,11 +1,14 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import com.varlanv.testkonvence.APEnforcementMetaItem;
+import com.varlanv.testkonvence.APEnforcementFull;
+import com.varlanv.testkonvence.APEnforcementTop;
+import com.varlanv.testkonvence.ImmutableAPEnforcementFull;
+import com.varlanv.testkonvence.XmlMemoryEnforceMeta;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,7 +29,7 @@ final class Train {
     }
 
     public void run() throws Exception {
-        var items = new XmlEnforceMeta().items(resultXml);
+        var items = XmlMemoryEnforceMeta.fromXmlPath(resultXml).entries();
         var sourcesRootPath = sourcesRoot.toAbsolutePath().toString();
         new SourceReplacementTrain(
                         log,
@@ -36,38 +39,35 @@ final class Train {
                 .run();
     }
 
-    private Stream<EnforcementMeta.Item> toItemsStream(List<APEnforcementMetaItem> items, String sourcesRootPath) {
-        return items.stream().map(item -> parseItem(sourcesRootPath, item)).flatMap(Optional::stream);
+    private Stream<EnforcementMeta.Item> toItemsStream(Collection<APEnforcementTop> topItems, String sourcesRootPath) {
+        return topItems.stream()
+                .flatMap(topItem -> topItem.classEnforcements().stream()
+                        .flatMap(middleItem -> middleItem.methodEnforcements().stream()
+                                .map(item -> ImmutableAPEnforcementFull.builder()
+                                        .fullEnclosingClassName(topItem.fullEnclosingClassName())
+                                        .className(middleItem.className())
+                                        .displayName(item.displayName())
+                                        .originalName(item.originalName())
+                                        .newName(item.newName())
+                                        .build())))
+                .map(item -> parseItem(sourcesRootPath, item))
+                .flatMap(Optional::stream);
     }
 
-    private Optional<EnforcementMeta.Item> parseItem(String sourcesRootPath, APEnforcementMetaItem item) {
+    private Optional<EnforcementMeta.Item> parseItem(String sourcesRootPath, APEnforcementFull item) {
         var sourceFile = Paths.get(sourcesRootPath + File.separator
                 + item.fullEnclosingClassName().replace(".", File.separator) + ".java");
         if (Files.isRegularFile(sourceFile)) {
             var classNameParts = item.className().split("\\.");
             var className = classNameParts[classNameParts.length - 1];
+            var absolutePath = sourceFile.toAbsolutePath();
             try {
-                return Optional.<EnforcementMeta.Item>of(new EnforcementMeta.Item(
-                        SourceFile.ofPath(sourceFile.toAbsolutePath()),
-                        className,
-                        resolveEnforceCandidate(item, className)));
+                return Optional.of(new EnforcementMeta.Item(SourceFile.ofPath(absolutePath), className, item));
             } catch (Exception e) {
-                return Optional.<EnforcementMeta.Item>empty();
+                log.debug("Failed to parse enforcement item [{}], skipping", absolutePath);
+                return Optional.empty();
             }
         }
-        return Optional.<EnforcementMeta.Item>empty();
-    }
-
-    private EnforceCandidate resolveEnforceCandidate(APEnforcementMetaItem item, String className) {
-        if (item.methodName().isEmpty()) {
-            return new ClassNameFromDisplayName(item.displayName(), className);
-        } else {
-            var snake = new SnakeMethodNameFromDisplayName(item.displayName(), item.methodName());
-            if (trainOptions.camelCaseMethodName()) {
-                return new CamelMethodNameFromDisplayName(snake);
-            } else {
-                return snake;
-            }
-        }
+        return Optional.empty();
     }
 }

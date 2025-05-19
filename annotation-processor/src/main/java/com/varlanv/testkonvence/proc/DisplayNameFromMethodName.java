@@ -1,4 +1,4 @@
-package com.varlanv.testkonvence.gradle.plugin;
+package com.varlanv.testkonvence.proc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,14 +7,10 @@ import java.util.stream.Collectors;
 
 final class DisplayNameFromMethodName {
 
-    private final String methodName;
+    private DisplayNameFromMethodName() {}
 
-    DisplayNameFromMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public String displayName() {
-        var methodName = preTransform(this.methodName);
+    static String convert(String originalMethodName) {
+        var methodName = preTransform(originalMethodName);
         if (methodName.length() == 1) {
             return methodName;
         }
@@ -35,7 +31,7 @@ final class DisplayNameFromMethodName {
         }
     }
 
-    private List<String> splitCamelToWords(String input) {
+    private static List<String> splitCamelToWords(String input) {
         var words = new ArrayList<String>();
         var currentWord = new StringBuilder();
 
@@ -53,7 +49,7 @@ final class DisplayNameFromMethodName {
         return words;
     }
 
-    private String preTransform(String methodName) {
+    private static String preTransform(String methodName) {
         if (methodName.length() == 1) {
             return methodName;
         }

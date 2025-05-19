@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.Constants;
+import com.varlanv.testkonvence.FunctionalUtil;
 import com.varlanv.testkonvence.TrustedException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,29 +64,20 @@ final class SourceReplacementTrain {
 
     private Transformations transformations() {
         return enforcementMeta.items().stream()
-                .flatMap(item -> {
-                    var candidate = item.candidate();
-                    if (candidate.kind() == EnforceCandidate.Kind.CLASS) {
-                        return Stream.<Transformation>empty();
-                    }
-                    return Stream.concat(
-                            displayNameToMethodNameTransformations(item), methodNameToDisplayNameTransformations(item));
-                })
+                .flatMap(item -> Stream.concat(
+                        displayNameToMethodNameTransformations(item), methodNameToDisplayNameTransformations(item)))
                 .reduce(Transformations.empty(), Transformations::register, FunctionalUtil.throwingCombiner());
     }
 
     private Stream<Transformation> methodNameToDisplayNameTransformations(EnforcementMeta.Item item) {
         var candidate = item.candidate();
-        if (!trainOptions.reverseTransformation()
-                || candidate.kind() != EnforceCandidate.Kind.METHOD
-                || !candidate.displayName().isEmpty()) {
+        if (!trainOptions.reverseTransformation()) {
             return Stream.empty();
         }
         return Stream.of(Transformation.of(item.sourceFile().lines(), item, sourceLines -> {
-            var displayName = new DisplayNameFromMethodName(candidate.originalName()).displayName();
             var linesView = sourceLines.view();
-            var methodName = candidate.originalName();
-            var matchStr = "void " + methodName + "(";
+            var displayName = candidate.displayName();
+            var matchStr = "void " + candidate.originalName() + "(";
             var matchedLineIndexes = new IntVector(3);
             var linesSize = linesView.size();
             for (int lineIdx = 0; lineIdx < linesSize; lineIdx++) {
@@ -150,9 +142,8 @@ final class SourceReplacementTrain {
             return sourceLines;
         }
 
-        var junitImportPair = IntObjectPair.<String>of(-1, junitDisplayNameImport);
-        var sortedJunitImports = Stream.<IntObjectPair<String>>concat(
-                        importJunitLines.stream(), Stream.of(junitImportPair))
+        var junitImportPair = IntObjectPair.of(-1, junitDisplayNameImport);
+        var sortedJunitImports = Stream.concat(importJunitLines.stream(), Stream.of(junitImportPair))
                 .sorted(Comparator.comparing(IntObjectPair::right))
                 .collect(Collectors.toList());
         var indexOfJunitDisplayNameImport = sortedJunitImports.indexOf(junitImportPair);
@@ -179,8 +170,8 @@ final class SourceReplacementTrain {
         var newName = candidate.newName();
         var originalName = candidate.originalName();
 
-        if (newName.isEmpty() || originalName.equals(newName) || candidate.kind() != EnforceCandidate.Kind.METHOD) {
-            return Stream.<Transformation>empty();
+        if (newName.isEmpty() || originalName.equals(newName)) {
+            return Stream.empty();
         }
         var sourceFile = item.sourceFile();
         var lines = sourceFile.lines();
@@ -195,13 +186,13 @@ final class SourceReplacementTrain {
             }
         }
         if (methodNameMatches.isEmpty()) {
-            return Stream.<Transformation>empty();
+            return Stream.empty();
         }
         if (methodNameMatches.size() == 1) {
             var methodNameMatch = methodNameMatches.get(0);
             var matchIndexes = methodNameMatch.matchIndexes();
             if (matchIndexes.size() == 1) {
-                return Stream.<Transformation>of(Transformation.of(
+                return Stream.of(Transformation.of(
                         lines,
                         item,
                         (sl) -> sl.replaceAt(
@@ -216,7 +207,7 @@ final class SourceReplacementTrain {
                 }
             });
             if (finalIndexes.size() == 1) {
-                return Stream.<Transformation>of(Transformation.of(
+                return Stream.of(Transformation.of(
                         lines,
                         item,
                         (sl) -> sl.replaceAt(
@@ -226,7 +217,7 @@ final class SourceReplacementTrain {
                 var maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
                 if (maybeIndexOfClosestClassDistance.isPresent()) {
                     var indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
-                    return Stream.<Transformation>of(Transformation.of(
+                    return Stream.of(Transformation.of(
                             lines,
                             item,
                             (sl) -> sl.replaceAt(
@@ -234,7 +225,7 @@ final class SourceReplacementTrain {
                 }
             }
         }
-        return Stream.<Transformation>empty();
+        return Stream.empty();
     }
 
     private static final class MethodNameMatch {

@@ -1,6 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.Constants;
+import java.util.ArrayList;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.jvm.JvmTestSuite;
@@ -11,14 +12,17 @@ import org.gradle.testing.base.TestingExtension;
 @SuppressWarnings("UnstableApiUsage")
 public final class TestKonvencePlugin implements Plugin<Project> {
 
+    private static final String testKonvenceTaskGroup = "test konvence";
+    private static final String testKonvenceEnforceAllTaskName = "testKonvenceEnforceAll";
+    private static final String testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
+
     @Override
     public void apply(Project project) {
-        var testKonvenceTaskGroup = "test konvence";
-        var testKonvenceEnforceAllTaskName = "testKonvenceEnforceAll";
-        var testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
         var extensions = project.getExtensions();
         var dependencies = project.getDependencies();
         var objects = project.getObjects();
+        var tasks = project.getTasks();
+        var providers = project.getProviders();
         var testKonvenceExtension = (TestKonvenceExtension) extensions.create(
                 TestKonvenceExtensionView.class, TestKonvenceExtensionView.name(), TestKonvenceExtension.class);
         testKonvenceExtension.getEnabled().convention(true);
@@ -27,9 +31,6 @@ public final class TestKonvencePlugin implements Plugin<Project> {
         testKonvenceExtension.getReverseTransformation().convention(reverseTransformationSpec);
         testKonvenceExtension.getApplyAutomaticallyAfterTestTask().convention(true);
         testKonvenceExtension.getCamelCaseMethodNameProperty().convention(false);
-
-        var tasks = project.getTasks();
-        var providers = project.getProviders();
 
         project.afterEvaluate(p -> {
             project.getPlugins().withId("java", javaPlugin -> {
@@ -70,6 +71,17 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                                 .configure(compileTestJava -> {
                                     compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
                                     compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
+                                    var options = compileTestJava.getOptions();
+                                    var args = new ArrayList<>(options.getCompilerArgs());
+                                    args.add("-A" + Constants.apUseCamelCaseMethodNamesOption + "="
+                                            + testKonvenceExtension
+                                                    .getCamelCaseMethodNameProperty()
+                                                    .get());
+                                    args.add("-A" + Constants.apReversedOption + "="
+                                            + reverseTransformationSpec
+                                                    .getEnabled()
+                                                    .get());
+                                    options.setCompilerArgs(args);
                                 });
                         var name = testSuite.getName();
                         var processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);

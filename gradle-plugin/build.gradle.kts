@@ -21,6 +21,7 @@ gradlePlugin {
 dependencies {
     compileOnly(projects.sharedUtil)
     compileOnly(projects.constants)
+    testCompileOnly(projects.constants)
     testImplementation(projects.annotationProcessor)
     testImplementation(libs.toolisticon.cute)
 }
