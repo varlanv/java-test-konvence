@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.gradle.testkit.runner.GradleRunner;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -237,7 +238,8 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     private String defaultBuildGradleConfig(
             Function<ImmutableSampleOptions.Builder, ImmutableSampleOptions.Builder> configure) {
         var options = configure.apply(ImmutableSampleOptions.builder()).build();
-        return groovy(
+        @Language("groovy")
+        var buildGradle =
                 """
             plugins {
                 id("java")
@@ -266,10 +268,8 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
             test {
                 useJUnitPlatform()
             }
-            """
-                        .formatted(
-                                options.applyAutomaticallyAfterTestTask(),
-                                options.camelMethodName(),
-                                options.reverseTransformation()));
+            """;
+        return groovy(buildGradle.formatted(
+                options.applyAutomaticallyAfterTestTask(), options.camelMethodName(), options.reverseTransformation()));
     }
 }
