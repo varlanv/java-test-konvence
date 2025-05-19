@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Verify
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -16,5 +16,5 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - run: ./gradlew assemble
+      - run: ./gradlew check
         shell: bash
