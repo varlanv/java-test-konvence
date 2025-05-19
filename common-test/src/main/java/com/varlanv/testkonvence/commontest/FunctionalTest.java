@@ -56,33 +56,38 @@ public interface FunctionalTest extends BaseTest {
     default void runGradleRunnerFixture(
             DataTable params, List<String> arguments, ThrowingConsumer<RunnerFunctionalFixture> fixtureConsumer) {
         runFunctionalFixture(parentFixture -> {
-            var args = new ArrayList<>(arguments);
-            if (params.configurationCache()) {
-                args.add("--configuration-cache");
-            }
-            if (params.buildCache()) {
-                args.add("--build-cache");
-            }
-            args.add("--warning-mode=summary");
-            args.add("-Dorg.gradle.logging.level=lifecycle");
-            args.add("-Dorg.gradle.logging.stacktrace=all");
-            var env = new HashMap<>(System.getenv());
-            env.put("FUNCTIONAL_SPEC_RUN", "true");
-            env.putAll(params.isCi() ? Map.of("CI", "true") : Map.of("CI", "false"));
+            var runner = prepareGradleRunner(params, arguments, parentFixture.subjectProjectDir);
             fixtureConsumer.accept(new RunnerFunctionalFixture(
-                    GradleRunner.create()
-                            .withPluginClasspath()
-                            .withProjectDir(parentFixture.subjectProjectDir.toFile())
-                            .withEnvironment(env)
-                            .withArguments(args)
-                            .forwardOutput()
-                            .withGradleVersion(params.gradleVersion()),
+                    runner,
                     parentFixture.rootTestProjectDir,
                     parentFixture.subjectProjectDir,
                     parentFixture.settingsFile,
                     parentFixture.rootBuildFile,
                     parentFixture.propertiesFile));
         });
+    }
+
+    default GradleRunner prepareGradleRunner(DataTable params, List<String> arguments, Path projectDir) {
+        var args = new ArrayList<>(arguments);
+        if (params.configurationCache()) {
+            args.add("--configuration-cache");
+        }
+        if (params.buildCache()) {
+            args.add("--build-cache");
+        }
+        args.add("--warning-mode=summary");
+        args.add("-Dorg.gradle.logging.level=lifecycle");
+        args.add("-Dorg.gradle.logging.stacktrace=all");
+        var env = new HashMap<>(System.getenv());
+        env.put("FUNCTIONAL_SPEC_RUN", "true");
+        env.putAll(params.isCi() ? Map.of("CI", "true") : Map.of("CI", "false"));
+        return GradleRunner.create()
+                .withPluginClasspath()
+                .withProjectDir(projectDir.toFile())
+                .withEnvironment(env)
+                .withArguments(args)
+                .forwardOutput()
+                .withGradleVersion(params.gradleVersion());
     }
 
     default BuildResult build(GradleRunner runner, ThrowingFunction<GradleRunner, BuildResult> runFn) {
