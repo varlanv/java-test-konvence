@@ -7,10 +7,16 @@ import com.varlanv.testkonvence.commontest.UnitTest;
 import io.toolisticon.cute.Cute;
 import io.toolisticon.cute.CuteApi;
 import io.toolisticon.cute.GeneratedFileObjectMatcher;
+
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.tools.StandardLocation;
+
 import org.intellij.lang.annotations.Language;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
@@ -26,12 +32,12 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_doesnt_find_annotation__then_write_empty_file() {
             expectEmptyTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     public class SomeTest {
-
+                    
                         void test() {
                         }
                     }
@@ -45,22 +51,22 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_display_name_annotation_first_then_should_generate_output() {
             expectTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-
+                    
                     public class SomeTest {
-
+                    
                         @DisplayName("Some cool test name")
                         @Test
                         void test() {
                         }
                     }
                     """,
-                    """
+                """
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
@@ -75,22 +81,22 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_test_annotation_first_then_should_generate_output() {
             expectTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-
+                    
                     public class SomeTest {
-
+                    
                         @Test
                         @DisplayName("Some cool test name")
                         void test() {
                         }
                     }
                     """,
-                    """
+                """
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
@@ -105,21 +111,21 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_no_display_name_annotation_then_should_generate_output() {
             expectTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-
+                    
                     public class SomeTest {
-
+                    
                         @Test
                         void test() {
                         }
                     }
                     """,
-                    """
+                """
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
@@ -134,22 +140,22 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_display_name_is_on_class_level__then_should_generate_output() {
             expectTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-
+                    
                     @DisplayName("Some cool test class")
                     public class SomeTest {
-
+                    
                         @Test
                         void test() {
                         }
                     }
                     """,
-                    """
+                """
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
@@ -170,22 +176,22 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_display_name_is_on_parameterized_test__then_should_generate_output() {
             expectTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     import org.junit.jupiter.params.ParameterizedTest;
                     import org.junit.jupiter.params.provider.ValueSource;
-
+                    
                     public class SomeTest {
-
+                    
                         @ParameterizedTest
                         @ValueSource(strings = {""})
                         void test() {
                         }
                     }
                     """,
-                    """
+                """
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
@@ -198,38 +204,110 @@ class TestKonvenceAPTest implements UnitTest {
         }
     }
 
+    public static void main(String[] args) {
+        String prev = """
+            "<root>",
+                  "<entry>",
+                  "<fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>",
+                  "<displayName>Some cool test name 1</displayName>",
+                  "<className>SomeTest</className>",
+                  "<methodName>test1</methodName>",
+                  "</entry>",
+                  "<entry>",
+                  "<fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>",
+                  "<displayName>Some cool test name 2</displayName>",
+                  "<className>SomeTest</className>",
+                  "<methodName>test2</methodName>",
+                  "</entry>",
+                  "<entry>",
+                  "<fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>",
+                  "<displayName>Some cool test name 3</displayName>",
+                  "<className>SomeTest</className>",
+                  "<methodName>test3</methodName>",
+                  "</entry>",
+                  "</root>"
+            """;
+
+        String now = """
+            "<root>",
+                  "<q>",
+                  "<w>",
+                  "<e>",
+                  "<i>testcases.SomeTest</i>",
+                  "<r/>",
+                  "<r>",
+                  "<u>SomeTest</u>",
+                  "<t>",
+                  "<y>",
+                  "<o>Some cool test name 1</o>",
+                  "<p>test1</p>",
+                  "<a>some_cool_test_name_1</a>",
+                  "</y>",
+                  "<y>",
+                  "<o>Some cool test name 2</o>",
+                  "<p>test2</p>",
+                  "<a>some_cool_test_name_2</a>",
+                  "</y>",
+                  "<y>",
+                  "<o>Some cool test name 3</o>",
+                  "<p>test3</p>",
+                  "<a>some_cool_test_name_3</a>",
+                  "</y>",
+                  "</t>",
+                  "</r>",
+                  "</e>",
+                  "</w>",
+                  "</q>",
+                  "</root>"
+            """;
+
+        Function<String, String> fn = str ->
+            new BufferedReader(
+                new StringReader(str)).
+                lines()
+                .map(String::trim)
+                .collect(Collectors.joining());
+
+        System.out.println("PREV - " + fn.apply(prev).length());
+        System.out.println("NOW - " + fn.apply(now).length());
+
+        System.out.println("PREV - " + fn.apply(prev));
+
+        System.out.println("NOW - " + fn.apply(now));
+    }
+
     @Nested
     class SingleClassFileWithThreeTestMethods implements UnitTest {
 
         @Test
         void should_generate_correct_output_for_three_test_with_display_name() {
             expectTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-
+                    
                     public class SomeTest {
-
+                    
                         @Test
                         @DisplayName("Some cool test name 1")
                         void test1() {
                         }
-
+                    
                         @Test
                         @DisplayName("Some cool test name 2")
                         void test2() {
                         }
-
+                    
                         @Test
                         @DisplayName("Some cool test name 3")
                         void test3() {
                         }
                     }
                     """,
-                    """
+                """
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
@@ -256,30 +334,30 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void should_generate_correct_output_for_one_test_with_display_name_and_two_without() {
             expectTransformation(
-                    "testcases.SomeTest",
-                    """
+                "testcases.SomeTest",
+                """
                     package testcases;
-
+                    
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-
+                    
                     public class SomeTest {
-
+                    
                         @Test
                         void test1() {
                         }
-
+                    
                         @Test
                         @DisplayName("Some cool test name 2")
                         void test2() {
                         }
-
+                    
                         @Test
                         void test3() {
                         }
                     }
                     """,
-                    """
+                """
                     <root>
                           <entry>
                               <fullEnclosingClassName>testcases.SomeTest</fullEnclosingClassName>
@@ -306,11 +384,11 @@ class TestKonvenceAPTest implements UnitTest {
 
     void expectEmptyTransformation(String className, @Language("Java") String sources) {
         assertThatThrownBy(() -> expectTransformation(className, sources, null))
-                .hasMessageContaining("hasn't been called");
+            .hasMessageContaining("hasn't been called");
     }
 
     void expectTransformation(
-            String className, @Language("Java") String sources, @Language("XML") @Nullable String expectedOutput) {
+        String className, @Language("Java") String sources, @Language("XML") @Nullable String expectedOutput) {
         expectTransformation(Map.of(className, sources), expectedOutput);
     }
 
@@ -323,16 +401,16 @@ class TestKonvenceAPTest implements UnitTest {
             cute = cute.andSourceFile(next.getKey(), next.getValue());
         }
         cute.andUseCompilerOptions("-A" + TestKonvenceAP.indentXmlOption + "=true")
-                .whenCompiled()
-                .thenExpectThat()
-                .compilationSucceeds()
-                .andThat()
-                .fileObject(
-                        StandardLocation.SOURCE_OUTPUT,
-                        TestKonvenceAP.enforcementsXmlPackage,
-                        TestKonvenceAP.enforcementsXmlName)
-                .matches(contentMatcher(expectedOutput))
-                .executeTest();
+            .whenCompiled()
+            .thenExpectThat()
+            .compilationSucceeds()
+            .andThat()
+            .fileObject(
+                StandardLocation.SOURCE_OUTPUT,
+                TestKonvenceAP.enforcementsXmlPackage,
+                TestKonvenceAP.enforcementsXmlName)
+            .matches(contentMatcher(expectedOutput))
+            .executeTest();
     }
 
     private GeneratedFileObjectMatcher contentMatcher(@Nullable String content) {
@@ -344,11 +422,11 @@ class TestKonvenceAPTest implements UnitTest {
                 } else {
                     assertThat(actual).isNotBlank();
                     assertThat(Arrays.stream(actual.split("\n"))
-                                    .map(String::trim)
-                                    .toList())
-                            .isEqualTo(Arrays.stream(content.split("\n"))
-                                    .map(String::trim)
-                                    .toList());
+                        .map(String::trim)
+                        .toList())
+                        .isEqualTo(Arrays.stream(content.split("\n"))
+                            .map(String::trim)
+                            .toList());
                 }
             }
             return true;

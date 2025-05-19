@@ -1,6 +1,9 @@
 package com.varlanv.testkonvence.proc;
 
-import com.varlanv.testkonvence.*;
+import com.varlanv.testkonvence.APEnforcementFull;
+import com.varlanv.testkonvence.Constants;
+import com.varlanv.testkonvence.ImmutableAPEnforcementFull;
+import com.varlanv.testkonvence.Pair;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -148,7 +151,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
         return topLevelClassName;
     }
 
-    Set<APEnforcementFull> output = new LinkedHashSet<>();
+    APIntermediateOutput output = new APIntermediateOutput();
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -171,7 +174,9 @@ public final class TestKonvenceAP extends AbstractProcessor {
             for (var annotation : annotations) {
                 var fn = strategy.get(annotation.getQualifiedName().toString());
                 if (fn != null) {
-                    output.addAll(fn.apply(roundEnv, annotation));
+                    for (var item : fn.apply(roundEnv, annotation)) {
+                        output.add(item);
+                    }
                 }
             }
         }
@@ -180,12 +185,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
 
     private void writeResult() throws Exception {
         var filer = processingEnv.getFiler();
-        var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(ImmutableList.copyOfNonNull(output.stream()
-            .sorted(Comparator.comparing(APEnforcementFull::fullEnclosingClassName)
-                .thenComparing(APEnforcementFull::className)
-                .thenComparing(APEnforcementFull::displayName)
-                .thenComparing(APEnforcementFull::methodName))
-            .collect(Collectors.toList())));
+        var xmlMemoryEnforceMeta = new XmlMemoryEnforceMeta(output.items());
         var resource =
             filer.createResource(StandardLocation.SOURCE_OUTPUT, enforcementsXmlPackage, enforcementsXmlName);
         try (var writer = resource.openWriter()) {

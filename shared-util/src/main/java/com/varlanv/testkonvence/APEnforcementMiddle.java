@@ -2,6 +2,8 @@ package com.varlanv.testkonvence;
 
 import org.immutables.value.Value;
 
+import java.util.SortedSet;
+
 @Value.Immutable(builder = false)
 public interface APEnforcementMiddle {
 
@@ -9,5 +11,5 @@ public interface APEnforcementMiddle {
     String className();
 
     @Value.Parameter
-    ImmutableList<APEnforcementItem> items();
+    SortedSet<APEnforcementItem> methodEnforcements();
 }

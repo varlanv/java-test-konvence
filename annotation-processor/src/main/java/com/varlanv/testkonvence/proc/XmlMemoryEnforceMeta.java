@@ -1,9 +1,6 @@
 package com.varlanv.testkonvence.proc;
 
-import com.varlanv.testkonvence.APEnforcementFull;
-import com.varlanv.testkonvence.APEnforcementMiddle;
 import com.varlanv.testkonvence.APEnforcementTop;
-import com.varlanv.testkonvence.ImmutableList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -13,24 +10,28 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 final class XmlMemoryEnforceMeta {
 
-    private static final String fullEnclosingClassNameProp = "a";
-    private static final String classNameProp = "b";
-    private static final String displayNameProp = "c";
-    private static final String methodNameProp = "d";
-    private static final String newNameProp = "e";
-    private static final String reversedProp = "f";
-    private static final String methodEnforcementsProp = "g";
-    private static final String entriesProp = "h";
-    private final ImmutableList<APEnforcementFull> entries;
+    private static final String methodEnforcementsElement = "q";
+    private static final String topEntriesElement = "w";
+    private static final String fullEnclosingClassNameElement = "e";
+    private static final String classEntriesElement = "r";
+    private static final String classEntryElement = "r";
+    private static final String methodEntriesElement = "t";
+    private static final String methodEntryElement = "y";
+    private static final String classNameProp = "u";
+    private static final String fullEnclosingClassNameProp = "i";
+    private static final String displayNameProp = "o";
+    private static final String methodNameProp = "p";
+    private static final String newNameProp = "a";
+    private final Collection<APEnforcementTop> entries;
 
-    XmlMemoryEnforceMeta(ImmutableList<APEnforcementFull> entries) {
+    XmlMemoryEnforceMeta(Collection<APEnforcementTop> entries) {
         this.entries = entries;
     }
 
@@ -43,26 +44,40 @@ final class XmlMemoryEnforceMeta {
     }
 
     private void write(Writer writer, boolean indent) throws Exception {
-        if (entries.value().isEmpty()) {
+        if (entries.isEmpty()) {
             writer.write("");
             writer.flush();
             return;
         }
         var documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         var document = documentBuilder.newDocument();
-        var root = document.createElement("root");
-        document.appendChild(root);
-        var documentEnforcement = document.createElement(methodEnforcementsProp);
-        root.appendChild(documentEnforcement);
+        var rootEl = document.createElement("root");
+        document.appendChild(rootEl);
+        var documentEnforcementEl = document.createElement(methodEnforcementsElement);
+        rootEl.appendChild(documentEnforcementEl);
+        var topEntriesEl = document.createElement(topEntriesElement);
+        documentEnforcementEl.appendChild(topEntriesEl);
 
-
-        for (var entry : entries.value()) {
-            var entryEl = document.createElement("entry");
-            appendTo(entryEl, "fullEnclosingClassName", entry.fullEnclosingClassName(), document);
-            appendTo(entryEl, "displayName", entry.displayName(), document);
-            appendTo(entryEl, "className", entry.className(), document);
-            appendTo(entryEl, "methodName", entry.originalName(), document);
-            root.appendChild(entryEl);
+        for (var topItem : entries) {
+            var topEl = document.createElement(fullEnclosingClassNameElement);
+            topEntriesEl.appendChild(topEl);
+            appendStringTo(topEl, fullEnclosingClassNameProp, topItem.fullEnclosingClassName(), document);
+            var classEntriesEl = document.createElement(classEntriesElement);
+            topEl.appendChild(classEntriesEl);
+            for (var classItem : topItem.classEnforcements()) {
+                var classEl = document.createElement(classEntryElement);
+                topEl.appendChild(classEl);
+                appendStringTo(classEl, classNameProp, classItem.className(), document);
+                var methodEntriesEl = document.createElement(methodEntriesElement);
+                classEl.appendChild(methodEntriesEl);
+                for (var methodItem : classItem.methodEnforcements()) {
+                    var methodEl = document.createElement(methodEntryElement);
+                    methodEntriesEl.appendChild(methodEl);
+                    appendStringTo(methodEl, displayNameProp, methodItem.displayName(), document);
+                    appendStringTo(methodEl, methodNameProp, methodItem.originalName(), document);
+                    appendStringTo(methodEl, newNameProp, methodItem.newName(), document);
+                }
+            }
         }
 
         var tf = TransformerFactory.newInstance();
@@ -73,17 +88,9 @@ final class XmlMemoryEnforceMeta {
         writer.flush();
     }
 
-    private void appendTo(Element target, String name, String value, Document document) {
+    private void appendStringTo(Element target, String name, String value, Document document) {
         var displayName = document.createElement(name);
         displayName.setTextContent(value);
         target.appendChild(displayName);
-    }
-
-    private ImmutableList<APEnforcementTop> merge() {
-        Map<String, List<APEnforcementMiddle>> middleMap = new HashMap<>();
-        for (var entry : entries) {
-            middleMap.computeIfAbsent(entry.fullEnclosingClassName(), k -> new ArrayList<>())
-                .add(APEnforcementMiddle);
-        }
     }
 }

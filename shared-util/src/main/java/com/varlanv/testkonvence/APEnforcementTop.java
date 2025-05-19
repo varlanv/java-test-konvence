@@ -2,10 +2,14 @@ package com.varlanv.testkonvence;
 
 import org.immutables.value.Value;
 
-@Value.Immutable
+import java.util.SortedSet;
+
+@Value.Immutable(builder = false)
 public interface APEnforcementTop {
 
+    @Value.Parameter
     String fullEnclosingClassName();
 
-    ImmutableList<APEnforcementMiddle> classEnforcements();
+    @Value.Parameter
+    SortedSet<APEnforcementMiddle> classEnforcements();
 }
