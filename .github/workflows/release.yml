@@ -16,5 +16,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - run: ./gradlew check
+      - run: ./gradlew assemble
+        shell: bash
+      - run: ./gradlew staticAnalyseFull
+        shell: bash
+      - run: ./gradlew test
+        shell: bash
+      - run: ./gradlew integrationTest
+        shell: bash
+      - run: ./gradlew functionalTest
         shell: bash
