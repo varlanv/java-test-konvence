@@ -1,4 +1,4 @@
-name: Release
+name: Verify
 
 on:
   push:
@@ -18,11 +18,16 @@ jobs:
           java-version: '21'
       - run: ./gradlew assemble
         shell: bash
+        name: Compile
       - run: ./gradlew staticAnalyseFull
         shell: bash
+        name: Run static analysis
       - run: ./gradlew test
         shell: bash
+        name: Run unit tests
       - run: ./gradlew integrationTest
         shell: bash
+        name: Run integration tests
       - run: ./gradlew functionalTest
         shell: bash
+        name: Run functional tests
