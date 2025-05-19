@@ -81,9 +81,9 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     @TestFactory
     Stream<DynamicTest> fromSamples() {
         return TestSamples.testSamples().stream()
-                .map(sample -> DynamicTest.dynamicTest(sample.description(), () -> {
-                    sample.consume(consumableSample -> {
-                        runGradleRunnerFixture(
+                .map(sample -> DynamicTest.dynamicTest(
+                        sample.description(),
+                        () -> sample.consume(consumableSample -> runGradleRunnerFixture(
                                 new DataTable(false, false, false, TestGradleVersions.current()),
                                 List.of("test"),
                                 (fixture) -> {
@@ -117,9 +117,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
                                         assertThat(modifiedSourceFileContent)
                                                 .isEqualTo(sampleSourceFile.expectedTransformation());
                                     }
-                                });
-                    });
-                }));
+                                }))));
     }
 
     @ParameterizedTest

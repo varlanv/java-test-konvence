@@ -1,0 +1,35 @@
+name: Verify
+
+on:
+  push:
+    branches:
+      - feature/3/GA-setup
+
+jobs:
+  test:
+    name: Verify
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Setup gradle
+        uses: ./.github/actions/setup-gradle
+      - run: ./gradlew assemble
+        shell: bash
+        name: Compile
+      - run: ./gradlew staticAnalyseFull
+        shell: bash
+        name: Run static analysis
+      - run: ./gradlew test
+        shell: bash
+        name: Run unit tests
+      - run: ./gradlew integrationTest
+        shell: bash
+        name: Run integration tests
+      - run: ./gradlew functionalTest
+        shell: bash
+        name: Run functional tests

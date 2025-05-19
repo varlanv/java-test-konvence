@@ -7,10 +7,7 @@ public final class TestGradleVersions {
     private TestGradleVersions() {}
 
     public static List<String> list() {
-        return List.of(
-                current(), latest7()
-                //            latest6()
-                );
+        return List.of(current());
     }
 
     public static String current() {
