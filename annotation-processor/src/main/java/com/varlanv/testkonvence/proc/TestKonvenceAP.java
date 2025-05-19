@@ -36,10 +36,10 @@ public final class TestKonvenceAP extends AbstractProcessor {
     private boolean isCamelCase() {
         var res = isCamelCase;
         if (res == null) {
-            res = processingEnv
-                    .getOptions()
-                    .getOrDefault(Constants.apUseCamelCaseMethodNamesOption, "false")
-                    .equals("true");
+            res = "true"
+                    .equals(processingEnv
+                            .getOptions()
+                            .getOrDefault(Constants.apUseCamelCaseMethodNamesOption, "false"));
             isCamelCase = res;
         }
         return res;
@@ -48,10 +48,7 @@ public final class TestKonvenceAP extends AbstractProcessor {
     private boolean isReversedEnabled() {
         var res = isReverseEnabled;
         if (res == null) {
-            res = processingEnv
-                    .getOptions()
-                    .getOrDefault(Constants.apReversedOption, "true")
-                    .equals("true");
+            res = "true".equals(processingEnv.getOptions().getOrDefault(Constants.apReversedOption, "true"));
             isReverseEnabled = res;
         }
         return res;

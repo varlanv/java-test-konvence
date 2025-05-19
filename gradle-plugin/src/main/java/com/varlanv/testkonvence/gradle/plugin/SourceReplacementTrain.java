@@ -70,9 +70,6 @@ final class SourceReplacementTrain {
     }
 
     private Stream<Transformation> methodNameToDisplayNameTransformations(EnforcementMeta.Item item) {
-        if (item.candidate().originalName().equals("test_happy")) {
-            var i = 1;
-        }
         var candidate = item.candidate();
         if (!trainOptions.reverseTransformation()) {
             return Stream.empty();

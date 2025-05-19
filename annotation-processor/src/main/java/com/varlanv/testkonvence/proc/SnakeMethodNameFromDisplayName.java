@@ -8,7 +8,9 @@ import java.util.stream.Stream;
 
 final class SnakeMethodNameFromDisplayName {
 
-    private static final Function<String, String>[] methodNameChain = Stream.of(
+    private SnakeMethodNameFromDisplayName() {}
+
+    private static final Function<String, String>[] transformationsChain = Stream.of(
                     // 1. Replace non-alphanumeric characters with underscores
                     Map.entry("[^a-zA-Z0-9]+", "_"),
                     // 2. Remove leading and trailing underscores
@@ -29,14 +31,14 @@ final class SnakeMethodNameFromDisplayName {
             })
             .collect(Collectors.collectingAndThen(Collectors.toList(), result -> {
                 result.add(String::toLowerCase);
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings({"unchecked", "rawtypes"})
                 var array = (Function<String, String>[]) result.toArray(new Function[0]);
                 return array;
             }));
 
     static String convert(String displayName) {
         var res = displayName;
-        for (var transform : methodNameChain) {
+        for (var transform : transformationsChain) {
             res = transform.apply(res);
         }
         return res;

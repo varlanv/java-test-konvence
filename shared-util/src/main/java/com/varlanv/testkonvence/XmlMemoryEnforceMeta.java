@@ -145,39 +145,39 @@ public final class XmlMemoryEnforceMeta {
         }
         var topEntries = new ArrayList<APEnforcementTop>();
         forEachNamed(topEntriesNode.getChildNodes(), (topNode, topName) -> {
-            if (topName.equals(fullEnclosingClassNameElement)) {
+            if (fullEnclosingClassNameElement.equals(topName)) {
                 var classEnforcements = new TreeSet<APEnforcementMiddle>();
                 var topBuilder = ImmutableAPEnforcementTop.builder().classEnforcements(classEnforcements);
                 forEachNamed(topNode.getChildNodes(), (topClassNode, topClassNodeName) -> {
-                    if (topClassNodeName.equals(fullEnclosingClassNameProp)) {
+                    if (fullEnclosingClassNameProp.equals(topClassNodeName)) {
                         topBuilder.fullEnclosingClassName(topClassNode.getTextContent());
-                    } else if (topClassNodeName.equals(classEntriesElement)) {
+                    } else if (classEntriesElement.equals(topClassNodeName)) {
                         forEachNamed(topClassNode.getChildNodes(), (classEntriesNode, classEntriesNodeName) -> {
-                            if (classEntriesNodeName.equals(classEntryElement)) {
+                            if (classEntryElement.equals(classEntriesNodeName)) {
                                 var methodEnforcements = new TreeSet<APEnforcementItem>();
                                 var middleBuilder =
                                         ImmutableAPEnforcementMiddle.builder().methodEnforcements(methodEnforcements);
                                 forEachNamed(classEntriesNode.getChildNodes(), (classEntryNode, classEntryNodeName) -> {
-                                    if (classEntryNodeName.equals(classNameProp)) {
+                                    if (classNameProp.equals(classEntryNodeName)) {
                                         middleBuilder.className(classEntryNode.getTextContent());
-                                    } else if (classEntryNodeName.equals(methodEntriesElement)) {
+                                    } else if (methodEntriesElement.equals(classEntryNodeName)) {
                                         forEachNamed(
                                                 classEntryNode.getChildNodes(),
                                                 (methodEntriesNode, methodEntriesNodeName) -> {
-                                                    if (methodEntriesNodeName.equals(methodEntryElement)) {
+                                                    if (methodEntryElement.equals(methodEntriesNodeName)) {
                                                         var itemBuilder = ImmutableAPEnforcementItem.builder();
                                                         forEachNamed(
                                                                 methodEntriesNode.getChildNodes(),
                                                                 (methodEntryNode, methodEntryNodeName) -> {
-                                                                    if (methodEntryNodeName.equals(displayNameProp)) {
+                                                                    if (displayNameProp.equals(methodEntryNodeName)) {
                                                                         itemBuilder.displayName(
                                                                                 methodEntryNode.getTextContent());
-                                                                    } else if (methodEntryNodeName.equals(
-                                                                            methodNameProp)) {
+                                                                    } else if (methodNameProp.equals(
+                                                                            methodEntryNodeName)) {
                                                                         itemBuilder.originalName(
                                                                                 methodEntryNode.getTextContent());
-                                                                    } else if (methodEntryNodeName.equals(
-                                                                            newNameProp)) {
+                                                                    } else if (newNameProp.equals(
+                                                                            methodEntryNodeName)) {
                                                                         itemBuilder.newName(
                                                                                 methodEntryNode.getTextContent());
                                                                     }

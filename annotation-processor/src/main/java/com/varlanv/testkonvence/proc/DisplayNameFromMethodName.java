@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 final class DisplayNameFromMethodName {
 
+    private DisplayNameFromMethodName() {}
+
     static String convert(String originalMethodName) {
         var methodName = preTransform(originalMethodName);
         if (methodName.length() == 1) {

@@ -2,6 +2,8 @@ package com.varlanv.testkonvence.proc;
 
 final class CamelMethodNameFromDisplayName {
 
+    private CamelMethodNameFromDisplayName() {}
+
     static String convert(String displayName) {
         var snakeName = SnakeMethodNameFromDisplayName.convert(displayName);
         var result = new StringBuilder(snakeName.length());
