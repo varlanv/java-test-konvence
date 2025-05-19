@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - feature/3/GA-setup
 
 jobs:
   test:
@@ -12,3 +12,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Echo
+        run: echo 1
+        shell: bash
