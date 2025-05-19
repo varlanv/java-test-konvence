@@ -3,7 +3,8 @@ name: Verify
 on:
   push:
     branches:
-      - feature/3/GA-setup
+      - feature/*
+      - fix/*
 
 jobs:
   test:

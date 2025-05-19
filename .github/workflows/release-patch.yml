@@ -17,8 +17,8 @@ jobs:
       - name: Setup gradle
         uses: ./.github/actions/setup-gradle
       - name: Increment patch version
-        run: ./gradle incrementPatchVersion
+        run: ./gradlew incrementPatchVersion
         shell: bash
       - name: Publish
-        run: ./gradle publishPlugins
+        run: ./gradlew publishPlugins
         shell: bash
