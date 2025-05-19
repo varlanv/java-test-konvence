@@ -1,11 +1,11 @@
-name: Release patch
+name: Release major
 
 on:
   workflow_dispatch:
 
 jobs:
   test:
-    name: Release patch version
+    name: Release major version
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -16,8 +16,8 @@ jobs:
           java-version: '21'
       - name: Setup gradle
         uses: ./.github/actions/setup-gradle
-      - name: Increment patch version
-        run: ./gradle incrementPatchVersion
+      - name: Increment major version
+        run: ./gradle incrementMajorVersion
         shell: bash
       - name: Publish
         run: ./gradle publishPlugins
