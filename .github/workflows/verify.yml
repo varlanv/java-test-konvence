@@ -16,6 +16,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+      - name: Setup gradle
+        uses: ./.github/actions/setup-gradle
       - run: ./gradlew assemble
         shell: bash
         name: Compile
