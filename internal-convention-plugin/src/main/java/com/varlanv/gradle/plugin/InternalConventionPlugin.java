@@ -84,9 +84,9 @@ public final class InternalConventionPlugin implements Plugin<Project> {
         internalConventionExtension.getInternalModule().convention(false);
         var isGradlePlugin = projectName.endsWith("plugin");
         var javaVersion = 11;
-        var jdkVersion = 17;
-        var internalJavaVersion = 17;
-        var jvmVendor = JvmVendorSpec.AZUL;
+        var jdkVersion = 21;
+        var internalJavaVersion = 21;
+        var jvmVendor = JvmVendorSpec.ADOPTIUM;
         var staticAnalyseFolder = rootDir.resolve(".config").resolve("static-analyse");
         // -------------------- Variables end --------------------
 

@@ -1,6 +1,11 @@
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
+tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {
+    languageVersion = JavaLanguageVersion.of(21)
+    vendor = JvmVendorSpec.ADOPTIUM
+}
+
 abstract class IncrementVersion : DefaultTask() {
 
     @InputDirectory
