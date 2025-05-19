@@ -22,6 +22,8 @@ import org.gradle.api.publish.maven.MavenPomLicense;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
+import org.gradle.external.javadoc.CoreJavadocOptions;
+import org.gradle.external.javadoc.MinimalJavadocOptions;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 import org.gradle.jvm.toolchain.JavaToolchainService;
 import org.gradle.jvm.toolchain.JvmVendorSpec;
@@ -125,9 +127,11 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                                 ));
                             });
                             tasks.named(mainSourceSet.getJavadocTaskName(), Javadoc.class).configure(javadoc -> {
+                                var javadocOptions =(CoreJavadocOptions) javadoc.getOptions();
+                                javadocOptions.addStringOption("Xdoclint:none", "-quiet");
                                 extensions.<JavaToolchainService>configure("javaToolchains", javaToolchains -> {
                                     javadoc.getJavadocTool().set(javaToolchains.javadocToolFor(toolchainSpec -> {
-                                        toolchainSpec.getLanguageVersion().set(JavaLanguageVersion.of(javaVersion));
+                                        toolchainSpec.getLanguageVersion().set(JavaLanguageVersion.of(jdkVersion));
                                         toolchainSpec.getVendor().set(jvmVendor);
                                     }));
                                 });
