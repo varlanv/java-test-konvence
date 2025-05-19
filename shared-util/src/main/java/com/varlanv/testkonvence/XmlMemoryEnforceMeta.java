@@ -1,17 +1,5 @@
 package com.varlanv.testkonvence;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Writer;
@@ -22,6 +10,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.TreeSet;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public final class XmlMemoryEnforceMeta {
 
@@ -131,8 +130,7 @@ public final class XmlMemoryEnforceMeta {
         target.appendChild(displayName);
     }
 
-    @Nullable
-    private static XmlMemoryEnforceMeta parse(Document document) throws Exception {
+    @Nullable private static XmlMemoryEnforceMeta parse(Document document) throws Exception {
         var rootNode = document.getFirstChild();
         if (rootNode == null) {
             return null;
@@ -157,26 +155,36 @@ public final class XmlMemoryEnforceMeta {
                         forEachNamed(topClassNode.getChildNodes(), (classEntriesNode, classEntriesNodeName) -> {
                             if (classEntriesNodeName.equals(classEntryElement)) {
                                 var methodEnforcements = new TreeSet<APEnforcementItem>();
-                                var middleBuilder = ImmutableAPEnforcementMiddle.builder().methodEnforcements(methodEnforcements);
+                                var middleBuilder =
+                                        ImmutableAPEnforcementMiddle.builder().methodEnforcements(methodEnforcements);
                                 forEachNamed(classEntriesNode.getChildNodes(), (classEntryNode, classEntryNodeName) -> {
                                     if (classEntryNodeName.equals(classNameProp)) {
                                         middleBuilder.className(classEntryNode.getTextContent());
                                     } else if (classEntryNodeName.equals(methodEntriesElement)) {
-                                        forEachNamed(classEntryNode.getChildNodes(), (methodEntriesNode, methodEntriesNodeName) -> {
-                                            if (methodEntriesNodeName.equals(methodEntryElement)) {
-                                                var itemBuilder = ImmutableAPEnforcementItem.builder();
-                                                forEachNamed(methodEntriesNode.getChildNodes(), (methodEntryNode, methodEntryNodeName) -> {
-                                                    if (methodEntryNodeName.equals(displayNameProp)) {
-                                                        itemBuilder.displayName(methodEntryNode.getTextContent());
-                                                    } else if (methodEntryNodeName.equals(methodNameProp)) {
-                                                        itemBuilder.originalName(methodEntryNode.getTextContent());
-                                                    } else if (methodEntryNodeName.equals(newNameProp)) {
-                                                        itemBuilder.newName(methodEntryNode.getTextContent());
+                                        forEachNamed(
+                                                classEntryNode.getChildNodes(),
+                                                (methodEntriesNode, methodEntriesNodeName) -> {
+                                                    if (methodEntriesNodeName.equals(methodEntryElement)) {
+                                                        var itemBuilder = ImmutableAPEnforcementItem.builder();
+                                                        forEachNamed(
+                                                                methodEntriesNode.getChildNodes(),
+                                                                (methodEntryNode, methodEntryNodeName) -> {
+                                                                    if (methodEntryNodeName.equals(displayNameProp)) {
+                                                                        itemBuilder.displayName(
+                                                                                methodEntryNode.getTextContent());
+                                                                    } else if (methodEntryNodeName.equals(
+                                                                            methodNameProp)) {
+                                                                        itemBuilder.originalName(
+                                                                                methodEntryNode.getTextContent());
+                                                                    } else if (methodEntryNodeName.equals(
+                                                                            newNameProp)) {
+                                                                        itemBuilder.newName(
+                                                                                methodEntryNode.getTextContent());
+                                                                    }
+                                                                });
+                                                        methodEnforcements.add(itemBuilder.build());
                                                     }
                                                 });
-                                                methodEnforcements.add(itemBuilder.build());
-                                            }
-                                        });
                                     }
                                 });
                                 classEnforcements.add(middleBuilder.build());
@@ -190,7 +198,8 @@ public final class XmlMemoryEnforceMeta {
         return new XmlMemoryEnforceMeta(Collections.unmodifiableList(topEntries));
     }
 
-    private static void forEachNamed(NodeList nodeList, ThrowingBiConsumer<@NonNull Node, @NonNull String> consumer) throws Exception {
+    private static void forEachNamed(NodeList nodeList, ThrowingBiConsumer<@NonNull Node, @NonNull String> consumer)
+            throws Exception {
         var len = nodeList.getLength();
         for (var idx = 0; idx < len; idx++) {
             var item = nodeList.item(idx);

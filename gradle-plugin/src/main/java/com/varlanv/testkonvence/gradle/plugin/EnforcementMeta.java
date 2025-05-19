@@ -1,10 +1,9 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
 import com.varlanv.testkonvence.APEnforcementFull;
-import org.jspecify.annotations.Nullable;
-
 import java.util.List;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 final class EnforcementMeta {
 

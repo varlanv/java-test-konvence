@@ -3,12 +3,11 @@ package com.varlanv.testkonvence.gradle.plugin;
 import com.varlanv.testkonvence.Constants;
 import com.varlanv.testkonvence.FunctionalUtil;
 import com.varlanv.testkonvence.TrustedException;
-import org.slf4j.Logger;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
 
 final class SourceReplacementTrain {
 
@@ -25,38 +24,38 @@ final class SourceReplacementTrain {
     public void run() throws Exception {
         transformations().consumeGroupedByFile((target, transformations) -> {
             var resultLines = IntStream.range(0, transformations.size())
-                .mapToObj(i -> IntObjectPair.of(i, transformations.get(i)))
-                .sorted((a, b) -> {
-                    if (a.right()
-                        .input()
-                        .meta()
-                        .candidate()
-                        .newName()
-                        .equals(b.right().input().meta().candidate().originalName())) {
-                        return 1;
-                    } else {
-                        return Integer.compare(a.left(), b.left());
-                    }
-                })
-                .reduce(
-                    target.lines(),
-                    (lines, transformation) ->
-                        transformation.right().action().apply(lines),
-                    FunctionalUtil.throwingCombiner());
+                    .mapToObj(i -> IntObjectPair.of(i, transformations.get(i)))
+                    .sorted((a, b) -> {
+                        if (a.right()
+                                .input()
+                                .meta()
+                                .candidate()
+                                .newName()
+                                .equals(b.right().input().meta().candidate().originalName())) {
+                            return 1;
+                        } else {
+                            return Integer.compare(a.left(), b.left());
+                        }
+                    })
+                    .reduce(
+                            target.lines(),
+                            (lines, transformation) ->
+                                    transformation.right().action().apply(lines),
+                            FunctionalUtil.throwingCombiner());
             if (resultLines.changed()) {
                 if (trainOptions.dryWithFailing()) {
                     throw new TrustedException(String.format(
-                        "[%s] - found test naming mismatch in file [%s]. "
-                            + "Consider running `testKonvenceEnforceAll` "
-                            + "Gradle task to apply test naming transformations.",
-                        Constants.PLUGIN_NAME, target.path().toAbsolutePath()));
+                            "[%s] - found test naming mismatch in file [%s]. "
+                                    + "Consider running `testKonvenceEnforceAll` "
+                                    + "Gradle task to apply test naming transformations.",
+                            Constants.PLUGIN_NAME, target.path().toAbsolutePath()));
                 } else {
                     try {
                         target.save(resultLines);
                     } catch (Exception e) {
                         log.debug(
-                            "Failed to apply transformation to file [{}], ignoring exception",
-                            target.path().toAbsolutePath());
+                                "Failed to apply transformation to file [{}], ignoring exception",
+                                target.path().toAbsolutePath());
                     }
                 }
             }
@@ -65,9 +64,9 @@ final class SourceReplacementTrain {
 
     private Transformations transformations() {
         return enforcementMeta.items().stream()
-            .flatMap(item -> Stream.concat(
-                displayNameToMethodNameTransformations(item), methodNameToDisplayNameTransformations(item)))
-            .reduce(Transformations.empty(), Transformations::register, FunctionalUtil.throwingCombiner());
+                .flatMap(item -> Stream.concat(
+                        displayNameToMethodNameTransformations(item), methodNameToDisplayNameTransformations(item)))
+                .reduce(Transformations.empty(), Transformations::register, FunctionalUtil.throwingCombiner());
     }
 
     private Stream<Transformation> methodNameToDisplayNameTransformations(EnforcementMeta.Item item) {
@@ -100,25 +99,25 @@ final class SourceReplacementTrain {
                 var stringBuilder = new StringBuilder();
                 stringBuilder.append(" ".repeat(Math.max(0, matchIdx)));
                 return findIndexOfEmptyLine(lineIdx, linesView)
-                    .map(emptyLineIdx -> {
-                        var displayNameAnnotation = stringBuilder
-                            .append("@DisplayName(\"")
-                            .append(displayName)
-                            .append("\")")
-                            .toString();
-                        var sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
-                        return handleDisplayNameImport(sl);
-                    })
-                    .orElse(sourceLines);
+                        .map(emptyLineIdx -> {
+                            var displayNameAnnotation = stringBuilder
+                                    .append("@DisplayName(\"")
+                                    .append(displayName)
+                                    .append("\")")
+                                    .toString();
+                            var sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
+                            return handleDisplayNameImport(sl);
+                        })
+                        .orElse(sourceLines);
             } else {
                 var maybeIndexOfClosestClassDistance =
-                    findIndexOfClosestClassDistance(item, linesView, matchedLineIndexes);
+                        findIndexOfClosestClassDistance(item, linesView, matchedLineIndexes);
                 if (maybeIndexOfClosestClassDistance.isPresent()) {
                     int indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
                     var line = linesView.get(indexOfClosestClassDistance);
                     var matchIdx = line.indexOf(matchStr);
                     var displayNameAnnotation =
-                        " ".repeat(Math.max(0, matchIdx)) + "@DisplayName(\"" + displayName + "\")";
+                            " ".repeat(Math.max(0, matchIdx)) + "@DisplayName(\"" + displayName + "\")";
                     var sl = sourceLines.pushAbove(indexOfClosestClassDistance, displayNameAnnotation);
                     return handleDisplayNameImport(sl);
                 }
@@ -134,11 +133,11 @@ final class SourceReplacementTrain {
         for (int lineIdx = 0; lineIdx < linesView.size(); lineIdx++) {
             var line = linesView.get(lineIdx);
             if (line.contains("class {")
-                || line.contains("import org.junit.jupiter.api.*")
-                || line.contains(junitDisplayNameImport)) {
+                    || line.contains("import org.junit.jupiter.api.*")
+                    || line.contains(junitDisplayNameImport)) {
                 return sourceLines;
             } else if (line.contains("import org.junit.jupiter.api")
-                || line.contains("org.junit.jupiter.params.ParameterizedTest")) {
+                    || line.contains("org.junit.jupiter.params.ParameterizedTest")) {
                 importJunitLines.add(IntObjectPair.of(lineIdx, line));
             }
         }
@@ -147,10 +146,9 @@ final class SourceReplacementTrain {
         }
 
         var junitImportPair = IntObjectPair.of(-1, junitDisplayNameImport);
-        var sortedJunitImports = Stream.concat(
-                importJunitLines.stream(), Stream.of(junitImportPair))
-            .sorted(Comparator.comparing(IntObjectPair::right))
-            .collect(Collectors.toList());
+        var sortedJunitImports = Stream.concat(importJunitLines.stream(), Stream.of(junitImportPair))
+                .sorted(Comparator.comparing(IntObjectPair::right))
+                .collect(Collectors.toList());
         var indexOfJunitDisplayNameImport = sortedJunitImports.indexOf(junitImportPair);
         if (indexOfJunitDisplayNameImport == 0) {
             var idx = sortedJunitImports.get(1).left();
@@ -198,10 +196,10 @@ final class SourceReplacementTrain {
             var matchIndexes = methodNameMatch.matchIndexes();
             if (matchIndexes.size() == 1) {
                 return Stream.of(Transformation.of(
-                    lines,
-                    item,
-                    (sl) -> sl.replaceAt(
-                        methodNameMatch.lineIndex(), line -> line.replace(originalName, newName))));
+                        lines,
+                        item,
+                        (sl) -> sl.replaceAt(
+                                methodNameMatch.lineIndex(), line -> line.replace(originalName, newName))));
             }
         } else {
             var finalIndexes = new IntVector(methodNameMatches.size());
@@ -213,20 +211,20 @@ final class SourceReplacementTrain {
             });
             if (finalIndexes.size() == 1) {
                 return Stream.of(Transformation.of(
-                    lines,
-                    item,
-                    (sl) -> sl.replaceAt(
-                        finalIndexes.get(0),
-                        line -> line.replace("void " + originalName + "(", "void " + newName + "("))));
+                        lines,
+                        item,
+                        (sl) -> sl.replaceAt(
+                                finalIndexes.get(0),
+                                line -> line.replace("void " + originalName + "(", "void " + newName + "("))));
             } else {
                 var maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
                 if (maybeIndexOfClosestClassDistance.isPresent()) {
                     var indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
                     return Stream.of(Transformation.of(
-                        lines,
-                        item,
-                        (sl) -> sl.replaceAt(
-                            indexOfClosestClassDistance, line -> line.replace(originalName, newName))));
+                            lines,
+                            item,
+                            (sl) -> sl.replaceAt(
+                                    indexOfClosestClassDistance, line -> line.replace(originalName, newName))));
                 }
             }
         }
@@ -253,7 +251,7 @@ final class SourceReplacementTrain {
     }
 
     private Optional<Integer> findIndexOfClosestClassDistance(
-        EnforcementMeta.Item item, List<String> lines, ImmutableIntVector matchedLineIndexes) {
+            EnforcementMeta.Item item, List<String> lines, ImmutableIntVector matchedLineIndexes) {
         var lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
         var immediateClassName = item.immediateClassName();
         var targetClassChunk = "class " + immediateClassName + " {";
@@ -263,7 +261,7 @@ final class SourceReplacementTrain {
             for (int idx = matchedLineIndex; idx >= 0; idx--) {
                 var line = lines.get(idx);
                 if (line.contains(immediateClassName)
-                    && (line.contains(targetClassChunk) || line.contains(targetInterfaceChunk))) {
+                        && (line.contains(targetClassChunk) || line.contains(targetInterfaceChunk))) {
                     lineIndexToOuterClassDistance.put(matchedLineIndex, distance);
                     break;
                 }

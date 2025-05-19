@@ -18,14 +18,14 @@ final class DisplayNameFromMethodName {
             return String.join(" ", splitCamelToWords(methodName));
         } else {
             return Arrays.stream(snakeSplit)
-                .map(word -> {
-                    var words = splitCamelToWords(word);
-                    if (words.size() > 1) {
-                        return "'" + word + "'";
-                    }
-                    return word;
-                })
-                .collect(Collectors.joining(" "));
+                    .map(word -> {
+                        var words = splitCamelToWords(word);
+                        if (words.size() > 1) {
+                            return "'" + word + "'";
+                        }
+                        return word;
+                    })
+                    .collect(Collectors.joining(" "));
         }
     }
 

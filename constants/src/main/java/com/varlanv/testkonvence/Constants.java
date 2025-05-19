@@ -2,8 +2,7 @@ package com.varlanv.testkonvence;
 
 public final class Constants {
 
-    private Constants() {
-    }
+    private Constants() {}
 
     public static final String apEnforcementsXmlPackage = "com.varlanv.testkonvence";
     public static final String apEnforcementsXmlName = "testkonvence_enforcements.xml";

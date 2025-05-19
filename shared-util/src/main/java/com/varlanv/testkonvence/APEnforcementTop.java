@@ -1,9 +1,8 @@
 package com.varlanv.testkonvence;
 
+import java.util.SortedSet;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.SortedSet;
 
 @Value.Immutable
 @Value.Style(strictBuilder = true)

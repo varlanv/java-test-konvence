@@ -1,23 +1,22 @@
 package com.varlanv.testkonvence.proc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.varlanv.testkonvence.Constants;
 import com.varlanv.testkonvence.commontest.UnitTest;
 import io.toolisticon.cute.Cute;
 import io.toolisticon.cute.CuteApi;
 import io.toolisticon.cute.GeneratedFileObjectMatcher;
-import org.intellij.lang.annotations.Language;
-import org.jspecify.annotations.Nullable;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import javax.tools.StandardLocation;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import javax.tools.StandardLocation;
+import org.intellij.lang.annotations.Language;
+import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 class TestKonvenceAPTest implements UnitTest {
 
@@ -29,12 +28,12 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_doesnt_find_annotation__then_write_empty_file() {
             expectEmptyTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     public class SomeTest {
-                    
+
                         void test() {
                         }
                     }
@@ -48,22 +47,22 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_display_name_annotation_first_then_should_generate_output() {
             expectTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-                    
+
                     public class SomeTest {
-                    
+
                         @Test
                         @DisplayName("Some cool test name")
                         void test() {
                         }
                     }
                     """,
-                """
+                    """
                         <root>
                             <q>
                                 <w>
@@ -84,29 +83,28 @@ class TestKonvenceAPTest implements UnitTest {
                                     </e>
                                 </w>
                             </q>
-                        </root>"""
-);
+                        </root>""");
         }
 
         @Test
         void when_test_annotation_first_then_should_generate_output() {
             expectTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-                    
+
                     public class SomeTest {
-                    
+
                         @Test
                         @DisplayName("Some cool test name")
                         void test() {
                         }
                     }
                     """,
-                """
+                    """
                         <root>
                             <q>
                                 <w>
@@ -127,28 +125,27 @@ class TestKonvenceAPTest implements UnitTest {
                                     </e>
                                 </w>
                             </q>
-                        </root>"""
-                );
+                        </root>""");
         }
 
         @Test
         void when_no_display_name_annotation_then_should_generate_output() {
             expectTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-                    
+
                     public class SomeTest {
-                    
+
                         @Test
                         void test() {
                         }
                     }
                     """,
-                """
+                    """
                         <root>
                             <q>
                                 <w>
@@ -175,22 +172,22 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_display_name_is_on_class_level__then_should_generate_output() {
             expectTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-                    
+
                     @DisplayName("Some cool test class")
                     public class SomeTest {
-                    
+
                         @Test
                         void test() {
                         }
                     }
                     """,
-                """
+                    """
                         <root>
                             <q>
                                 <w>
@@ -217,22 +214,22 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void when_display_name_is_on_parameterized_test__then_should_generate_output() {
             expectTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     import org.junit.jupiter.params.ParameterizedTest;
                     import org.junit.jupiter.params.provider.ValueSource;
-                    
+
                     public class SomeTest {
-                    
+
                         @ParameterizedTest
                         @ValueSource(strings = {""})
                         void test() {
                         }
                     }
                     """,
-                """
+                    """
                     <root>
                         <q>
                             <w>
@@ -263,32 +260,32 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void should_generate_correct_output_for_three_test_with_display_name() {
             expectTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-                    
+
                     public class SomeTest {
-                    
+
                         @Test
                         @DisplayName("Some cool test name 1")
                         void test1() {
                         }
-                    
+
                         @Test
                         @DisplayName("Some cool test name 2")
                         void test2() {
                         }
-                    
+
                         @Test
                         @DisplayName("Some cool test name 3")
                         void test3() {
                         }
                     }
                     """,
-                """
+                    """
                         <root>
                             <q>
                                 <w>
@@ -325,30 +322,30 @@ class TestKonvenceAPTest implements UnitTest {
         @Test
         void should_generate_correct_output_for_one_test_with_display_name_and_two_without() {
             expectTransformation(
-                "testcases.SomeTest",
-                """
+                    "testcases.SomeTest",
+                    """
                     package testcases;
-                    
+
                     import org.junit.jupiter.api.Test;
                     import org.junit.jupiter.api.DisplayName;
-                    
+
                     public class SomeTest {
-                    
+
                         @Test
                         void test1() {
                         }
-                    
+
                         @Test
                         @DisplayName("Some cool test name 2")
                         void test2() {
                         }
-                    
+
                         @Test
                         void test3() {
                         }
                     }
                     """,
-                """
+                    """
                         <root>
                             <q>
                                 <w>
@@ -385,11 +382,11 @@ class TestKonvenceAPTest implements UnitTest {
 
     void expectEmptyTransformation(String className, @Language("Java") String sources) {
         assertThatThrownBy(() -> expectTransformation(className, sources, null))
-            .hasMessageContaining("hasn't been called");
+                .hasMessageContaining("hasn't been called");
     }
 
     void expectTransformation(
-        String className, @Language("Java") String sources, @Language("XML") @Nullable String expectedOutput) {
+            String className, @Language("Java") String sources, @Language("XML") @Nullable String expectedOutput) {
         expectTransformation(Map.of(className, sources), expectedOutput);
     }
 
@@ -402,16 +399,16 @@ class TestKonvenceAPTest implements UnitTest {
             cute = cute.andSourceFile(next.getKey(), next.getValue());
         }
         cute.andUseCompilerOptions("-A" + Constants.apIndentXmlOption + "=true")
-            .whenCompiled()
-            .thenExpectThat()
-            .compilationSucceeds()
-            .andThat()
-            .fileObject(
-                StandardLocation.SOURCE_OUTPUT,
-                Constants.apEnforcementsXmlPackage,
-                Constants.apEnforcementsXmlName)
-            .matches(contentMatcher(expectedOutput))
-            .executeTest();
+                .whenCompiled()
+                .thenExpectThat()
+                .compilationSucceeds()
+                .andThat()
+                .fileObject(
+                        StandardLocation.SOURCE_OUTPUT,
+                        Constants.apEnforcementsXmlPackage,
+                        Constants.apEnforcementsXmlName)
+                .matches(contentMatcher(expectedOutput))
+                .executeTest();
     }
 
     private GeneratedFileObjectMatcher contentMatcher(@Nullable String content) {
@@ -422,12 +419,10 @@ class TestKonvenceAPTest implements UnitTest {
                     assertThat(actual).isEmpty();
                 } else {
                     assertThat(actual).isNotBlank();
-                    var actualString = Arrays.stream(actual.split("\n"))
-                        .map(String::trim)
-                        .collect(Collectors.joining());
-                    var expectedString = Arrays.stream(content.split("\n"))
-                        .map(String::trim)
-                        .collect(Collectors.joining());
+                    var actualString =
+                            Arrays.stream(actual.split("\n")).map(String::trim).collect(Collectors.joining());
+                    var expectedString =
+                            Arrays.stream(content.split("\n")).map(String::trim).collect(Collectors.joining());
                     assertThat(actualString).isEqualTo(expectedString);
                 }
             }

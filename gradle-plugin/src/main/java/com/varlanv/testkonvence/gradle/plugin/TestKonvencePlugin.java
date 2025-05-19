@@ -73,8 +73,14 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                                     compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
                                     var options = compileTestJava.getOptions();
                                     var args = new ArrayList<>(options.getCompilerArgs());
-                                     args.add("-A" + Constants.apUseCamelCaseMethodNamesOption +"=" + testKonvenceExtension.getCamelCaseMethodNameProperty().get());
-                                     args.add("-A" + Constants.apReversedOption +"=" + reverseTransformationSpec.getEnabled().get());
+                                    args.add("-A" + Constants.apUseCamelCaseMethodNamesOption + "="
+                                            + testKonvenceExtension
+                                                    .getCamelCaseMethodNameProperty()
+                                                    .get());
+                                    args.add("-A" + Constants.apReversedOption + "="
+                                            + reverseTransformationSpec
+                                                    .getEnabled()
+                                                    .get());
                                     options.setCompilerArgs(args);
                                 });
                         var name = testSuite.getName();

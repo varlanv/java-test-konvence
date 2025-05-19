@@ -1,44 +1,30 @@
 package com.varlanv.testkonvence;
 
-import com.varlanv.testkonvence.commontest.BaseTest;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.varlanv.testkonvence.commontest.BaseTest;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.TreeSet;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class XmlMemoryEnforceMetaTest implements BaseTest {
 
-    private static final XmlMemoryEnforceMeta defaultSubject = XmlMemoryEnforceMeta.fromEntriesCollection(
-        List.of(
-            creatEnforcementTop(0),
-            creatEnforcementTop(1)
-        )
-    );
+    private static final XmlMemoryEnforceMeta defaultSubject =
+            XmlMemoryEnforceMeta.fromEntriesCollection(List.of(creatEnforcementTop(0), creatEnforcementTop(1)));
 
     private static APEnforcementTop creatEnforcementTop(int index) {
         return ImmutableAPEnforcementTop.of(
-            "topClassName" + index,
-            new TreeSet<>(
-                List.of(
-                    ImmutableAPEnforcementMiddle.of(
-                        "someClassName" + index, new TreeSet<>(
-                            List.of(
-                                ImmutableAPEnforcementItem.builder()
-                                    .displayName("dName" + index)
-                                    .originalName("oName" + index)
-                                    .newName("nName" + index)
-                                    .build()
-                            )
-                        )
-                    )
-                )
-            )
-        );
+                "topClassName" + index,
+                new TreeSet<>(List.of(ImmutableAPEnforcementMiddle.of(
+                        "someClassName" + index,
+                        new TreeSet<>(List.of(ImmutableAPEnforcementItem.builder()
+                                .displayName("dName" + index)
+                                .originalName("oName" + index)
+                                .newName("nName" + index)
+                                .build()))))));
     }
 
     @Test
@@ -47,7 +33,9 @@ class XmlMemoryEnforceMetaTest implements BaseTest {
 
         defaultSubject.writeTo(writer);
 
-        assertThat(writer.toString()).isEqualToIgnoringWhitespace("""
+        assertThat(writer.toString())
+                .isEqualToIgnoringWhitespace(
+                        """
             <root>
                 <q>
                     <w>
@@ -92,7 +80,8 @@ class XmlMemoryEnforceMetaTest implements BaseTest {
 
         defaultSubject.writeTo(writer);
 
-        var actual = XmlMemoryEnforceMeta.fromXmlStream(new ByteArrayInputStream(writer.toString().getBytes(StandardCharsets.UTF_8)));
+        var actual = XmlMemoryEnforceMeta.fromXmlStream(
+                new ByteArrayInputStream(writer.toString().getBytes(StandardCharsets.UTF_8)));
 
         assertThat(actual.entries()).isEqualTo(defaultSubject.entries());
     }

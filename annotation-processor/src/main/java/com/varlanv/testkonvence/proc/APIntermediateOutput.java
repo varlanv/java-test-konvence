@@ -1,7 +1,6 @@
 package com.varlanv.testkonvence.proc;
 
 import com.varlanv.testkonvence.*;
-
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,9 +9,8 @@ import java.util.SortedSet;
 final class APIntermediateOutput {
 
     private final Map<String, EnforcementsRecord> enforcements = new LinkedHashMap<>();
-    private final ImmutableSortedSetPair<APEnforcementTop> topLevelEnforcements = new ImmutableSortedSetPair<>(
-        Comparator.comparing(APEnforcementTop::fullEnclosingClassName)
-    );
+    private final ImmutableSortedSetPair<APEnforcementTop> topLevelEnforcements =
+            new ImmutableSortedSetPair<>(Comparator.comparing(APEnforcementTop::fullEnclosingClassName));
 
     public void add(APEnforcementFull fullItem) {
         var fullEnclosingClassName = fullItem.fullEnclosingClassName();
@@ -29,10 +27,7 @@ final class APIntermediateOutput {
             enforcementsRecord.classSet.add(middleItem);
 
             topLevelEnforcements.add(
-                ImmutableAPEnforcementTop.of(
-                    fullEnclosingClassName,
-                    enforcementsRecord.classSet.immutableSet())
-            );
+                    ImmutableAPEnforcementTop.of(fullEnclosingClassName, enforcementsRecord.classSet.immutableSet()));
         } else {
             var itemsList = enforcementsRecord.classMap.get(className);
             if (itemsList == null) {
@@ -57,23 +52,22 @@ final class APIntermediateOutput {
 
     private static ImmutableSortedSetPair<APEnforcementItem> newSortedSetForItems() {
         return new ImmutableSortedSetPair<>(Comparator.comparing(APEnforcementItem::originalName)
-            .thenComparing(APEnforcementItem::displayName)
-            .thenComparing(APEnforcementItem::newName));
+                .thenComparing(APEnforcementItem::displayName)
+                .thenComparing(APEnforcementItem::newName));
     }
 
     private static final class EnforcementsRecord {
 
-        private final ImmutableSortedSetPair<APEnforcementMiddle> classSet = new ImmutableSortedSetPair<>(
-            Comparator.comparing(APEnforcementMiddle::className)
-        );
+        private final ImmutableSortedSetPair<APEnforcementMiddle> classSet =
+                new ImmutableSortedSetPair<>(Comparator.comparing(APEnforcementMiddle::className));
         private final Map<String, ImmutableSortedSetPair<APEnforcementItem>> classMap = new LinkedHashMap<>();
     }
 
     private static APEnforcementItem buildItem(APEnforcementFull fullItem) {
         return ImmutableAPEnforcementItem.builder()
-            .displayName(fullItem.displayName())
-            .originalName(fullItem.originalName())
-            .newName(fullItem.newName())
-            .build();
+                .displayName(fullItem.displayName())
+                .originalName(fullItem.originalName())
+                .newName(fullItem.newName())
+                .build();
     }
 }

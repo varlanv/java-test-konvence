@@ -1,13 +1,12 @@
 package com.varlanv.testkonvence.proc;
 
-import com.varlanv.testkonvence.commontest.UnitTest;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.varlanv.testkonvence.commontest.UnitTest;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
 class SnakeMethodNameFromDisplayNameTest implements UnitTest {
 

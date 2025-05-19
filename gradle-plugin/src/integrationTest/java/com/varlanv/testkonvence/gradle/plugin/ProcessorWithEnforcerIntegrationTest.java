@@ -1,5 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.varlanv.testkonvence.Constants;
 import com.varlanv.testkonvence.XmlMemoryEnforceMeta;
 import com.varlanv.testkonvence.commontest.IntegrationTest;
@@ -8,15 +10,6 @@ import com.varlanv.testkonvence.commontest.sample.ConsumableSample;
 import com.varlanv.testkonvence.commontest.sample.SampleSourceFile;
 import com.varlanv.testkonvence.proc.TestKonvenceAP;
 import io.toolisticon.cute.Cute;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.ThrowableAssert;
-import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.tools.StandardLocation;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
@@ -27,8 +20,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.tools.StandardLocation;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ThrowableAssert;
+import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
 
@@ -37,21 +36,23 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
     @TestFactory
     Stream<DynamicTest> fromSamples() {
         return TestSamples.testSamples().stream()
-            .map(sample -> DynamicTest.dynamicTest(sample.description(), () -> sample.consume(this::spec)));
+                .map(sample -> DynamicTest.dynamicTest(sample.description(), () -> sample.consume(this::spec)));
     }
 
     void spec(ConsumableSample sample) throws Exception {
         var sources = sample.sources().value().stream()
-            .collect(Collectors.toMap(SampleSourceFile::outerClassName, SampleSourceFile::content));
+                .collect(Collectors.toMap(SampleSourceFile::outerClassName, SampleSourceFile::content));
         var resultXml = runAnnotationProcessor(sample, sources);
         consumeTempFile(resultXmlPath -> {
             Files.write(resultXmlPath, resultXml);
             new Train(
-                log,
-                resultXmlPath,
-                sample.dir(),
-                ImmutableTrainOptions.builder().reverseTransformation(sample.options().reverseTransformation()).build()
-            ).run();
+                            log,
+                            resultXmlPath,
+                            sample.dir(),
+                            ImmutableTrainOptions.builder()
+                                    .reverseTransformation(sample.options().reverseTransformation())
+                                    .build())
+                    .run();
 
             for (var source : sample.sources()) {
                 var actualReader = new BufferedReader(new StringReader(source.content()));
@@ -69,7 +70,8 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
         });
     }
 
-    byte[] runAnnotationProcessor(ConsumableSample sample, String className, @Language("Java") String sources) throws Exception {
+    byte[] runAnnotationProcessor(ConsumableSample sample, String className, @Language("Java") String sources)
+            throws Exception {
         return runAnnotationProcessor(sample, Map.of(className, sources));
     }
 
@@ -77,33 +79,34 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
         var iterator = sources.entrySet().iterator();
         var first = iterator.next();
         var cute = Cute.blackBoxTest()
-            .given()
-            .processor(TestKonvenceAP.class)
-            .andSourceFile(first.getKey(), first.getValue());
+                .given()
+                .processor(TestKonvenceAP.class)
+                .andSourceFile(first.getKey(), first.getValue());
         while (iterator.hasNext()) {
             var next = iterator.next();
             cute = cute.andSourceFile(next.getKey(), next.getValue());
         }
         var resultXml = new AtomicReference<byte[]>();
         cute.andUseCompilerOptions(resolveCompilerOptions(sample))
-            .whenCompiled()
-            .thenExpectThat()
-            .compilationSucceeds()
-            .andThat()
-            .fileObject(
-                StandardLocation.SOURCE_OUTPUT,
-                Constants.apEnforcementsXmlPackage,
-                Constants.apEnforcementsXmlName)
-            .exists()
-            .executeTest()
-            .executeCustomAssertions(outcome -> {
-                var fileManager = outcome.getFileManager();
-                var fileObjects = fileManager.getFileObjects();
-                assertThat(fileObjects).hasSize(1);
-                resultXml.set(fileObjects.get(0).getContentAsByteArray());
-            });
+                .whenCompiled()
+                .thenExpectThat()
+                .compilationSucceeds()
+                .andThat()
+                .fileObject(
+                        StandardLocation.SOURCE_OUTPUT,
+                        Constants.apEnforcementsXmlPackage,
+                        Constants.apEnforcementsXmlName)
+                .exists()
+                .executeTest()
+                .executeCustomAssertions(outcome -> {
+                    var fileManager = outcome.getFileManager();
+                    var fileObjects = fileManager.getFileObjects();
+                    assertThat(fileObjects).hasSize(1);
+                    resultXml.set(fileObjects.get(0).getContentAsByteArray());
+                });
         if (resultXml.get().length > 0) {
-            ThrowableAssert.ThrowingCallable throwingCallable = () -> XmlMemoryEnforceMeta.fromXmlStream(new ByteArrayInputStream(resultXml.get()));
+            ThrowableAssert.ThrowingCallable throwingCallable =
+                    () -> XmlMemoryEnforceMeta.fromXmlStream(new ByteArrayInputStream(resultXml.get()));
             Assertions.assertThatNoException().isThrownBy(throwingCallable);
         }
         return resultXml.get();
