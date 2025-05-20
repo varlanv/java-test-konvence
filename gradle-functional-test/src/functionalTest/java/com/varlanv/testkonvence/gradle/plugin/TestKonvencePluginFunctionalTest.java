@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.gradle.testkit.runner.GradleRunner;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -195,6 +196,240 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
         });
     }
 
+    @Test
+    void when_two_test_files__then_rename_both() {
+        useTempDir(rootDirPath -> {
+            Files.writeString(rootDirPath.resolve("build.gradle"), groovy(standardBuildScript()));
+            Files.writeString(
+                    rootDirPath.resolve("settings.gradle"),
+                    groovy("""
+                rootProject.name = "test-fixture"
+                """));
+            var testDir = Files.createDirectories(rootDirPath
+                    .resolve("src")
+                    .resolve("test")
+                    .resolve("java")
+                    .resolve("com")
+                    .resolve("varlanv")
+                    .resolve("testkonvence"));
+
+            var testFile1 = Files.writeString(
+                    testDir.resolve("Sample1Test.java"),
+                    java(
+                            """
+                        package com.varlanv.testkonvence;
+
+                        import org.junit.jupiter.api.Test;
+
+                        class Sample1Test {
+
+                            @Test
+                            void sample_test_1() {
+                            }
+                        }
+                        """));
+            var testFile2 = Files.writeString(
+                    testDir.resolve("Sample2Test.java"),
+                    java(
+                            """
+                package com.varlanv.testkonvence;
+
+                import org.junit.jupiter.api.Test;
+
+                class Sample2Test {
+
+                    @Test
+                    void sample_test_2() {
+                    }
+                }
+                """));
+
+            var runner = prepareGradleRunner(new DataTable(), List.of("test"), rootDirPath);
+
+            build(runner, GradleRunner::build);
+
+            assertThat(Files.readString(testFile1))
+                    .isEqualTo(
+                            java(
+                                    """
+package com.varlanv.testkonvence;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class Sample1Test {
+
+    @Test
+    @DisplayName("sample test 1")
+    void sample_test_1() {
+    }
+}
+"""));
+
+            assertThat(Files.readString(testFile2))
+                    .isEqualTo(
+                            java(
+                                    """
+package com.varlanv.testkonvence;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class Sample2Test {
+
+    @Test
+    @DisplayName("sample test 2")
+    void sample_test_2() {
+    }
+}
+"""));
+        });
+    }
+
+    @Test
+    void when_two_test_source_roots_and_run_both_test_task__then_apply_to_both_sources() {
+        useTempDir(rootDirPath -> {
+            Files.writeString(
+                    rootDirPath.resolve("build.gradle"),
+                    groovy(
+                            """
+                            plugins {
+                                id("java")
+                                id("com.varlanv.test-konvence")
+                            }
+
+                            test {
+                                useJUnitPlatform()
+                            }
+
+                            testing {
+                                suites {
+                                    register("integrationTest", JvmTestSuite.class, {
+                                        dependencies {
+                                            implementation(project())
+                                        }
+                                        targets {
+                                            all {
+                                                testTask.configure {
+                                                    useJUnitPlatform()
+                                                    shouldRunAfter(test)
+                                                }
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+
+                            tasks.named("check", {
+                                dependsOn("integrationTest")
+                            })
+
+                            repositories {
+                                mavenLocal()
+                                mavenCentral()
+                            }
+
+                            dependencies {
+                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+                                testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.3")
+                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+                            }
+            """));
+            Files.writeString(
+                    rootDirPath.resolve("settings.gradle"),
+                    groovy("""
+                rootProject.name = "test-fixture"
+                """));
+
+            var testPackage = Files.createDirectories(rootDirPath
+                    .resolve("src")
+                    .resolve("test")
+                    .resolve("java")
+                    .resolve("com")
+                    .resolve("varlanv")
+                    .resolve("testkonvence"));
+
+            var integrationTestPackage = Files.createDirectories(rootDirPath
+                    .resolve("src")
+                    .resolve("integrationTest")
+                    .resolve("java")
+                    .resolve("com")
+                    .resolve("varlanv")
+                    .resolve("testkonvence"));
+
+            var testFile = Files.writeString(
+                    testPackage.resolve("Sample1Test.java"),
+                    java(
+                            """
+                        package com.varlanv.testkonvence;
+
+                        import org.junit.jupiter.api.Test;
+
+                        class Sample1Test {
+
+                            @Test
+                            void sample_test_1() {
+                            }
+                        }
+                        """));
+            var integrationTestFile = Files.writeString(
+                    integrationTestPackage.resolve("Sample2IntegrationTest.java"),
+                    java(
+                            """
+                package com.varlanv.testkonvence;
+
+                import org.junit.jupiter.api.Test;
+
+                class Sample2IntegrationTest {
+
+                    @Test
+                    void sample_test_2() {
+                    }
+                }
+                """));
+
+            var runner = prepareGradleRunner(new DataTable(), List.of("check"), rootDirPath);
+
+            build(runner, GradleRunner::build);
+
+            assertThat(Files.readString(testFile))
+                    .isEqualTo(
+                            java(
+                                    """
+package com.varlanv.testkonvence;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class Sample1Test {
+
+    @Test
+    @DisplayName("sample test 1")
+    void sample_test_1() {
+    }
+}
+"""));
+
+            assertThat(Files.readString(integrationTestFile))
+                    .isEqualTo(
+                            java(
+                                    """
+package com.varlanv.testkonvence;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class Sample2IntegrationTest {
+
+    @Test
+    @DisplayName("sample test 2")
+    void sample_test_2() {
+    }
+}
+"""));
+        });
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     @DisplayName("'testKonvenceEnforceAll' task should replace method names if found")
@@ -237,37 +472,62 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
         var options = configure.apply(ImmutableSampleOptions.builder()).build();
         return groovy(
                 """
-            plugins {
-                id("java")
-                id("com.varlanv.test-konvence")
-            }
-
-            repositories {
-                mavenLocal()
-                mavenCentral()
-            }
-
-            testKonvence {
-                applyAutomaticallyAfterTestTask(%s)
-                useCamelCaseForMethodNames(%s)
-                reverseTransformation {
-                    enabled(%s)
+                plugins {
+                    id("java")
+                    id("com.varlanv.test-konvence")
                 }
-            }
 
-            dependencies {
-                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
-                testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.3")
-                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-            }
+                repositories {
+                    mavenLocal()
+                    mavenCentral()
+                }
 
-            test {
-                useJUnitPlatform()
-            }
-            """
+                testKonvence {
+                    applyAutomaticallyAfterTestTask(%s)
+                    useCamelCaseForMethodNames(%s)
+                    reverseTransformation {
+                        enabled(%s)
+                    }
+                }
+
+                dependencies {
+                    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+                    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.3")
+                    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+                }
+
+                test {
+                    useJUnitPlatform()
+                }
+                """
                         .formatted(
                                 options.applyAutomaticallyAfterTestTask(),
                                 options.camelMethodName(),
                                 options.reverseTransformation()));
+    }
+
+    @Language("groovy")
+    private String standardBuildScript() {
+        return """
+                            plugins {
+                                id("java")
+                                id("com.varlanv.test-konvence")
+                            }
+
+                            repositories {
+                                mavenLocal()
+                                mavenCentral()
+                            }
+
+                            dependencies {
+                                testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+                                testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.3")
+                                testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+                            }
+
+                            test {
+                                useJUnitPlatform()
+                            }
+            """;
     }
 }

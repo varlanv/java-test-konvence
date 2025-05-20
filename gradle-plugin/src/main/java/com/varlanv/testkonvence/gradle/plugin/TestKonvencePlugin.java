@@ -67,22 +67,21 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                         var jvmTestSuite = (JvmTestSuite) testSuite;
                         var testSourceSet = jvmTestSuite.getSources();
                         // configure compile task to use annotation processor
-                        tasks.named(testSourceSet.getCompileJavaTaskName(), JavaCompile.class)
-                                .configure(compileTestJava -> {
-                                    compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
-                                    compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
-                                    var options = compileTestJava.getOptions();
-                                    var args = new ArrayList<>(options.getCompilerArgs());
-                                    args.add("-A" + Constants.apUseCamelCaseMethodNamesOption + "="
-                                            + testKonvenceExtension
-                                                    .getCamelCaseMethodNameProperty()
-                                                    .get());
-                                    args.add("-A" + Constants.apReversedOption + "="
-                                            + reverseTransformationSpec
-                                                    .getEnabled()
-                                                    .get());
-                                    options.setCompilerArgs(args);
-                                });
+                        var testCompileTaskProvider =
+                                tasks.named(testSourceSet.getCompileJavaTaskName(), JavaCompile.class);
+                        testCompileTaskProvider.configure(compileTestJava -> {
+                            compileTestJava.dependsOn(setupAnnotationProcessorTaskProvider);
+                            compileTestJava.mustRunAfter(setupAnnotationProcessorTaskProvider);
+                            var options = compileTestJava.getOptions();
+                            var args = new ArrayList<>(options.getCompilerArgs());
+                            args.add("-A" + Constants.apUseCamelCaseMethodNamesOption + "="
+                                    + testKonvenceExtension
+                                            .getCamelCaseMethodNameProperty()
+                                            .get());
+                            args.add("-A" + Constants.apReversedOption + "="
+                                    + reverseTransformationSpec.getEnabled().get());
+                            options.setCompilerArgs(args);
+                        });
                         var name = testSuite.getName();
                         var processorJar = buildDirectory.files("tmp/testkonvenceplugin/" + Constants.PROCESSOR_JAR);
                         dependencies.add(name + "AnnotationProcessor", processorJar);
@@ -91,12 +90,12 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                             var testTask = testTarget.getTestTask();
                             log.debug("Configuring test task [{}]", testTask.getName());
                             var enforceFilesCollection = objects.fileCollection();
-                            enforceFilesCollection.setFrom(
-                                    buildDirectory.map(
-                                            buildDir -> buildDir.getAsFileTree()
-                                                    .matching(
-                                                            pattern -> pattern.include(
-                                                                    "generated/sources/annotationProcessor/**/testkonvence_enforcements.xml"))));
+                            enforceFilesCollection.setFrom(buildDirectory.map(buildDir -> buildDir.getAsFileTree()
+                                    .matching(pattern -> pattern.include(String.format(
+                                            "generated/sources/annotationProcessor/java/%s/%s/%s",
+                                            testSourceSet.getName(),
+                                            Constants.apEnforcementsXmlPackage.replace('.', '/'),
+                                            Constants.apEnforcementsXmlName)))));
                             var compileClasspath = objects.fileCollection();
                             compileClasspath.setFrom(testSourceSet.getCompileClasspath());
                             var testNameEnforceAction = new TestNameEnforceAction(
