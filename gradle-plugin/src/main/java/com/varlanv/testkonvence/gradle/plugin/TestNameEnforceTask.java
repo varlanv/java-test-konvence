@@ -36,6 +36,9 @@ public abstract class TestNameEnforceTask extends DefaultTask {
     @Internal
     public abstract Property<Boolean> getEnableReverseTransformation();
 
+    @Internal
+    public abstract Property<Boolean> getPerformanceLogEnabled();
+
     @TaskAction
     public void execute() {
         new TestNameEnforceAction(
@@ -45,7 +48,8 @@ public abstract class TestNameEnforceTask extends DefaultTask {
                         getPluginEnabled(),
                         getDryWithFailing(),
                         getUseCamelCaseMethodName(),
-                        getEnableReverseTransformation())
+                        getEnableReverseTransformation(),
+                        getPerformanceLogEnabled())
                 .execute(this);
     }
 }

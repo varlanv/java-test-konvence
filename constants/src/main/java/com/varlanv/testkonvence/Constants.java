@@ -4,6 +4,7 @@ public final class Constants {
 
     private Constants() {}
 
+    public static final String performanceLogProperty = "com.varlanv.testkonvence.undocumented.performanceLog";
     public static final String apEnforcementsXmlPackage = "com.varlanv.testkonvence";
     public static final String apEnforcementsXmlName = "testkonvence_enforcements.xml";
     public static final String apIndentXmlOption = "com.varlanv.testkonvence.indentXml";

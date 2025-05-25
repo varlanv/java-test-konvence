@@ -23,6 +23,10 @@ public final class TestKonvencePlugin implements Plugin<Project> {
         var objects = project.getObjects();
         var tasks = project.getTasks();
         var providers = project.getProviders();
+        var performanceLogEnabled = providers
+                .gradleProperty(Constants.performanceLogProperty)
+                .map(Boolean::parseBoolean)
+                .orElse(false);
         var testKonvenceExtension = (TestKonvenceExtension) extensions.create(
                 TestKonvenceExtensionView.class, TestKonvenceExtensionView.name(), TestKonvenceExtension.class);
         testKonvenceExtension.getEnabled().convention(true);
@@ -80,6 +84,7 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                                             .get());
                             args.add("-A" + Constants.apReversedOption + "="
                                     + reverseTransformationSpec.getEnabled().get());
+                            args.add("-A" + Constants.performanceLogProperty + "=" + performanceLogEnabled.get());
                             options.setCompilerArgs(args);
                         });
                         var name = testSuite.getName();
@@ -112,7 +117,8 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                                     testKonvenceExtension
                                             .getReverseTransformation()
                                             .get()
-                                            .getEnabled());
+                                            .getEnabled(),
+                                    performanceLogEnabled);
                             var enforceTaskProvider = tasks.register(
                                     TestNameEnforceTask.name(testTask.getName()),
                                     TestNameEnforceTask.class,
@@ -137,6 +143,7 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                                         enforceTask
                                                 .getEnableReverseTransformation()
                                                 .set(testNameEnforceAction.enableReverseTransformation());
+                                        enforceTask.getPerformanceLogEnabled().set(performanceLogEnabled);
                                     });
                             if (testKonvenceExtension
                                     .getApplyAutomaticallyAfterTestTask()
@@ -168,6 +175,7 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                 extension.getEnabled(),
                 dryWithFailingProvider,
                 testNameEnforceAction.camelCaseMethodNameProvider(),
-                testNameEnforceAction.enableReverseTransformation());
+                testNameEnforceAction.enableReverseTransformation(),
+                testNameEnforceAction.performanceLogEnabled());
     }
 }

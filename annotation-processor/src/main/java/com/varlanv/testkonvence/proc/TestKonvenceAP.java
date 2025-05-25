@@ -20,17 +20,27 @@ import org.jspecify.annotations.Nullable;
 
 public final class TestKonvenceAP extends AbstractProcessor {
 
-    public static final Set<String> supportedOptions =
-            Set.of(Constants.apIndentXmlOption, Constants.apReversedOption, Constants.apUseCamelCaseMethodNamesOption);
+    public static final Set<String> supportedOptions = Set.of(
+            Constants.apIndentXmlOption,
+            Constants.apReversedOption,
+            Constants.apUseCamelCaseMethodNamesOption,
+            Constants.performanceLogProperty);
 
     @Nullable private Boolean isCamelCase;
 
     @Nullable private Boolean isReverseEnabled;
 
-    private String convertDisplayNameToMethodName(String displayName) {
-        return isCamelCase()
-                ? CamelMethodNameFromDisplayName.convert(displayName)
-                : SnakeMethodNameFromDisplayName.convert(displayName);
+    @Nullable private ApPerformanceLog performanceLog;
+
+    private ApPerformanceLog performanceLog() {
+        var res = performanceLog;
+        if (res == null) {
+            var isEnabled =
+                    "true".equals(processingEnv.getOptions().getOrDefault(Constants.performanceLogProperty, "false"));
+            res = new ApPerformanceLog(isEnabled);
+            performanceLog = res;
+        }
+        return res;
     }
 
     private boolean isCamelCase() {
@@ -43,6 +53,12 @@ public final class TestKonvenceAP extends AbstractProcessor {
             isCamelCase = res;
         }
         return res;
+    }
+
+    private String convertDisplayNameToMethodName(String displayName) {
+        return isCamelCase()
+                ? CamelMethodNameFromDisplayName.convert(displayName)
+                : SnakeMethodNameFromDisplayName.convert(displayName);
     }
 
     private boolean isReversedEnabled() {
@@ -210,9 +226,10 @@ public final class TestKonvenceAP extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        var performanceLog = performanceLog();
         if (roundEnv.processingOver()) {
             try {
-                writeResult();
+                performanceLog.incrementTotal(this::writeResult);
             } catch (Exception e) {
                 processingEnv
                         .getMessager()
@@ -222,16 +239,20 @@ public final class TestKonvenceAP extends AbstractProcessor {
                                         "Failed to apply annotation processor for Gradle plugin [%s], "
                                                 + "plugin logic will not be applied. Internal error message: %s",
                                         Constants.PLUGIN_NAME, e.getMessage()));
+            } finally {
+                performanceLog.printResult(processingEnv);
             }
         } else {
-            var newOutput = output;
-            for (var annotation : annotations) {
-                var fn = strategy.get(annotation.getQualifiedName().toString());
-                if (fn != null) {
-                    newOutput = fn.apply(roundEnv, annotation, newOutput);
+            performanceLog.incrementTotalSafe(() -> {
+                var newOutput = output;
+                for (var annotation : annotations) {
+                    var fn = strategy.get(annotation.getQualifiedName().toString());
+                    if (fn != null) {
+                        newOutput = fn.apply(roundEnv, annotation, newOutput);
+                    }
                 }
-            }
-            output = newOutput;
+                output = newOutput;
+            });
         }
         return false;
     }

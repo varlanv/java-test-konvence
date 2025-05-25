@@ -14,4 +14,9 @@ interface TrainOptions {
     default boolean reverseTransformation() {
         return false;
     }
+
+    @Value.Default
+    default boolean performanceLogEnabled() {
+        return false;
+    }
 }

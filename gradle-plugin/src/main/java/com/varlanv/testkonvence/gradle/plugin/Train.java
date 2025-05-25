@@ -20,22 +20,36 @@ final class Train {
     private final Path resultXml;
     private final Path sourcesRoot;
     private final TrainOptions trainOptions;
+    private final TrainPerformanceLog performanceLog;
 
-    Train(Logger log, Path resultXml, Path sourcesRoot, TrainOptions trainOptions) {
+    Train(Logger log, Path resultXml, Path sourcesRoot, TrainOptions trainOptions, TrainPerformanceLog performanceLog) {
         this.log = log;
         this.resultXml = resultXml;
         this.sourcesRoot = sourcesRoot;
         this.trainOptions = trainOptions;
+        this.performanceLog = performanceLog;
+    }
+
+    Train(Logger log, Path resultXml, Path sourcesRoot, TrainOptions trainOptions) {
+        this(
+                log,
+                resultXml,
+                sourcesRoot,
+                trainOptions,
+                new TrainPerformanceLog(trainOptions.performanceLogEnabled(), log));
     }
 
     public void run() throws Exception {
-        var items = XmlMemoryEnforceMeta.fromXmlPath(resultXml).entries();
+        var items = performanceLog.printIntermediateSupplier(
+                () -> "Parse enforce xml",
+                () -> XmlMemoryEnforceMeta.fromXmlPath(resultXml).entries());
         var sourcesRootPath = sourcesRoot.toAbsolutePath().toString();
         new SourceReplacementTrain(
                         log,
                         trainOptions,
                         new EnforcementMeta(
-                                toItemsStream(items, sourcesRootPath).collect(Collectors.toList())))
+                                toItemsStream(items, sourcesRootPath).collect(Collectors.toList())),
+                        performanceLog)
                 .run();
     }
 

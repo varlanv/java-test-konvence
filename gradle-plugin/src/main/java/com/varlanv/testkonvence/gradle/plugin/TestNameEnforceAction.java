@@ -20,6 +20,7 @@ class TestNameEnforceAction implements Action<Task> {
     private final Provider<Boolean> dryWithFailingProvider;
     private final Provider<Boolean> camelCaseMethodNameProvider;
     private final Provider<Boolean> enableReverseTransformation;
+    private final Provider<Boolean> performanceLogEnabled;
 
     TestNameEnforceAction(
             ConfigurableFileCollection sourcesRootProp,
@@ -28,7 +29,8 @@ class TestNameEnforceAction implements Action<Task> {
             Provider<Boolean> pluginEnabled,
             Provider<Boolean> dryWithFailingProvider,
             Provider<Boolean> camelCaseMethodNameProvider,
-            Provider<Boolean> enableReverseTransformation) {
+            Provider<Boolean> enableReverseTransformation,
+            Provider<Boolean> performanceLogEnabled) {
         this.sourcesRootProp = sourcesRootProp;
         this.compileClasspath = compileClasspath;
         this.enforceFiles = enforceFiles;
@@ -36,6 +38,7 @@ class TestNameEnforceAction implements Action<Task> {
         this.dryWithFailingProvider = dryWithFailingProvider;
         this.camelCaseMethodNameProvider = camelCaseMethodNameProvider;
         this.enableReverseTransformation = enableReverseTransformation;
+        this.performanceLogEnabled = performanceLogEnabled;
     }
 
     public ConfigurableFileCollection sourcesRootProp() {
@@ -62,6 +65,10 @@ class TestNameEnforceAction implements Action<Task> {
         return enableReverseTransformation;
     }
 
+    public Provider<Boolean> performanceLogEnabled() {
+        return performanceLogEnabled;
+    }
+
     @Override
     public void execute(Task task) {
         if (pluginEnabled.get()) {
@@ -84,34 +91,43 @@ class TestNameEnforceAction implements Action<Task> {
     }
 
     private void apply() throws Exception {
-        var sourcesRoots = sourcesRootProp.getFiles();
-        if (sourcesRoots.isEmpty()) {
-            log.debug("Source root is empty");
-        } else if (sourcesRoots.size() > 1) {
-            log.debug("More than single sources found");
-        } else {
-            var sourcesRoot = sourcesRoots.iterator().next().toPath();
-            var sourceFiles = compileClasspath.getFiles();
-            if (sourceFiles.isEmpty()) {
-                log.debug("Source files are empty");
-            } else if (Files.notExists(sourcesRoot)) {
-                log.debug("Source root does not exist: {}", sourcesRoot);
-            } else {
-                for (var enforceFile : enforceFiles) {
-                    if (Files.notExists(enforceFile.toPath())) {
-                        throw new IllegalStateException("Enforce file does not exist: " + enforceFile);
+        boolean isPerformanceLogEnabled = performanceLogEnabled.get();
+        var performanceLog = new TrainPerformanceLog(isPerformanceLogEnabled, log);
+        try {
+            performanceLog.acceptTotal(() -> {
+                var sourcesRoots = sourcesRootProp.getFiles();
+                if (sourcesRoots.isEmpty()) {
+                    log.debug("Source root is empty");
+                } else if (sourcesRoots.size() > 1) {
+                    log.debug("More than single sources found");
+                } else {
+                    var sourcesRoot = sourcesRoots.iterator().next().toPath();
+                    var sourceFiles = compileClasspath.getFiles();
+                    if (sourceFiles.isEmpty()) {
+                        log.debug("Source files are empty");
+                    } else if (Files.notExists(sourcesRoot)) {
+                        log.debug("Source root does not exist: {}", sourcesRoot);
+                    } else {
+                        for (var enforceFile : enforceFiles) {
+                            if (Files.notExists(enforceFile.toPath())) {
+                                throw new IllegalStateException("Enforce file does not exist: " + enforceFile);
+                            }
+                            new Train(
+                                            log,
+                                            enforceFile.toPath(),
+                                            sourcesRoot,
+                                            ImmutableTrainOptions.builder()
+                                                    .dryWithFailing(dryWithFailingProvider.get())
+                                                    .reverseTransformation(enableReverseTransformation.get())
+                                                    .performanceLogEnabled(isPerformanceLogEnabled)
+                                                    .build())
+                                    .run();
+                        }
                     }
-                    new Train(
-                                    log,
-                                    enforceFile.toPath(),
-                                    sourcesRoot,
-                                    ImmutableTrainOptions.builder()
-                                            .dryWithFailing(dryWithFailingProvider.get())
-                                            .reverseTransformation(enableReverseTransformation.get())
-                                            .build())
-                            .run();
                 }
-            }
+            });
+        } finally {
+            performanceLog.printResult();
         }
     }
 }

@@ -5,7 +5,6 @@ import com.varlanv.testkonvence.FunctionalUtil;
 import com.varlanv.testkonvence.TrustedException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 
@@ -14,34 +13,45 @@ final class SourceReplacementTrain {
     private final Logger log;
     private final TrainOptions trainOptions;
     private final EnforcementMeta enforcementMeta;
+    private final TrainPerformanceLog performanceLog;
 
-    SourceReplacementTrain(Logger log, TrainOptions trainOptions, EnforcementMeta enforcementMeta) {
+    SourceReplacementTrain(
+            Logger log,
+            TrainOptions trainOptions,
+            EnforcementMeta enforcementMeta,
+            TrainPerformanceLog performanceLog) {
         this.log = log;
         this.trainOptions = trainOptions;
         this.enforcementMeta = enforcementMeta;
+        this.performanceLog = performanceLog;
     }
 
     public void run() throws Exception {
         transformations().consumeGroupedByFile((target, transformations) -> {
-            var resultLines = IntStream.range(0, transformations.size())
-                    .mapToObj(i -> IntObjectPair.of(i, transformations.get(i)))
-                    .sorted((a, b) -> {
-                        if (a.right()
-                                .input()
-                                .meta()
-                                .candidate()
-                                .newName()
-                                .equals(b.right().input().meta().candidate().originalName())) {
-                            return 1;
-                        } else {
-                            return Integer.compare(a.left(), b.left());
-                        }
-                    })
-                    .reduce(
-                            target.lines(),
-                            (lines, transformation) ->
-                                    transformation.right().action().apply(lines),
-                            FunctionalUtil.throwingCombiner());
+            var targetPath = target.path().toAbsolutePath();
+            var transformationsSorted = new TreeSet<IntObjectPair<Transformation>>((a, b) -> {
+                if (a.right()
+                        .input()
+                        .meta()
+                        .candidate()
+                        .newName()
+                        .equals(b.right().input().meta().candidate().originalName())) {
+                    return 1;
+                } else {
+                    return Integer.compare(a.left(), b.left());
+                }
+            });
+            for (var transformationIdx = 0; transformationIdx < transformations.size(); transformationIdx++) {
+                transformationsSorted.add(IntObjectPair.of(transformationIdx, transformations.get(transformationIdx)));
+            }
+            var resultLines = target.lines();
+            for (var transformation : transformationsSorted) {
+                var resFinal = resultLines;
+                resultLines = performanceLog.printIntermediateSupplier(
+                        () -> "Apply transformation to file " + targetPath,
+                        () -> transformation.right().action().apply(resFinal));
+            }
+            var resultLinesFinal = resultLines;
             if (resultLines.changed()) {
                 if (trainOptions.dryWithFailing()) {
                     throw new TrustedException(String.format(
@@ -51,11 +61,10 @@ final class SourceReplacementTrain {
                             Constants.PLUGIN_NAME, target.path().toAbsolutePath()));
                 } else {
                     try {
-                        target.save(resultLines);
+                        performanceLog.printIntermediateRunnable(
+                                () -> "Saving results at path: " + targetPath, () -> target.save(resultLinesFinal));
                     } catch (Exception e) {
-                        log.debug(
-                                "Failed to apply transformation to file [{}], ignoring exception",
-                                target.path().toAbsolutePath());
+                        log.debug("Failed to apply transformation to file [{}], ignoring exception", targetPath);
                     }
                 }
             }
