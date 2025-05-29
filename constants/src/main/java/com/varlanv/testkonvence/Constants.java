@@ -11,7 +11,7 @@ public final class Constants {
     public static final String apUseCamelCaseMethodNamesOption = "com.varlanv.testkonvence.camelCaseMethods";
     public static final String apReversedOption = "com.varlanv.testkonvence.reversed";
     public static final String PLUGIN_NAME = "com.varlanv.testkonvence";
-    public static final String PLUGIN_VERSION = "1.0.4";
+    public static final String PLUGIN_VERSION = "1.0.5";
     public static final String PROCESSOR_JAR = "annotation-processor-" + PLUGIN_VERSION + ".jar";
     public static final String TEST_KONVENCE_TASK_GROUP = "test konvence";
     public static final String TEST_KONVENCE_VERIFY_TASK_NAME = "testKonvenceVerify";
