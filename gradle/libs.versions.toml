@@ -11,7 +11,7 @@ cuteToolisticon = "1.7.0"
 benmanesVersion = "0.52.0"
 spotbugsVersion = "6.1.13"
 spotlessVersion = "7.0.4"
-immutablesVersion = "2.7.3"
+immutablesVersion = "2.10.1"
 jSpecifyVersion = "1.0.0"
 
 [libraries]
