@@ -39,7 +39,7 @@ In `build.gradle(.kts)`:
 
 ```kotlin
 plugins {
-    id("com.varlanv.test-konvence") version "1.0.2"
+    id("com.varlanv.test-konvence") version "1.0.3"
 }
 ```
 
@@ -129,7 +129,7 @@ In `build.gradle(.kts)`:
 
 ```kotlin
 plugins {
-    id("com.varlanv.test-konvence") version "1.0.2"
+    id("com.varlanv.test-konvence") version "1.0.3"
 }
 
 testKonvence {
