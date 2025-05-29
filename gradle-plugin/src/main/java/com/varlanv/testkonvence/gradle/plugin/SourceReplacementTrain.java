@@ -34,9 +34,9 @@ final class SourceReplacementTrain {
                 if (a.right()
                         .input()
                         .meta()
-                        .candidate()
+                        .candidate
                         .newName()
-                        .equals(b.right().input().meta().candidate().originalName())) {
+                        .equals(b.right().input().meta().candidate.originalName())) {
                     return 1;
                 } else {
                     return Integer.compare(a.left(), b.left());
@@ -82,11 +82,11 @@ final class SourceReplacementTrain {
     }
 
     private Stream<Transformation> methodNameToDisplayNameTransformations(EnforcementMeta.Item item) {
-        var candidate = item.candidate();
+        var candidate = item.candidate;
         if (!trainOptions.reverseTransformation() || !candidate.newName().isEmpty()) {
             return Stream.empty();
         }
-        return Stream.of(Transformation.of(item.sourceFile().lines(), item, sourceLines -> {
+        return Stream.of(Transformation.of(item.sourceFile.lines(), item, sourceLines -> {
             var linesView = sourceLines.view();
             var displayName = candidate.displayName();
             var softMatchStr = " " + candidate.originalName() + "(";
@@ -120,7 +120,7 @@ final class SourceReplacementTrain {
                             .append("\")")
                             .toString();
                     var sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
-                    return handleDisplayNameImport(sl);
+                    return handleDisplayNameImport(sl, item);
                 } else {
                     return sourceLines;
                 }
@@ -132,22 +132,23 @@ final class SourceReplacementTrain {
                     var indent = indexOfFirstNonWhiteSpace(line);
                     var displayNameAnnotation = " ".repeat(indent) + "@DisplayName(\"" + displayName + "\")";
                     var sl = sourceLines.pushAbove(closesClassLineNum, displayNameAnnotation);
-                    return handleDisplayNameImport(sl);
+                    return handleDisplayNameImport(sl, item);
                 }
             }
             return sourceLines;
         }));
     }
 
-    private SourceLines handleDisplayNameImport(SourceLines sourceLines) {
+    private SourceLines handleDisplayNameImport(SourceLines sourceLines, EnforcementMeta.Item item) {
         var linesView = sourceLines.view();
         var importJunitLines = new LinkedHashSet<IntObjectPair<String>>();
         var junitDisplayNameImport = "import org.junit.jupiter.api.DisplayName;";
         for (int lineIdx = 0; lineIdx < linesView.size(); lineIdx++) {
             var line = linesView.get(lineIdx);
-            if (line.contains("class {")
-                    || line.contains("import org.junit.jupiter.api.*")
-                    || line.contains(junitDisplayNameImport)) {
+            if (line.contains("class ") && line.contains("{") && line.contains(item.topClassSimpleName)) {
+                break;
+            }
+            if (line.contains("import org.junit.jupiter.api.*") || line.contains(junitDisplayNameImport)) {
                 return sourceLines;
             } else if (line.contains("import org.junit.jupiter.api")
                     || line.contains("org.junit.jupiter.params.ParameterizedTest")) {
@@ -182,14 +183,14 @@ final class SourceReplacementTrain {
     }
 
     private Stream<Transformation> displayNameToMethodNameTransformations(EnforcementMeta.Item item) {
-        var candidate = item.candidate();
+        var candidate = item.candidate;
         var newName = candidate.newName();
         var originalName = candidate.originalName();
 
         if (newName.isEmpty() || originalName.equals(newName)) {
             return Stream.empty();
         }
-        var sourceFile = item.sourceFile();
+        var sourceFile = item.sourceFile;
         var lines = sourceFile.lines();
         var linesView = lines.view();
         var methodNameMatches = new ArrayList<MethodNameMatch>(2);
@@ -264,7 +265,7 @@ final class SourceReplacementTrain {
     @Nullable private Integer findLineNumWithClosestDistanceToClass(
             EnforcementMeta.Item item, List<String> lines, ImmutableIntVector matchedLineIndexes) {
         var lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
-        var immediateClassName = item.immediateClassName();
+        var immediateClassName = item.immediateClassName;
         var targetClassChunk = "class " + immediateClassName + " ";
         var targetInterfaceChunk = "interface " + immediateClassName + " ";
         matchedLineIndexes.forEach(matchedLineIndex -> {

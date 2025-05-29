@@ -33,26 +33,20 @@ final class EnforcementMeta {
 
     static class Item {
 
-        private final SourceFile sourceFile;
-        private final String immediateClassName;
-        private final APEnforcementFull candidate;
+        final SourceFile sourceFile;
+        final String immediateClassName;
+        final String topClassSimpleName;
+        final APEnforcementFull candidate;
 
-        public Item(SourceFile sourceFile, String immediateClassName, APEnforcementFull candidate) {
+        public Item(
+                SourceFile sourceFile,
+                String immediateClassName,
+                String topClassSimpleName,
+                APEnforcementFull candidate) {
             this.sourceFile = sourceFile;
             this.immediateClassName = immediateClassName;
+            this.topClassSimpleName = topClassSimpleName;
             this.candidate = candidate;
-        }
-
-        public SourceFile sourceFile() {
-            return sourceFile;
-        }
-
-        public String immediateClassName() {
-            return immediateClassName;
-        }
-
-        public APEnforcementFull candidate() {
-            return candidate;
         }
 
         @Override

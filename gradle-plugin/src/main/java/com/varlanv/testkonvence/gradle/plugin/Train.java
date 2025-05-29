@@ -76,8 +76,10 @@ final class Train {
             var classNameParts = item.className().split("\\.");
             var className = classNameParts[classNameParts.length - 1];
             var absolutePath = sourceFile.toAbsolutePath();
+            var topClassNameParts = item.fullEnclosingClassName().split("\\.");
+            var topClassName = topClassNameParts[topClassNameParts.length - 1];
             try {
-                return new EnforcementMeta.Item(SourceFile.ofPath(absolutePath), className, item);
+                return new EnforcementMeta.Item(SourceFile.ofPath(absolutePath), className, topClassName, item);
             } catch (Exception e) {
                 log.debug("Failed to parse enforcement item [{}], skipping", absolutePath);
                 return null;

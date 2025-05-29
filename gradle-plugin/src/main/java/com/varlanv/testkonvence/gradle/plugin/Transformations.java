@@ -30,7 +30,7 @@ interface Transformations {
                 }
                 var grouped = new LinkedHashMap<String, Pair<SourceFile, List<Transformation>>>();
                 transformationsList.forEach(transformation -> {
-                    var sourceFile = transformation.input().meta().sourceFile();
+                    var sourceFile = transformation.input().meta().sourceFile;
                     grouped.computeIfAbsent(sourceFile.path().toString(), k -> Pair.of(sourceFile, new ArrayList<>(1)))
                             .right()
                             .add(transformation);
