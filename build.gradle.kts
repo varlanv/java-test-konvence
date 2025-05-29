@@ -41,9 +41,18 @@ abstract class IncrementVersion : DefaultTask() {
                 .resolve("testkonvence")
                 .resolve("Constants.java"),
             rootProjectPath.resolve("gradle.properties"),
-            rootProjectPath.resolve("README.md")
+            rootProjectPath.resolve("gradle").resolve("libs.versions.toml"),
+            rootProjectPath.resolve("demo").resolve("build.gradle.kts")
         ).forEach {
             val text = it.readText(Charsets.UTF_8)
+            val firstIndexOfVersion = text.indexOf(currentVersion)
+            if (firstIndexOfVersion == -1) {
+                throw IllegalStateException("Version $currentVersion not found in file -> $it")
+            }
+            val lastIndexOfVersion = text.lastIndexOf(currentVersion)
+            if (firstIndexOfVersion != lastIndexOfVersion) {
+                throw IllegalStateException("Multiple occurrences of version $currentVersion in file -> $it")
+            }
             val newText = text.replace(currentVersion, newVersion)
             if (text != newText) {
                 it.writeText(newText, Charsets.UTF_8)
