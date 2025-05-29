@@ -82,7 +82,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
     @TestFactory
     @DisplayName("from samples")
-    Stream<DynamicTest> fromSamples() {
+    Stream<DynamicTest> from_samples() {
         return TestSamples.testSamples().stream()
                 .map(sample -> DynamicTest.dynamicTest(
                         sample.description(),
@@ -200,7 +200,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
 
     @Test
     @DisplayName("when two test files then rename both")
-    void when_two_test_files__then_rename_both() {
+    void when_two_test_files_then_rename_both() {
         useTempDir(rootDirPath -> {
             Files.writeString(rootDirPath.resolve("build.gradle"), groovy(standardBuildScript()));
             Files.writeString(
@@ -291,7 +291,7 @@ class Sample2Test {
 
     @Test
     @DisplayName("when two test source roots and run both test task then apply to both sources")
-    void when_two_test_source_roots_and_run_both_test_task__then_apply_to_both_sources() {
+    void when_two_test_source_roots_and_run_both_test_task_then_apply_to_both_sources() {
         useTempDir(rootDirPath -> {
             Files.writeString(
                     rootDirPath.resolve("build.gradle"),

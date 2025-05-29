@@ -13,7 +13,7 @@ class CamelMethodNameFromDisplayNameTest implements UnitTest {
 
     @TestFactory
     @DisplayName("default data table")
-    Stream<DynamicTest> defaultDataTable() {
+    Stream<DynamicTest> default_data_table() {
         return Stream.of(
                         Map.entry("", ""),
                         Map.entry("   ", ""),

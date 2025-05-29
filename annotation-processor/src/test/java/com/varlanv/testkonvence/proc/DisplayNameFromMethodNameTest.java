@@ -13,7 +13,7 @@ class DisplayNameFromMethodNameTest implements UnitTest {
 
     @TestFactory
     @DisplayName("default data table")
-    Stream<DynamicTest> defaultDataTable() {
+    Stream<DynamicTest> default_data_table() {
         return Stream.of(
                         Map.entry("a_b_c", "a b c"),
                         Map.entry("abCd", "ab cd"),

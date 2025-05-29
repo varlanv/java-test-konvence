@@ -28,7 +28,7 @@ class TestKonvenceAPTest implements UnitTest {
 
         @Test
         @DisplayName("when doesnt find annotation then write empty file")
-        void when_doesnt_find_annotation__then_write_empty_file() {
+        void when_doesnt_find_annotation_then_write_empty_file() {
             expectEmptyTransformation(
                     "testcases.SomeTest",
                     """
@@ -176,7 +176,7 @@ class TestKonvenceAPTest implements UnitTest {
 
         @Test
         @DisplayName("when display name is on class level then should generate output")
-        void when_display_name_is_on_class_level__then_should_generate_output() {
+        void when_display_name_is_on_class_level_then_should_generate_output() {
             expectTransformation(
                     "testcases.SomeTest",
                     """
@@ -219,7 +219,7 @@ class TestKonvenceAPTest implements UnitTest {
 
         @Test
         @DisplayName("when display name is on parameterized test then should generate output")
-        void when_display_name_is_on_parameterized_test__then_should_generate_output() {
+        void when_display_name_is_on_parameterized_test_then_should_generate_output() {
             expectTransformation(
                     "testcases.SomeTest",
                     """
