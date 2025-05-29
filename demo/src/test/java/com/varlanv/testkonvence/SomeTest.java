@@ -12,8 +12,8 @@ class SomeTest {
     }
 
     @Test
-    @DisplayName("two should be greater than one")
-    void two_should_be_greater_than_one() {
-        assert 2 > 1;
+    @DisplayName("two should equal to itself")
+    void two_should_equal_to_itself() {
+        assert 2 == 2;
     }
 }

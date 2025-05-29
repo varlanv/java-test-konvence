@@ -4,6 +4,8 @@ A gradle plugin that provides a way to automatically change test method
 names based on `@DisplayName` annotation, as well as doing opposite - automatically generate
 `@DisplayName` based on test method name.
 
+![gif demo of testkonvence plugin](https://github.com/varlanv/doc-resources/raw/refs/heads/main/test-konvence-animation.gif)
+
 ## Motivation
 
 Writing clear, descriptive tests is crucial for maintainable software. Many modern testing frameworks, like those
