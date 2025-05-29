@@ -27,6 +27,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
         """);
 
     @TestFactory
+    @DisplayName("test gradle version compatibility")
     Stream<DynamicTest> test_gradle_version_compatibility() {
         return TestSamples.testSamples().stream()
                 .limit(1)
@@ -80,6 +81,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     }
 
     @TestFactory
+    @DisplayName("from samples")
     Stream<DynamicTest> fromSamples() {
         return TestSamples.testSamples().stream()
                 .map(sample -> DynamicTest.dynamicTest(
@@ -124,7 +126,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     @DisplayName("If requesting dry enforce with failing and there is enforcement fail, then should fail build")
-    void should_fail_when_dry_enforce_with_failing_and_there_is_enforcement_fail_then_fail_build(
+    void if_requesting_dry_enforce_with_failing_and_there_is_enforcement_fail_then_should_fail_build(
             Boolean applyAutomaticallyAfterTestTask) {
         var sample = TestSamples.testSamples().stream()
                 .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
@@ -164,7 +166,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     @Test
     @DisplayName(
             "If set property 'applyAutomaticallyAfterTestTask' to false, then should not apply enforce after test task")
-    void should_not_apply_enforce_when_applyAutomaticallyAfterTestTask_set_to_false() {
+    void if_set_property_applyautomaticallyaftertesttask_to_false_then_should_not_apply_enforce_after_test_task() {
         var sample = TestSamples.testSamples().stream()
                 .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
                 .findFirst()
@@ -197,6 +199,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
     }
 
     @Test
+    @DisplayName("when two test files then rename both")
     void when_two_test_files__then_rename_both() {
         useTempDir(rootDirPath -> {
             Files.writeString(rootDirPath.resolve("build.gradle"), groovy(standardBuildScript()));
@@ -287,6 +290,7 @@ class Sample2Test {
     }
 
     @Test
+    @DisplayName("when two test source roots and run both test task then apply to both sources")
     void when_two_test_source_roots_and_run_both_test_task__then_apply_to_both_sources() {
         useTempDir(rootDirPath -> {
             Files.writeString(
@@ -433,7 +437,7 @@ class Sample2IntegrationTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     @DisplayName("'testKonvenceApply' task should replace method names if found")
-    void testKonvenceApply_should_replace_method_names_if_found(Boolean applyAutomaticallyAfterTestTask) {
+    void testkonvenceapply_task_should_replace_method_names_if_found(Boolean applyAutomaticallyAfterTestTask) {
         var sample = TestSamples.testSamples().stream()
                 .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
                 .findFirst()

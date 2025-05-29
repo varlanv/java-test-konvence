@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.tools.StandardLocation;
 import org.intellij.lang.annotations.Language;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,7 @@ class TestKonvenceAPTest implements UnitTest {
     class EmptyOutputFile implements UnitTest {
 
         @Test
+        @DisplayName("when doesnt find annotation then write empty file")
         void when_doesnt_find_annotation__then_write_empty_file() {
             expectEmptyTransformation(
                     "testcases.SomeTest",
@@ -45,6 +47,7 @@ class TestKonvenceAPTest implements UnitTest {
     class SingleClassFileWithSingleTestMethod implements UnitTest {
 
         @Test
+        @DisplayName("when display name annotation first then should generate output")
         void when_display_name_annotation_first_then_should_generate_output() {
             expectTransformation(
                     "testcases.SomeTest",
@@ -87,6 +90,7 @@ class TestKonvenceAPTest implements UnitTest {
         }
 
         @Test
+        @DisplayName("when test annotation first then should generate output")
         void when_test_annotation_first_then_should_generate_output() {
             expectTransformation(
                     "testcases.SomeTest",
@@ -129,6 +133,7 @@ class TestKonvenceAPTest implements UnitTest {
         }
 
         @Test
+        @DisplayName("when no display name annotation then should generate output")
         void when_no_display_name_annotation_then_should_generate_output() {
             expectTransformation(
                     "testcases.SomeTest",
@@ -170,6 +175,7 @@ class TestKonvenceAPTest implements UnitTest {
         }
 
         @Test
+        @DisplayName("when display name is on class level then should generate output")
         void when_display_name_is_on_class_level__then_should_generate_output() {
             expectTransformation(
                     "testcases.SomeTest",
@@ -212,6 +218,7 @@ class TestKonvenceAPTest implements UnitTest {
         }
 
         @Test
+        @DisplayName("when display name is on parameterized test then should generate output")
         void when_display_name_is_on_parameterized_test__then_should_generate_output() {
             expectTransformation(
                     "testcases.SomeTest",
@@ -258,6 +265,7 @@ class TestKonvenceAPTest implements UnitTest {
     class SingleClassFileWithThreeTestMethods implements UnitTest {
 
         @Test
+        @DisplayName("should generate correct output for three test with display name")
         void should_generate_correct_output_for_three_test_with_display_name() {
             expectTransformation(
                     "testcases.SomeTest",
@@ -320,6 +328,7 @@ class TestKonvenceAPTest implements UnitTest {
         }
 
         @Test
+        @DisplayName("should generate correct output for one test with display name and two without")
         void should_generate_correct_output_for_one_test_with_display_name_and_two_without() {
             expectTransformation(
                     "testcases.SomeTest",

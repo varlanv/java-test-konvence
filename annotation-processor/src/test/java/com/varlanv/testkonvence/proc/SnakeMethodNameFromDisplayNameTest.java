@@ -5,12 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.varlanv.testkonvence.commontest.UnitTest;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 class SnakeMethodNameFromDisplayNameTest implements UnitTest {
 
     @TestFactory
+    @DisplayName("default data table")
     Stream<DynamicTest> defaultDataTable() {
         return Stream.of(
                         Map.entry("", ""),
