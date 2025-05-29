@@ -133,7 +133,7 @@ class TestKonvencePluginFunctionalTest implements FunctionalTest {
         sample.consume(consumableSample -> {
             runGradleRunnerFixture(
                     new DataTable(false, false, false, TestGradleVersions.current()),
-                    List.of("testKonvenceDryEnforceWithFailing"),
+                    List.of("testKonvenceVerify"),
                     (fixture) -> {
                         Files.writeString(fixture.settingsFile(), defaultSettingsGradleConfig);
 
@@ -441,7 +441,7 @@ class Sample2IntegrationTest {
         sample.consume(consumableSample -> {
             runGradleRunnerFixture(
                     new DataTable(false, false, false, TestGradleVersions.current()),
-                    List.of("testKonvenceEnforceAll"),
+                    List.of("testKonvenceApply"),
                     (fixture) -> {
                         Files.writeString(fixture.settingsFile(), defaultSettingsGradleConfig);
 

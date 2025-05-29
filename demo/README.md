@@ -1,0 +1,1 @@
+Demo module, which applies the test-konvence plugin to itself.

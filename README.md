@@ -45,12 +45,12 @@ plugins {
 
 The plugin will add two tasks:
 
-1. **testKonvenceEnforceAll** - task for changing test method names to match JUnit `@DisplayName` annotation,
+1. **testKonvenceApply** - task for changing test method names to match JUnit `@DisplayName` annotation,
    and generate `@DisplayName` annotation based on method name where it doesn't yet exist.
-2. **testKonvenceDryEnforceWithFailing** - task for failing build in case there are tests, for which
+2. **testKonvenceVerify** - task for failing build in case there are tests, for which
    test name transformation is not yet applied, either method name to `@DisplayName`, or `@DisplayName` to method name.
 
-The plugin will also configure automatic applying of `testKonvenceEnforceAll` task after each test run.
+The plugin will also configure automatic applying of `testKonvenceApply` task after each test run.
 
 Consider following test class:
 
@@ -67,7 +67,7 @@ class StringTest {
 }
 ```
 
-After running `test` task, or running `testKonvenceEnforceAll` task, two things will be added:
+After running `test` task, or running `testKonvenceApply` task, two things will be added:
 
 1. If not already present, `import org.junit.jupiter.api.DisplayName` import will be added
 2. `@DisplayName` will be generated from test name.
@@ -104,7 +104,7 @@ class StringTest {
 }
 ```
 
-After running `test` task, or running `testKonvenceEnforceAll` task,
+After running `test` task, or running `testKonvenceApply` task,
 since there is mismatch between what method name and what is written in `@DisplayName`,
 the class will be rewritten to following:
 
@@ -138,7 +138,7 @@ testKonvence {
 ```
 
 Then, somewhere in CI / CD configuration, add a step:
-`./gradlew testKonvenceDryEnforceWithFailing`.
+`./gradlew testKonvenceVerify`.
 
 Configuring a plugin like this will make it so that developers will
 have nice developer experience on local machines, with test naming
@@ -164,11 +164,11 @@ testKonvence {
 ```
 
 * **enabled** - whether to apply plugin logic. If set to **false**,
-  tasks `testKonvenceEnforceAll` and `testKonvenceDryEnforceWithFailing`
+  tasks `testKonvenceApply` and `testKonvenceVerify`
   will still be created, but will have no-op action. Default is **true**.
 * **applyAutomaticallyAfterTestTask** - if set to **true**, all tests will be
   automatically renamed(if needed) after `test` task. If set to **false**,
-  applying test naming transformations will be available only through `testKonvenceEnforceAll` task.
+  applying test naming transformations will be available only through `testKonvenceApply` task.
   Default is **true**.
 * **useCamelCaseForMethodNames** - if is to **true**, camel case method names will be used,
   instead of the default snake case. Default is **false**.
@@ -204,7 +204,7 @@ methods in source files, and applying necessary changes(if any).
 
 Such implementation has two key points as a result:
 
-1. The overhead added by running `testKonvenceEnforceAll` after each test run is absolutely minimal.
+1. The overhead added by running `testKonvenceApply` after each test run is absolutely minimal.
    No additional compilation or AST tree parsing and manipulation is done. If all of your tests
    already have stable test naming, and you introduce a new test method, only this test class and method
    will be processed.

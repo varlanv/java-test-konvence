@@ -38,5 +38,6 @@ include(
     "gradle-plugin",
     "common-test",
     "gradle-functional-test",
+    "demo"
 )
 

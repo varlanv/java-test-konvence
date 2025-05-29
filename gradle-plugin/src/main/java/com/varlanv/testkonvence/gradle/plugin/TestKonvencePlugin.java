@@ -13,8 +13,8 @@ import org.gradle.testing.base.TestingExtension;
 public final class TestKonvencePlugin implements Plugin<Project> {
 
     private static final String testKonvenceTaskGroup = "test konvence";
-    private static final String testKonvenceEnforceAllTaskName = "testKonvenceEnforceAll";
-    private static final String testKonvenceDryEnforceWithFailingTaskName = "testKonvenceDryEnforceWithFailing";
+    private static final String testKonvenceEnforceAllTaskName = "testKonvenceApply";
+    private static final String testKonvenceDryEnforceWithFailingTaskName = "testKonvenceVerify";
 
     @Override
     public void apply(Project project) {
