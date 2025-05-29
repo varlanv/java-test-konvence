@@ -1,6 +1,6 @@
 # Gradle plugin for enforcing test naming convention.
 
-A gradle plugin that provides a way to automatically change test method
+A Gradle plugin that provides a way to automatically change test method
 names based on `@DisplayName` annotation, as well as doing opposite - automatically generate
 `@DisplayName` based on test method name.
 
@@ -8,10 +8,12 @@ names based on `@DisplayName` annotation, as well as doing opposite - automatica
 
 ## Motivation
 
-Writing clear, descriptive tests is crucial for maintainable software. Many modern testing frameworks, like those
-commonly found in Scala, JavaScript, or Groovy, allow developers the convenience of defining test names using flexible,
+Many modern testing frameworks, like those commonly found in Scala, JavaScript, or Groovy,
+allow developers the convenience of defining test names using flexible,
 readable strings. While JUnit 5's `@DisplayName` annotation brings this capability to Java, it can
 introduce a new challenge: keeping the underlying Java method name consistent with the human-readable `@DisplayName`.
+Because of this, in many real projects, developers completely ignore `@DisplayName` and describe test cases only
+with method name.
 
 This plugin aims to solve several common pain points:
 
@@ -19,17 +21,17 @@ This plugin aims to solve several common pain points:
   the corresponding Java method. This can lead to confusing mismatches where test reports show one name, while the code
   refers to another. Similarly, if the method name is refactored, the `@DisplayName` can become outdated.
 * **Team Inconsistency:** Without a clear convention, different team members might adopt varying styles for naming tests
-  or utilizing (or neglecting) `@DisplayName`. This can lead to an inconsistent test suite that's harder to navigate and
+  or using (or neglecting) `@DisplayName`. This can lead to an inconsistent test suite that's harder to navigate and
   understand.
 * **Focus on Readability, Not Just Rules:** Developers should be empowered to write highly descriptive, sentence-like
   test names using `@DisplayName`. The concern of manually creating a compliant Java method name, or keeping it
   synchronized, can be a distraction.
 
-`test-konvence` addresses these issues by automating the synchronization between your test method names and their
+`test-konvence` plugin addresses these issues by automating the synchronization between your test method names and their
 `@DisplayName` annotations. It allows your team to:
 
 * **Enforce a consistent naming strategy** across all JUnit 5 tests.
-* **Treat `@DisplayName` as the primary, human-readable identifier** for your tests.
+* **Treat `@DisplayName` as source of truth and the primary, human-readable identifier** for your tests.
 * **Forget about manual method name adjustments** – the plugin ensures method names are automatically generated or
   updated to reflect the `@DisplayName`.
 
@@ -54,7 +56,7 @@ The plugin will add two tasks:
 
 The plugin will also configure automatic applying of `testKonvenceApply` task after each test run.
 
-Consider following test class:
+Consider the following test class:
 
 ```java
 import org.junit.jupiter.api.Assertions;
@@ -148,6 +150,9 @@ enforced on each test run. Meanwhile, the CI / CD pipeline will enforce that
 test naming is always consistent and will fail the build in case a developer forgot to
 apply test naming transformations.
 
+By default, the plugin will not try to apply test naming transformations on the CI / CD server. That is, 
+if environment variable "CI" is present, which is true for most major CI / CD providers 
+
 ## Configurations
 
 Here is an exhaustive list of available configurations:
@@ -226,7 +231,7 @@ The plugin is built to support all the major Gradle optimization features, such 
 ## Known limitations
 
 - Java version 11 or above for compiling test sources is required
-- Currently, only JUnit 5 is supported
+- Only JUnit 5 is supported
 - The plugin was tested with the latest Gradle 8x and 7x versions (8.14.1, 7.6.1). Any other version is not
   guaranteed to work, but in general, any version in range 7.6.1 - 8.x.x should work.
 

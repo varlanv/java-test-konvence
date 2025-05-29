@@ -23,13 +23,14 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                 .gradleProperty(Constants.performanceLogProperty)
                 .map(Boolean::parseBoolean)
                 .orElse(false);
+        var isCi = providers.gradleProperty("CI").isPresent();
         var testKonvenceExtension = (TestKonvenceExtension) extensions.create(
                 TestKonvenceExtensionView.class, TestKonvenceExtensionView.name(), TestKonvenceExtension.class);
         testKonvenceExtension.getEnabled().convention(true);
         var reverseTransformationSpec = objects.newInstance(ReverseTransformationSpec.class);
         reverseTransformationSpec.getEnabled().convention(true);
         testKonvenceExtension.getReverseTransformation().convention(reverseTransformationSpec);
-        testKonvenceExtension.getApplyAutomaticallyAfterTestTask().convention(true);
+        testKonvenceExtension.getApplyAutomaticallyAfterTestTask().convention(!isCi);
         testKonvenceExtension.getCamelCaseMethodNameProperty().convention(false);
 
         project.afterEvaluate(p -> {
