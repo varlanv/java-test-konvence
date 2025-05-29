@@ -921,6 +921,265 @@ public final class TestSamples {
                             }
                         }
                         """)
+                                .withOptions(options -> options.reverseTransformation(true)))
+                .describe(
+                        "One nested class with same test name as parent, both without @DisplayName",
+                        spec -> spec.withClass("testcases.SomeTest")
+                                .withJavaSources(
+                                        """
+                        package testcases;
+
+                        import org.junit.jupiter.api.Nested;
+                        import org.junit.jupiter.api.Test;
+
+                        class SomeTest {
+
+                            @Test
+                            void some_test() {
+                            }
+
+                            @Nested
+                            class NestedTest {
+
+                                @Test
+                                void some_test() {
+                                }
+                            }
+                        }
+                        """)
+                                .withExpectedTransformation(
+                                        """
+package testcases;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class SomeTest {
+
+    @Test
+    @DisplayName("some test")
+    void some_test() {
+    }
+
+    @Nested
+    class NestedTest {
+
+        @Test
+        @DisplayName("some test")
+        void some_test() {
+        }
+    }
+}
+""")
+                                .withOptions(options -> options.reverseTransformation(true)))
+                .describe(
+                        "Two nested classes on top level with same test name as parent, all without @DisplayName",
+                        spec -> spec.withClass("testcases.SomeTest")
+                                .withJavaSources(
+                                        """
+                        package testcases;
+
+                        import org.junit.jupiter.api.Nested;
+                        import org.junit.jupiter.api.Test;
+
+                        class SomeTest {
+
+                            @Test
+                            void some_test() {
+                            }
+
+                            @Nested
+                            class NestedTest1 {
+
+                                @Test
+                                void some_test() {
+                                }
+                            }
+
+                            @Nested
+                            class NestedTest2 {
+
+                                @Test
+                                void some_test() {
+                                }
+                            }
+                        }
+                        """)
+                                .withExpectedTransformation(
+                                        """
+package testcases;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class SomeTest {
+
+    @Test
+    @DisplayName("some test")
+    void some_test() {
+    }
+
+    @Nested
+    class NestedTest1 {
+
+        @Test
+        @DisplayName("some test")
+        void some_test() {
+        }
+    }
+
+    @Nested
+    class NestedTest2 {
+
+        @Test
+        @DisplayName("some test")
+        void some_test() {
+        }
+    }
+}
+""")
+                                .withOptions(options -> options.reverseTransformation(true)))
+                .describe(
+                        "Two deeply nested classes with same test name as parent, all without @DisplayName",
+                        spec -> spec.withClass("testcases.SomeTest")
+                                .withJavaSources(
+                                        """
+                        package testcases;
+
+                        import org.junit.jupiter.api.Nested;
+                        import org.junit.jupiter.api.Test;
+
+                        class SomeTest {
+
+                            @Test
+                            void some_test() {
+                            }
+
+                            @Nested
+                            class NestedTest1 {
+
+                                @Test
+                                void some_test() {
+                                }
+
+                                @Nested
+                                class NestedTest2 {
+
+                                    @Test
+                                    void some_test() {
+                                    }
+                                }
+                            }
+                        }
+                        """)
+                                .withExpectedTransformation(
+                                        """
+package testcases;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class SomeTest {
+
+    @Test
+    @DisplayName("some test")
+    void some_test() {
+    }
+
+    @Nested
+    class NestedTest1 {
+
+        @Test
+        @DisplayName("some test")
+        void some_test() {
+        }
+
+        @Nested
+        class NestedTest2 {
+
+            @Test
+            @DisplayName("some test")
+            void some_test() {
+            }
+        }
+    }
+}
+""")
+                                .withOptions(options -> options.reverseTransformation(true)))
+                .describe(
+                        "Two deeply nested classes with same test name as parent, but all have different @DisplayName",
+                        spec -> spec.withClass("testcases.SomeTest")
+                                .withJavaSources(
+                                        """
+package testcases;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class SomeTest {
+
+    @Test
+    @DisplayName("some test1")
+    void some_test() {
+    }
+
+    @Nested
+    class NestedTest1 {
+
+        @Test
+        @DisplayName("some test2")
+        void some_test() {
+        }
+
+        @Nested
+        class NestedTest2 {
+
+            @Test
+            @DisplayName("some test3")
+            void some_test() {
+            }
+        }
+    }
+}
+""")
+                                .withExpectedTransformation(
+                                        """
+package testcases;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class SomeTest {
+
+    @Test
+    @DisplayName("some test1")
+    void some_test1() {
+    }
+
+    @Nested
+    class NestedTest1 {
+
+        @Test
+        @DisplayName("some test2")
+        void some_test2() {
+        }
+
+        @Nested
+        class NestedTest2 {
+
+            @Test
+            @DisplayName("some test3")
+            void some_test3() {
+            }
+        }
+    }
+}
+""")
                                 .withOptions(options -> options.reverseTransformation(true)));
     }
 

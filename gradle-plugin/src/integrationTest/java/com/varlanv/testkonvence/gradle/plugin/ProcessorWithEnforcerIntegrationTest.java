@@ -26,6 +26,7 @@ import org.assertj.core.api.ThrowableAssert;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +60,14 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                 var expectedReader = new BufferedReader(new StringReader(source.expectedTransformation()));
                 var lineCount = 0;
                 String actualLine;
-                while ((actualLine = actualReader.readLine()) != null) {
-                    var expectedLine = expectedReader.readLine();
-                    assertThat(actualLine).as("Line number [%d]", lineCount).isEqualTo(expectedLine);
-                    lineCount++;
+                try {
+                    while ((actualLine = actualReader.readLine()) != null) {
+                        var expectedLine = expectedReader.readLine();
+                        assertThat(actualLine).as("Line number [%d]", lineCount).isEqualTo(expectedLine);
+                        lineCount++;
+                    }
+                } catch (AssertionFailedError e) {
+                    throw new AssertionFailedError("Found diff", source.expectedTransformation(), source.content(), e);
                 }
                 assertThat(source.content()).isEqualToIgnoringWhitespace(source.expectedTransformation());
                 assertThat(source.content()).isEqualTo(source.expectedTransformation());

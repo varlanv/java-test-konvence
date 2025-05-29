@@ -6,6 +6,7 @@ import com.varlanv.testkonvence.TrustedException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 final class SourceReplacementTrain {
@@ -82,7 +83,7 @@ final class SourceReplacementTrain {
 
     private Stream<Transformation> methodNameToDisplayNameTransformations(EnforcementMeta.Item item) {
         var candidate = item.candidate();
-        if (!trainOptions.reverseTransformation()) {
+        if (!trainOptions.reverseTransformation() || !candidate.newName().isEmpty()) {
             return Stream.empty();
         }
         return Stream.of(Transformation.of(item.sourceFile().lines(), item, sourceLines -> {
@@ -106,27 +107,26 @@ final class SourceReplacementTrain {
                 var matchIdx = line.indexOf(matchStr);
                 var stringBuilder = new StringBuilder();
                 stringBuilder.append(" ".repeat(Math.max(0, matchIdx)));
-                return findIndexOfEmptyLine(lineIdx, linesView)
-                        .map(emptyLineIdx -> {
-                            var displayNameAnnotation = stringBuilder
-                                    .append("@DisplayName(\"")
-                                    .append(displayName)
-                                    .append("\")")
-                                    .toString();
-                            var sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
-                            return handleDisplayNameImport(sl);
-                        })
-                        .orElse(sourceLines);
+                var emptyLineIdx = findIndexOfEmptyLine(lineIdx, linesView);
+                if (emptyLineIdx != null) {
+                    var displayNameAnnotation = stringBuilder
+                            .append("@DisplayName(\"")
+                            .append(displayName)
+                            .append("\")")
+                            .toString();
+                    var sl = sourceLines.pushAbove(lineIdx, displayNameAnnotation);
+                    return handleDisplayNameImport(sl);
+                } else {
+                    return sourceLines;
+                }
             } else {
-                var maybeIndexOfClosestClassDistance =
-                        findIndexOfClosestClassDistance(item, linesView, matchedLineIndexes);
-                if (maybeIndexOfClosestClassDistance.isPresent()) {
-                    int indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
-                    var line = linesView.get(indexOfClosestClassDistance);
+                var closesClassLineNum = findLineNumWithClosestDistanceToClass(item, linesView, matchedLineIndexes);
+                if (closesClassLineNum != null) {
+                    var line = linesView.get(closesClassLineNum);
                     var matchIdx = line.indexOf(matchStr);
                     var displayNameAnnotation =
                             " ".repeat(Math.max(0, matchIdx)) + "@DisplayName(\"" + displayName + "\")";
-                    var sl = sourceLines.pushAbove(indexOfClosestClassDistance, displayNameAnnotation);
+                    var sl = sourceLines.pushAbove(closesClassLineNum, displayNameAnnotation);
                     return handleDisplayNameImport(sl);
                 }
             }
@@ -167,13 +167,13 @@ final class SourceReplacementTrain {
         }
     }
 
-    private Optional<Integer> findIndexOfEmptyLine(int start, List<String> lines) {
+    @Nullable private Integer findIndexOfEmptyLine(int start, List<String> lines) {
         for (int i = start; i > 0; i--) {
             if (lines.get(i).trim().isEmpty()) {
-                return Optional.of(i);
+                return i;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     private Stream<Transformation> displayNameToMethodNameTransformations(EnforcementMeta.Item item) {
@@ -225,14 +225,12 @@ final class SourceReplacementTrain {
                                 finalIndexes.get(0),
                                 line -> line.replace("void " + originalName + "(", "void " + newName + "("))));
             } else {
-                var maybeIndexOfClosestClassDistance = findIndexOfClosestClassDistance(item, linesView, finalIndexes);
-                if (maybeIndexOfClosestClassDistance.isPresent()) {
-                    var indexOfClosestClassDistance = maybeIndexOfClosestClassDistance.get();
+                var closesClassLineNum = findLineNumWithClosestDistanceToClass(item, linesView, finalIndexes);
+                if (closesClassLineNum != null) {
                     return Stream.of(Transformation.of(
                             lines,
                             item,
-                            (sl) -> sl.replaceAt(
-                                    indexOfClosestClassDistance, line -> line.replace(originalName, newName))));
+                            (sl) -> sl.replaceAt(closesClassLineNum, line -> line.replace(originalName, newName))));
                 }
             }
         }
@@ -258,24 +256,27 @@ final class SourceReplacementTrain {
         }
     }
 
-    private Optional<Integer> findIndexOfClosestClassDistance(
+    @Nullable private Integer findLineNumWithClosestDistanceToClass(
             EnforcementMeta.Item item, List<String> lines, ImmutableIntVector matchedLineIndexes) {
         var lineIndexToOuterClassDistance = new TreeMap<Integer, Integer>();
         var immediateClassName = item.immediateClassName();
-        var targetClassChunk = "class " + immediateClassName + " {";
-        var targetInterfaceChunk = "interface " + immediateClassName + " {";
+        var targetClassChunk = "class " + immediateClassName + " ";
+        var targetInterfaceChunk = "interface " + immediateClassName + " ";
         matchedLineIndexes.forEach(matchedLineIndex -> {
             int distance = 0;
             for (int idx = matchedLineIndex; idx >= 0; idx--) {
                 var line = lines.get(idx);
-                if (line.contains(immediateClassName)
-                        && (line.contains(targetClassChunk) || line.contains(targetInterfaceChunk))) {
+                if (line.contains(targetClassChunk) || line.contains(targetInterfaceChunk)) {
                     lineIndexToOuterClassDistance.put(matchedLineIndex, distance);
                     break;
                 }
                 distance++;
             }
         });
-        return Optional.ofNullable(lineIndexToOuterClassDistance.firstEntry()).map(Map.Entry::getKey);
+        var entry = lineIndexToOuterClassDistance.firstEntry();
+        if (entry == null) {
+            return null;
+        }
+        return entry.getKey();
     }
 }

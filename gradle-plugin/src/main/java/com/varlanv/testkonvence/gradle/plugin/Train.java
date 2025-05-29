@@ -9,9 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 final class Train {
@@ -65,10 +66,10 @@ final class Train {
                                         .newName(item.newName())
                                         .build())))
                 .map(item -> parseItem(sourcesRootPath, item))
-                .flatMap(Optional::stream);
+                .filter(Objects::nonNull);
     }
 
-    private Optional<EnforcementMeta.Item> parseItem(String sourcesRootPath, APEnforcementFull item) {
+    private EnforcementMeta.@Nullable Item parseItem(String sourcesRootPath, APEnforcementFull item) {
         var sourceFile = Paths.get(sourcesRootPath + File.separator
                 + item.fullEnclosingClassName().replace(".", File.separator) + ".java");
         if (Files.isRegularFile(sourceFile)) {
@@ -76,12 +77,12 @@ final class Train {
             var className = classNameParts[classNameParts.length - 1];
             var absolutePath = sourceFile.toAbsolutePath();
             try {
-                return Optional.of(new EnforcementMeta.Item(SourceFile.ofPath(absolutePath), className, item));
+                return new EnforcementMeta.Item(SourceFile.ofPath(absolutePath), className, item);
             } catch (Exception e) {
                 log.debug("Failed to parse enforcement item [{}], skipping", absolutePath);
-                return Optional.empty();
+                return null;
             }
         }
-        return Optional.empty();
+        return null;
     }
 }
