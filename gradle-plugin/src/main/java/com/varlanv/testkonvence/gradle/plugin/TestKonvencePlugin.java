@@ -12,10 +12,6 @@ import org.gradle.testing.base.TestingExtension;
 @SuppressWarnings("UnstableApiUsage")
 public final class TestKonvencePlugin implements Plugin<Project> {
 
-    private static final String testKonvenceTaskGroup = "test konvence";
-    private static final String testKonvenceEnforceAllTaskName = "testKonvenceApply";
-    private static final String testKonvenceDryEnforceWithFailingTaskName = "testKonvenceVerify";
-
     @Override
     public void apply(Project project) {
         var extensions = project.getExtensions();
@@ -38,17 +34,17 @@ public final class TestKonvencePlugin implements Plugin<Project> {
 
         project.afterEvaluate(p -> {
             project.getPlugins().withId("java", javaPlugin -> {
-                var testKonvenceEnforceAllTask =
-                        tasks.register(testKonvenceEnforceAllTaskName, testKonvenceEnforceAll -> {
-                            testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
-                            testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
-                            testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
+                var testKonvenceApplyTask =
+                        tasks.register(Constants.TEST_KONVENCE_APPLY_TASK_NAME, testKonvenceApply -> {
+                            testKonvenceApply.getOutputs().upToDateWhen(ignore -> false);
+                            testKonvenceApply.setGroup(Constants.TEST_KONVENCE_TASK_GROUP);
+                            testKonvenceApply.dependsOn(tasks.withType(JavaCompile.class));
                         });
-                var testKonvenceDryEnforceWithFailingTask =
-                        tasks.register(testKonvenceDryEnforceWithFailingTaskName, testKonvenceEnforceAll -> {
-                            testKonvenceEnforceAll.getOutputs().upToDateWhen(ignore -> false);
-                            testKonvenceEnforceAll.setGroup(testKonvenceTaskGroup);
-                            testKonvenceEnforceAll.dependsOn(tasks.withType(JavaCompile.class));
+                var testKonvenceVerifyTask =
+                        tasks.register(Constants.TEST_KONVENCE_VERIFY_TASK_NAME, testKonvenceVerify -> {
+                            testKonvenceVerify.getOutputs().upToDateWhen(ignore -> false);
+                            testKonvenceVerify.setGroup(Constants.TEST_KONVENCE_TASK_GROUP);
+                            testKonvenceVerify.dependsOn(tasks.withType(JavaCompile.class));
                         });
 
                 var log = project.getLogger();
@@ -153,9 +149,9 @@ public final class TestKonvencePlugin implements Plugin<Project> {
                                 });
                             }
 
-                            testKonvenceEnforceAllTask.configure(task -> task.doLast(newEnforceAction(
+                            testKonvenceApplyTask.configure(task -> task.doLast(newEnforceAction(
                                     testKonvenceExtension, testNameEnforceAction, providers.provider(() -> false))));
-                            testKonvenceDryEnforceWithFailingTask.configure(task -> task.doLast(newEnforceAction(
+                            testKonvenceVerifyTask.configure(task -> task.doLast(newEnforceAction(
                                     testKonvenceExtension, testNameEnforceAction, providers.provider(() -> true))));
                         });
                     }

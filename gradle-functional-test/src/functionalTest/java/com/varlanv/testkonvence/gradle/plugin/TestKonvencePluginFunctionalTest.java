@@ -432,8 +432,8 @@ class Sample2IntegrationTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    @DisplayName("'testKonvenceEnforceAll' task should replace method names if found")
-    void testKonvenceEnforceAll_should_replace_method_names_if_found(Boolean applyAutomaticallyAfterTestTask) {
+    @DisplayName("'testKonvenceApply' task should replace method names if found")
+    void testKonvenceApply_should_replace_method_names_if_found(Boolean applyAutomaticallyAfterTestTask) {
         var sample = TestSamples.testSamples().stream()
                 .filter(s -> Objects.equals(s.description(), "Should replace method name if found"))
                 .findFirst()

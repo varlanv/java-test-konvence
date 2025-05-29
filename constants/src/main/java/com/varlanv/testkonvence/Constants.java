@@ -13,5 +13,8 @@ public final class Constants {
     public static final String PLUGIN_NAME = "com.varlanv.testkonvence";
     public static final String PLUGIN_VERSION = "1.0.3";
     public static final String PROCESSOR_JAR = "annotation-processor-" + PLUGIN_VERSION + ".jar";
+    public static final String TEST_KONVENCE_TASK_GROUP = "test konvence";
+    public static final String TEST_KONVENCE_VERIFY_TASK_NAME = "testKonvenceVerify";
+    public static final String TEST_KONVENCE_APPLY_TASK_NAME = "testKonvenceApply";
     public static final String PROCESSOR_JAR_RESOURCE = "/" + PROCESSOR_JAR;
 }
