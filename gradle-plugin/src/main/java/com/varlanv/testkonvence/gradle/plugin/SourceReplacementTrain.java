@@ -89,24 +89,29 @@ final class SourceReplacementTrain {
         return Stream.of(Transformation.of(item.sourceFile().lines(), item, sourceLines -> {
             var linesView = sourceLines.view();
             var displayName = candidate.displayName();
-            var matchStr = "void " + candidate.originalName() + "(";
+            var softMatchStr = " " + candidate.originalName() + "(";
+            var perfectMatchStr = "void " + candidate.originalName() + "(";
             var matchedLineIndexes = new IntVector(3);
+            var perfectMatchesIndexes = new IntVector(3);
             var linesSize = linesView.size();
             for (int lineIdx = 0; lineIdx < linesSize; lineIdx++) {
                 var line = linesView.get(lineIdx);
-                var matchIdx = line.indexOf(matchStr);
-                if (matchIdx != -1) {
+                if (line.contains(softMatchStr)) {
                     matchedLineIndexes.add(lineIdx);
+                    if (line.contains(perfectMatchStr)) {
+                        perfectMatchesIndexes.add(lineIdx);
+                    }
                 }
             }
             if (matchedLineIndexes.size() == 0) {
                 return sourceLines;
-            } else if (matchedLineIndexes.size() == 1) {
-                var lineIdx = matchedLineIndexes.get(0);
+            } else if (matchedLineIndexes.size() == 1 || perfectMatchesIndexes.size() == 1) {
+                var lineIdx =
+                        perfectMatchesIndexes.size() == 1 ? perfectMatchesIndexes.get(0) : matchedLineIndexes.get(0);
                 var line = linesView.get(lineIdx);
-                var matchIdx = line.indexOf(matchStr);
                 var stringBuilder = new StringBuilder();
-                stringBuilder.append(" ".repeat(Math.max(0, matchIdx)));
+                var indent = indexOfFirstNonWhiteSpace(line);
+                stringBuilder.append(" ".repeat(indent));
                 var emptyLineIdx = findIndexOfEmptyLine(lineIdx, linesView);
                 if (emptyLineIdx != null) {
                     var displayNameAnnotation = stringBuilder
@@ -120,12 +125,12 @@ final class SourceReplacementTrain {
                     return sourceLines;
                 }
             } else {
-                var closesClassLineNum = findLineNumWithClosestDistanceToClass(item, linesView, matchedLineIndexes);
+                var indexes = perfectMatchesIndexes.size() > 0 ? perfectMatchesIndexes : matchedLineIndexes;
+                var closesClassLineNum = findLineNumWithClosestDistanceToClass(item, linesView, indexes);
                 if (closesClassLineNum != null) {
                     var line = linesView.get(closesClassLineNum);
-                    var matchIdx = line.indexOf(matchStr);
-                    var displayNameAnnotation =
-                            " ".repeat(Math.max(0, matchIdx)) + "@DisplayName(\"" + displayName + "\")";
+                    var indent = indexOfFirstNonWhiteSpace(line);
+                    var displayNameAnnotation = " ".repeat(indent) + "@DisplayName(\"" + displayName + "\")";
                     var sl = sourceLines.pushAbove(closesClassLineNum, displayNameAnnotation);
                     return handleDisplayNameImport(sl);
                 }
@@ -278,5 +283,15 @@ final class SourceReplacementTrain {
             return null;
         }
         return entry.getKey();
+    }
+
+    private static int indexOfFirstNonWhiteSpace(String str) {
+        var len = str.length();
+        for (var i = 0; i < len; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

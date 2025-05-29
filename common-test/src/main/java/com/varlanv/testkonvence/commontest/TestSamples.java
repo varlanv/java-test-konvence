@@ -1180,6 +1180,46 @@ class SomeTest {
     }
 }
 """)
+                                .withOptions(options -> options.reverseTransformation(true)))
+                .describe(
+                        "requested reverseTransformation and sigle @TestFactory that returns stream and displayName not present",
+                        spec -> spec.withClass("testcases.SomeTest")
+                                .withJavaSources(
+                                        """
+package testcases;
+
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
+import java.util.stream.Stream;
+
+class SomeTest {
+
+    @TestFactory
+    Stream<DynamicTest> defaultDataTable() {
+        return Stream.of("1").map(string -> DynamicTest.dynamicTest(string, () -> {}));
+    }
+}
+""")
+                                .withExpectedTransformation(
+                                        """
+package testcases;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
+import java.util.stream.Stream;
+
+class SomeTest {
+
+    @TestFactory
+    @DisplayName("default data table")
+    Stream<DynamicTest> defaultDataTable() {
+        return Stream.of("1").map(string -> DynamicTest.dynamicTest(string, () -> {}));
+    }
+}
+""")
                                 .withOptions(options -> options.reverseTransformation(true)));
     }
 
