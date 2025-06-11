@@ -15,11 +15,11 @@ public final class TestGradleVersions {
     }
 
     public static String latest7() {
-        return "7.6.1";
+        return "7.6.5";
     }
 
     public static String latest8() {
-        return "8.14.1";
+        return "8.14.2";
     }
 
     public static String latest6() {
