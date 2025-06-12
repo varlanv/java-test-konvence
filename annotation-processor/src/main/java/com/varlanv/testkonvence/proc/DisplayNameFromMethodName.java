@@ -3,6 +3,7 @@ package com.varlanv.testkonvence.proc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 final class DisplayNameFromMethodName {
@@ -38,13 +39,13 @@ final class DisplayNameFromMethodName {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (Character.isUpperCase(c) && currentWord.length() > 0) {
-                words.add(currentWord.toString().toLowerCase());
+                words.add(currentWord.toString().toLowerCase(Locale.ROOT));
                 currentWord.setLength(0);
             }
             currentWord.append(c);
         }
 
-        words.add(currentWord.toString().toLowerCase());
+        words.add(currentWord.toString().toLowerCase(Locale.ROOT));
 
         return words;
     }

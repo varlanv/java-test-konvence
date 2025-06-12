@@ -62,7 +62,7 @@ public interface Sample {
     private SampleSourceFile toFileSample(SampleSources sampleSources, Path dir) {
         return BaseTest.supplyQuiet(() -> {
             var resultDir = dir;
-            for (var packagePart : sampleSources.packageName().split("\\.")) {
+            for (var packagePart : sampleSources.packageName().split("\\.", -1)) {
                 resultDir = resultDir.resolve(packagePart);
             }
             Files.createDirectories(resultDir);

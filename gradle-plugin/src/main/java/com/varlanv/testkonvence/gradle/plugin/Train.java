@@ -73,10 +73,10 @@ final class Train {
         var sourceFile = Paths.get(sourcesRootPath + File.separator
                 + item.fullEnclosingClassName().replace(".", File.separator) + ".java");
         if (Files.isRegularFile(sourceFile)) {
-            var classNameParts = item.className().split("\\.");
+            var classNameParts = item.className().split("\\.", -1);
             var className = classNameParts[classNameParts.length - 1];
             var absolutePath = sourceFile.toAbsolutePath();
-            var topClassNameParts = item.fullEnclosingClassName().split("\\.");
+            var topClassNameParts = item.fullEnclosingClassName().split("\\.", -1);
             var topClassName = topClassNameParts[topClassNameParts.length - 1];
             try {
                 return new EnforcementMeta.Item(SourceFile.ofPath(absolutePath), className, topClassName, item);

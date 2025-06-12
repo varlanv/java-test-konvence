@@ -8,6 +8,8 @@ import org.gradle.api.Action;
 public interface TestKonvenceExtensionView {
 
     /**
+     * Name of the extension
+     *
      * @return name of the extension.
      */
     static String name() {

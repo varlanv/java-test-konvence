@@ -40,7 +40,7 @@ public class SampleSpec {
     }
 
     public SampleSpecFileStep withClass(String fullyQualifiedClassName) {
-        var packageParts = fullyQualifiedClassName.split("\\.");
+        var packageParts = fullyQualifiedClassName.split("\\.", -1);
         if (packageParts.length == 0) {
             return new SampleSpecFileStep(this, fullyQualifiedClassName, "");
         }

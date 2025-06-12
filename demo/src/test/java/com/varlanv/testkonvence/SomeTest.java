@@ -3,6 +3,7 @@ package com.varlanv.testkonvence;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("all")
 class SomeTest {
 
     @Test
