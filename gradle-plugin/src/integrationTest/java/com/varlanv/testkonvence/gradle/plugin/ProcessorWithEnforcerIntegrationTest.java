@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.varlanv.testkonvence.Constants;
@@ -21,7 +22,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.tools.StandardLocation;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DynamicTest;
@@ -109,10 +109,13 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
                     assertThat(fileObjects).hasSize(1);
                     resultXml.set(fileObjects.get(0).getContentAsByteArray());
                 });
+        if (resultXml.get() == null) {
+            throw new AssertionError("Result xml is null");
+        }
         if (resultXml.get().length > 0) {
             ThrowableAssert.ThrowingCallable throwingCallable =
                     () -> XmlMemoryEnforceMeta.fromXmlStream(new ByteArrayInputStream(resultXml.get()));
-            Assertions.assertThatNoException().isThrownBy(throwingCallable);
+            assertThatNoException().isThrownBy(throwingCallable);
         }
         return resultXml.get();
     }

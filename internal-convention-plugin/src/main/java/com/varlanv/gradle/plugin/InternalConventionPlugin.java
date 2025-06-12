@@ -114,7 +114,7 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                 pluginManager.apply(CheckstylePlugin.class);
                 pluginManager.apply(VersionsPlugin.class);
                 pluginManager.apply(ErrorPronePlugin.class);
-//                pluginManager.apply(NullAwayPlugin.class);
+                pluginManager.apply(NullAwayPlugin.class);
                 if (internalEnvironment.isLocal()) {
                     pluginManager.apply(IdeaPlugin.class);
                     extensions.<IdeaModel>configure("idea", idea -> {
@@ -141,9 +141,9 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                             spotlessJava.trimTrailingWhitespace();
                             spotlessJava.cleanthat();
                         }));
-//                extensions.<NullAwayExtension>configure("nullaway", nullAwayExtension -> {
-//                    nullAwayExtension.getOnlyNullMarked().set(true);
-//                });
+                extensions.<NullAwayExtension>configure("nullaway", nullAwayExtension -> {
+                    nullAwayExtension.getOnlyNullMarked().set(true);
+                });
             });
             // -------------------- Apply common plugins end --------------------
             pluginManager.withPlugin("java", plugin -> {
@@ -203,7 +203,7 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                 dependencies.addProvider(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME, immutablesDependency);
                 dependencies.addProvider(JavaPlugin.ANNOTATION_PROCESSOR_CONFIGURATION_NAME, immutablesDependency);
                 dependencies.addProvider("errorprone", internalProperties.getLib("errorprone"));
-//                dependencies.addProvider("errorprone", internalProperties.getLib("nullaway"));
+                dependencies.addProvider("errorprone", internalProperties.getLib("nullaway"));
 
                 dependencies.addProvider(
                         JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME,

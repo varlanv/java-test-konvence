@@ -73,6 +73,9 @@ public final class TestKonvenceAP extends AbstractProcessor {
     private final AnnotationStrategy testAnnotationFn = (roundEnv, annotation, out) -> {
         var elements = roundEnv.getElementsAnnotatedWith(annotation);
         for (var element : elements) {
+            if (element.getEnclosingElement() == null) {
+                continue;
+            }
             if (element.getKind() == ElementKind.METHOD) {
                 var displayNameValue = findDisplayNameAnnotationValue(element);
                 var className = element.getEnclosingElement().getSimpleName().toString();
@@ -110,6 +113,9 @@ public final class TestKonvenceAP extends AbstractProcessor {
     private final AnnotationStrategy displayNameAnnotationFn = (roundEnv, annotation, out) -> {
         var elements = roundEnv.getElementsAnnotatedWith(annotation);
         for (var element : elements) {
+            if (element.getEnclosingElement() == null) {
+                continue;
+            }
             if (element.getKind() == ElementKind.METHOD) {
                 var displayNameValue = findDisplayNameAnnotationValue(element);
                 if (displayNameValue != null) {
@@ -158,18 +164,13 @@ public final class TestKonvenceAP extends AbstractProcessor {
             .collect(Collectors.toMap(Pair::left, Pair::right));
 
     private static String findTopLevelClassName(Element start) {
-        String topLevelClassName;
-        Element enclosingElement = start;
-        while (true) {
-            var nestedEnclElement = enclosingElement.getEnclosingElement();
-            if (nestedEnclElement.getKind() == ElementKind.PACKAGE) {
-                topLevelClassName =
-                        ((TypeElement) enclosingElement).getQualifiedName().toString();
-                break;
-            }
-            enclosingElement = nestedEnclElement;
+        var current = start;
+        var enclosing = current.getEnclosingElement();
+        while (enclosing != null && enclosing.getKind() != ElementKind.PACKAGE) {
+            current = enclosing;
+            enclosing = current.getEnclosingElement();
         }
-        return topLevelClassName;
+        return ((TypeElement) current).getQualifiedName().toString();
     }
 
     APIntermediateOutput output = new APIntermediateOutput();
