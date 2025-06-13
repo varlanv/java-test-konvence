@@ -32,6 +32,7 @@ abstract class IncrementVersion : DefaultTask() {
 
         listOf(
             rootProjectPath
+                .resolve("lib")
                 .resolve("constants")
                 .resolve("src")
                 .resolve("main")

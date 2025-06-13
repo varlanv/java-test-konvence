@@ -5,18 +5,19 @@ plugins {
 }
 
 dependencies {
-    compileOnly(projects.constants)
-    compileOnly(projects.sharedUtil)
-    testCompileOnly(projects.constants)
+    compileOnly(projects.lib.constants)
+    compileOnly(projects.lib.sharedUtil)
+    testCompileOnly(projects.lib.constants)
     testImplementation(libs.toolisticon.cute)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.named<Jar>("jar") {
-    dependsOn(":shared-util:jar")
+    dependsOn(":lib:shared-util:jar")
     val rootDirPath = project.rootDir.toPath()
     from(rootDirPath
+        .resolve("lib")
         .resolve("shared-util")
         .resolve("build")
         .resolve("classes")

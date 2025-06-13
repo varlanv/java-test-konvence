@@ -32,12 +32,12 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 includeBuild("internal-convention-plugin")
 
 include(
-    "constants",
-    "shared-util",
-    "annotation-processor",
-    "gradle-plugin",
-    "common-test",
-    "gradle-functional-test",
-    "demo"
+    "lib:constants",
+    "lib:shared-util",
+    "lib:annotation-processor",
+    "lib:gradle-plugin",
+    "testing:common-test",
+    "testing:gradle-functional-test",
+    "demo",
 )
 

@@ -19,24 +19,26 @@ gradlePlugin {
 }
 
 dependencies {
-    compileOnly(projects.sharedUtil)
-    compileOnly(projects.constants)
-    testCompileOnly(projects.constants)
-    testImplementation(projects.annotationProcessor)
+    compileOnly(projects.lib.sharedUtil)
+    compileOnly(projects.lib.constants)
+    testCompileOnly(projects.lib.constants)
+    testImplementation(projects.lib.annotationProcessor)
     testImplementation(libs.toolisticon.cute)
 }
 
 tasks.named<Jar>("jar") {
-    dependsOn(":annotation-processor:jar")
-    dependsOn(":shared-util:jar")
+    dependsOn(":lib:annotation-processor:jar")
+    dependsOn(":lib:shared-util:jar")
     val rootDirPath = project.rootDir.toPath()
     from(rootDirPath
+        .resolve("lib")
         .resolve("shared-util")
         .resolve("build")
         .resolve("classes")
         .resolve("java")
         .resolve("main"))
     from(rootDirPath
+        .resolve("lib")
         .resolve("annotation-processor")
         .resolve("build")
         .resolve("libs")

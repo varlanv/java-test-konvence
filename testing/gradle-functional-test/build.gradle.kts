@@ -9,8 +9,8 @@ internalConvention {
 }
 
 dependencies {
-    implementation(projects.gradlePlugin)
-    implementation(projects.annotationProcessor)
+    implementation(projects.lib.gradlePlugin)
+    implementation(projects.lib.annotationProcessor)
     testImplementation(libs.apache.commons.lang)
     testImplementation(gradleTestKit())
 }

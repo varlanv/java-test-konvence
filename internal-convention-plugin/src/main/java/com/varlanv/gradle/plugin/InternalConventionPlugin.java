@@ -212,10 +212,10 @@ public final class InternalConventionPlugin implements Plugin<Project> {
                         JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME,
                         internalProperties.getLib("junit-platform-launcher"));
 
-                if (!internalEnvironment.isTest() && !projectPath.equals(":common-test")) {
+                if (!internalEnvironment.isTest() && !projectPath.equals(":testing:common-test")) {
                     dependencies.add(
                             JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME,
-                            dependencies.project(Collections.singletonMap("path", ":common-test")));
+                            dependencies.project(Collections.singletonMap("path", ":testing:common-test")));
                 }
 
                 // -------------------- Add common dependencies end --------------------
