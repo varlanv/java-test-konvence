@@ -5,7 +5,6 @@ import com.varlanv.testkonvence.ThrowingRunnable;
 import java.time.Duration;
 import java.util.function.Consumer;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.tools.Diagnostic;
 
 final class ApPerformanceLog {
 
@@ -15,33 +14,27 @@ final class ApPerformanceLog {
     private final Consumer<ProcessingEnvironment> printResult;
 
     ApPerformanceLog(boolean enabled) {
-        totalTime = 0;
         if (enabled) {
             incrementTotal = action -> {
-                var before = System.currentTimeMillis();
+                var before = System.nanoTime();
                 try {
                     action.run();
                 } finally {
-                    var after = System.currentTimeMillis();
+                    var after = System.nanoTime();
                     totalTime += after - before;
                 }
             };
             incrementTotalSafe = action -> {
-                var before = System.currentTimeMillis();
+                var before = System.nanoTime();
                 try {
                     action.run();
                 } finally {
-                    var after = System.currentTimeMillis();
+                    var after = System.nanoTime();
                     totalTime += after - before;
                 }
             };
-            printResult = processingEnvironment -> {
-                processingEnvironment
-                        .getMessager()
-                        .printMessage(
-                                Diagnostic.Kind.NOTE,
-                                "Total time for TestKonvence annotation processing - " + Duration.ofMillis(totalTime));
-            };
+            printResult = processingEnvironment -> System.err.println(
+                    "Total time for TestKonvence annotation processing - " + Duration.ofNanos(totalTime));
         } else {
             incrementTotal = ThrowingRunnable::run;
             incrementTotalSafe = Runnable::run;

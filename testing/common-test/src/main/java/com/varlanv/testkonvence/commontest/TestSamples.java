@@ -588,7 +588,7 @@ public final class TestSamples {
                                 Map.entry("a_b_c-", "a_b_c"),
                                 Map.entry("-a_b_c", "a_b_c"))
                         .map(entry -> Map.entry(
-                                "Test method name \"someTest\" should be converted to method name \"%s\" when display name is \"%s\""
+                                "Test method name 'someTest' should be converted to method name '%s' when display name is '%s'"
                                         .formatted(entry.getKey(), entry.getValue()),
                                 spec -> spec.withClass("testcases.SomeTest")
                                         .withJavaSources(

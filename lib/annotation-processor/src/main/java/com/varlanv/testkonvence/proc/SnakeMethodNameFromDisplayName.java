@@ -1,5 +1,6 @@
 package com.varlanv.testkonvence.proc;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -30,9 +31,9 @@ final class SnakeMethodNameFromDisplayName {
                         value -> pattern.matcher(value).replaceAll(replacement);
             })
             .collect(Collectors.collectingAndThen(Collectors.toList(), result -> {
-                result.add(String::toLowerCase);
-                @SuppressWarnings({"unchecked", "rawtypes"})
-                var array = (Function<String, String>[]) result.toArray(new Function[0]);
+                result.add(s -> s.toLowerCase(Locale.ROOT));
+                @SuppressWarnings("unchecked")
+                var array = (Function<String, String>[]) result.toArray(new Function<?, ?>[0]);
                 return array;
             }));
 

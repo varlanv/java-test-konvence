@@ -24,13 +24,29 @@ public final class TestKonvenceAP extends AbstractProcessor {
             Constants.apIndentXmlOption,
             Constants.apReversedOption,
             Constants.apUseCamelCaseMethodNamesOption,
-            Constants.performanceLogProperty);
+            Constants.performanceLogProperty,
+            Constants.maxMethodNameLengthProperty);
 
     @Nullable private Boolean isCamelCase;
 
     @Nullable private Boolean isReverseEnabled;
 
     @Nullable private ApPerformanceLog performanceLog;
+
+    private int maxMethodNameLength = -1;
+
+    public int maxMethodNameLength() {
+        var res = maxMethodNameLength;
+        if (res == -1) {
+            res = Integer.parseInt(processingEnv
+                    .getOptions()
+                    .getOrDefault(
+                            Constants.maxMethodNameLengthProperty,
+                            String.valueOf(Constants.DEFAULT_MAX_METHOD_NAME_LENGTH)));
+            maxMethodNameLength = res;
+        }
+        return res;
+    }
 
     private ApPerformanceLog performanceLog() {
         var res = performanceLog;
@@ -95,15 +111,13 @@ public final class TestKonvenceAP extends AbstractProcessor {
                     var methodElement = (ExecutableElement) element;
                     var methodName = methodElement.getSimpleName().toString();
                     var newName = convertDisplayNameToMethodName(displayNameValue);
-                    if (!Objects.equals(newName, methodName)) {
-                        out.add(ImmutableAPEnforcementFull.builder()
-                                .fullEnclosingClassName(findTopLevelClassName(element))
-                                .displayName(displayNameValue)
-                                .className(className)
-                                .originalName(methodName)
-                                .newName(newName)
-                                .build());
-                    }
+                    out.add(ImmutableAPEnforcementFull.builder()
+                            .fullEnclosingClassName(findTopLevelClassName(element))
+                            .displayName(displayNameValue)
+                            .className(className)
+                            .originalName(methodName)
+                            .newName(newName)
+                            .build());
                 }
             }
         }
@@ -122,17 +136,15 @@ public final class TestKonvenceAP extends AbstractProcessor {
                     var methodElement = (ExecutableElement) element;
                     var methodName = methodElement.getSimpleName().toString();
                     var newName = convertDisplayNameToMethodName(displayNameValue);
-                    if (!Objects.equals(newName, methodName)) {
-                        out.add(ImmutableAPEnforcementFull.builder()
-                                .fullEnclosingClassName(findTopLevelClassName(element))
-                                .displayName(displayNameValue)
-                                .className(element.getEnclosingElement()
-                                        .getSimpleName()
-                                        .toString())
-                                .originalName(methodName)
-                                .newName(newName)
-                                .build());
-                    }
+                    out.add(ImmutableAPEnforcementFull.builder()
+                            .fullEnclosingClassName(findTopLevelClassName(element))
+                            .displayName(displayNameValue)
+                            .className(element.getEnclosingElement()
+                                    .getSimpleName()
+                                    .toString())
+                            .originalName(methodName)
+                            .newName(newName)
+                            .build());
                 }
             }
         }

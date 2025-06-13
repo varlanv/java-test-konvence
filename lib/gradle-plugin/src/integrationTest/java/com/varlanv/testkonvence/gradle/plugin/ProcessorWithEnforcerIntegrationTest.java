@@ -1,7 +1,7 @@
 package com.varlanv.testkonvence.gradle.plugin;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import com.varlanv.testkonvence.Constants;
 import com.varlanv.testkonvence.XmlMemoryEnforceMeta;
@@ -121,7 +121,8 @@ public class ProcessorWithEnforcerIntegrationTest implements IntegrationTest {
     }
 
     private String[] resolveCompilerOptions(ConsumableSample sample) {
-        var args = new ArrayList<>(List.of("-A" + Constants.apIndentXmlOption + "=false"));
+        var args = new ArrayList<>(List.of(
+                "-A" + Constants.apIndentXmlOption + "=false", "-A" + Constants.performanceLogProperty + "=true"));
         if (sample.options().reverseTransformation()) {
             args.add("-A" + Constants.apReversedOption + "=true");
         }
