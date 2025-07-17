@@ -12,6 +12,9 @@ abstract class IncrementVersion : DefaultTask() {
     abstract fun getRootProjectFile(): DirectoryProperty
 
     @Input
+    abstract fun getIsCi(): Property<Boolean>
+
+    @Input
     abstract fun getVersionSemantic(): Property<String>
 
     @Input
@@ -19,6 +22,7 @@ abstract class IncrementVersion : DefaultTask() {
 
     @TaskAction
     fun run() {
+        val isCi = getIsCi()
         val versionSemantic = getVersionSemantic().get()
         val rootProjectPath = getRootProjectFile().get().asFile.toPath()
         val currentVersion = getCurrentVersion().get()
@@ -30,7 +34,7 @@ abstract class IncrementVersion : DefaultTask() {
             else -> throw IllegalStateException("Unknown version semantic -> $versionSemantic")
         }
 
-        listOf(
+        val filesForVersionUpdate = mutableListOf(
             rootProjectPath
                 .resolve("lib")
                 .resolve("constants")
@@ -41,9 +45,14 @@ abstract class IncrementVersion : DefaultTask() {
                 .resolve("varlanv")
                 .resolve("testkonvence")
                 .resolve("Constants.java"),
-            rootProjectPath.resolve("gradle.properties"),
-            rootProjectPath.resolve("gradle").resolve("libs.versions.toml"),
-        ).forEach {
+            rootProjectPath.resolve("gradle.properties")
+        )
+        if (!getIsCi().get()) {
+            filesForVersionUpdate.add(rootProjectPath.resolve("gradle").resolve("libs.versions.toml"))
+            filesForVersionUpdate.add(rootProjectPath.resolve("demo").resolve("build.gradle.kts"))
+            filesForVersionUpdate.add(rootProjectPath.resolve("README.md"))
+        }
+        filesForVersionUpdate.forEach {
             val text = it.readText(Charsets.UTF_8)
             val firstIndexOfVersion = text.indexOf(currentVersion)
             if (firstIndexOfVersion == -1) {
@@ -64,6 +73,7 @@ abstract class IncrementVersion : DefaultTask() {
 listOf("Patch", "Minor", "Major").forEach {
     tasks.register("increment${it}Version", IncrementVersion::class) {
         group = "version"
+        getIsCi().set(providers.environmentVariable("CI").orNull != null)
         getRootProjectFile().set(project.layout.projectDirectory)
         getVersionSemantic().set(it)
         getCurrentVersion().set(properties["version"].toString())
