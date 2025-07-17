@@ -1,3 +1,4 @@
+import kotlin.io.path.name
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
@@ -22,7 +23,6 @@ abstract class IncrementVersion : DefaultTask() {
 
     @TaskAction
     fun run() {
-        val isCi = getIsCi()
         val versionSemantic = getVersionSemantic().get()
         val rootProjectPath = getRootProjectFile().get().asFile.toPath()
         val currentVersion = getCurrentVersion().get()
@@ -59,7 +59,7 @@ abstract class IncrementVersion : DefaultTask() {
                 throw IllegalStateException("Version $currentVersion not found in file -> $it")
             }
             val lastIndexOfVersion = text.lastIndexOf(currentVersion)
-            if (firstIndexOfVersion != lastIndexOfVersion) {
+            if (firstIndexOfVersion != lastIndexOfVersion && !it.name.equals("readme.md", ignoreCase = true)) {
                 throw IllegalStateException("Multiple occurrences of version $currentVersion in file -> $it")
             }
             val newText = text.replace(currentVersion, newVersion)
