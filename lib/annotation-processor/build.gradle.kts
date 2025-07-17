@@ -10,6 +10,7 @@ dependencies {
     testCompileOnly(projects.lib.constants)
     testImplementation(libs.toolisticon.cute)
     testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.selfie)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

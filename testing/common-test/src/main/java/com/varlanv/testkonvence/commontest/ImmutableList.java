@@ -23,16 +23,6 @@ public final class ImmutableList<T> implements Iterable<@NonNull T> {
         return new ImmutableList<>(result);
     }
 
-    public static <T> ImmutableList<T> copyOfWithoutNulls(Collection<@Nullable T> collection) {
-        var result = new ArrayList<@NonNull T>(collection.size());
-        for (var t : collection) {
-            if (t != null) {
-                result.add(t);
-            }
-        }
-        return new ImmutableList<>(result);
-    }
-
     @SafeVarargs
     @SuppressWarnings("varargs")
     public static <T> ImmutableList<T> of(T... value) {

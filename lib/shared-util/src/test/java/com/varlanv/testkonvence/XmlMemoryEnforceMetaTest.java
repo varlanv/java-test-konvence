@@ -2,6 +2,7 @@ package com.varlanv.testkonvence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.diffplug.selfie.Selfie;
 import com.varlanv.testkonvence.commontest.BaseTest;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
@@ -35,45 +36,9 @@ class XmlMemoryEnforceMetaTest implements BaseTest {
 
         defaultSubject.writeTo(writer);
 
-        assertThat(writer.toString())
-                .isEqualToIgnoringWhitespace(
-                        """
-            <root>
-                <q>
-                    <w>
-                        <e>
-                            <o>topClassName0</o>
-                            <r>
-                                <t>
-                                    <i>someClassName0</i>
-                                    <y>
-                                        <u>
-                                            <p>dName0</p>
-                                            <a>oName0</a>
-                                            <s>nName0</s>
-                                        </u>
-                                    </y>
-                                </t>
-                            </r>
-                        </e>
-                        <e>
-                            <o>topClassName1</o>
-                            <r>
-                                <t>
-                                    <i>someClassName1</i>
-                                    <y>
-                                        <u>
-                                            <p>dName1</p>
-                                            <a>oName1</a>
-                                            <s>nName1</s>
-                                        </u>
-                                    </y>
-                                </t>
-                            </r>
-                        </e>
-                    </w>
-                </q>
-            </root>""");
+        Selfie.expectSelfie(writer.toString())
+                .toBe(
+                        "<root><q><w><e><o>topClassName0</o><r><t><i>someClassName0</i><y><u><p>dName0</p><a>oName0</a><s>nName0</s></u></y></t></r></e><e><o>topClassName1</o><r><t><i>someClassName1</i><y><u><p>dName1</p><a>oName1</a><s>nName1</s></u></y></t></r></e></w></q></root>");
     }
 
     @Test

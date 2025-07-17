@@ -17,6 +17,7 @@ nullawayPluginVersion = "2.2.0"
 benmanesPluginVersion = "0.52.0"
 spotbugsPluginVersion = "6.2.2"
 spotlessPluginVersion = "7.1.0"
+selfieVersion = "2.5.3"
 testKonvencePluginVersion = "1.0.9"
 shadowPluginVersion = "8.3.8"
 gradlePluginPublishVersion = "1.3.1"
@@ -30,6 +31,7 @@ jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version
 apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", version.ref = "apacheCommons" }
 apache-commons-io = { group = "commons-io", name = "commons-io", version.ref = "apacheCommonsIo" }
 toolisticon-cute = { group = "io.toolisticon.cute", name = "cute", version.ref = "cuteToolisticon" }
+selfie = { group = "com.diffplug.selfie", name = "selfie-runner-junit5", version.ref = "selfieVersion" }
 immutables-values = { group = "org.immutables", name = "value", version.ref = "immutablesVersion" }
 jSpecify = { group = "org.jspecify", name = "jspecify", version.ref = "jSpecifyVersion" }
 benmanes-version-plugin = { group = "com.github.ben-manes.versions", name = "com.github.ben-manes.versions.gradle.plugin", version.ref = "benmanesPluginVersion" }
