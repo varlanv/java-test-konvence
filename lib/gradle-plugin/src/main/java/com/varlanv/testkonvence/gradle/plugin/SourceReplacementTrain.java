@@ -60,8 +60,8 @@ final class SourceReplacementTrain {
                                     + "Consider running `%s` "
                                     + "Gradle task to apply test naming transformations.",
                             Constants.PLUGIN_NAME,
-                            Constants.TEST_KONVENCE_APPLY_TASK_NAME,
-                            target.path().toAbsolutePath()));
+                            target.path().toAbsolutePath(),
+                            Constants.TEST_KONVENCE_APPLY_TASK_NAME));
                 } else {
                     try {
                         performanceLog.printIntermediateRunnable(
