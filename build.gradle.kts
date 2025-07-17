@@ -43,7 +43,6 @@ abstract class IncrementVersion : DefaultTask() {
                 .resolve("Constants.java"),
             rootProjectPath.resolve("gradle.properties"),
             rootProjectPath.resolve("gradle").resolve("libs.versions.toml"),
-            rootProjectPath.resolve("demo").resolve("build.gradle.kts")
         ).forEach {
             val text = it.readText(Charsets.UTF_8)
             val firstIndexOfVersion = text.indexOf(currentVersion)
