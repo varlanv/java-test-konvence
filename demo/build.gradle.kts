@@ -1,5 +1,5 @@
 plugins {
     java
     alias(libs.plugins.internalConvention)
-    id("com.varlanv.test-konvence") version "1.0.8"
+    id("com.varlanv.test-konvence") version "1.0.9"
 }
