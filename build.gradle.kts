@@ -8,18 +8,19 @@ tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {
 
 abstract class IncrementVersion : DefaultTask() {
 
+    @InputDirectory
+    abstract fun getRootProjectFile(): DirectoryProperty
+
     @Input
     abstract fun getVersionSemantic(): Property<String>
 
     @Input
     abstract fun getCurrentVersion(): Property<String>
 
-    @InputFiles
-    abstract fun getVersionFiles(): ConfigurableFileCollection
-
     @TaskAction
     fun run() {
         val versionSemantic = getVersionSemantic().get()
+        val rootProjectPath = getRootProjectFile().get().asFile.toPath()
         val currentVersion = getCurrentVersion().get()
         val currentVersionParts = currentVersion.split('.')
         val newVersion = when (versionSemantic) {
@@ -29,7 +30,20 @@ abstract class IncrementVersion : DefaultTask() {
             else -> throw IllegalStateException("Unknown version semantic -> $versionSemantic")
         }
 
-        getVersionFiles().forEach {
+        listOf(
+            rootProjectPath
+                .resolve("lib")
+                .resolve("constants")
+                .resolve("src")
+                .resolve("main")
+                .resolve("java")
+                .resolve("com")
+                .resolve("varlanv")
+                .resolve("testkonvence")
+                .resolve("Constants.java"),
+            rootProjectPath.resolve("gradle.properties"),
+            rootProjectPath.resolve("gradle").resolve("libs.versions.toml"),
+        ).forEach {
             val text = it.readText(Charsets.UTF_8)
             val firstIndexOfVersion = text.indexOf(currentVersion)
             if (firstIndexOfVersion == -1) {
@@ -50,49 +64,8 @@ abstract class IncrementVersion : DefaultTask() {
 listOf("Patch", "Minor", "Major").forEach {
     tasks.register("increment${it}Version", IncrementVersion::class) {
         group = "version"
-        val rootProjectPath = project.layout.projectDirectory.asFile
+        getRootProjectFile().set(project.layout.projectDirectory)
         getVersionSemantic().set(it)
         getCurrentVersion().set(properties["version"].toString())
-        getVersionFiles().setFrom(
-            listOf(
-                rootProjectPath
-                    .resolve("lib")
-                    .resolve("constants")
-                    .resolve("src")
-                    .resolve("main")
-                    .resolve("java")
-                    .resolve("com")
-                    .resolve("varlanv")
-                    .resolve("testkonvence")
-                    .resolve("Constants.java"),
-                rootProjectPath.resolve("gradle.properties"),
-                rootProjectPath.resolve("gradle").resolve("libs.versions.toml"),
-                rootProjectPath.resolve("demo").resolve("build.gradle.kts")
-            )
-        )
-    }
-}
-
-listOf("Patch", "Minor", "Major").forEach {
-    tasks.register("increment${it}VersionCI", IncrementVersion::class) {
-        group = "version"
-        val rootProjectPath = project.layout.projectDirectory.asFile
-        getVersionSemantic().set(it)
-        getCurrentVersion().set(properties["version"].toString())
-        getVersionFiles().setFrom(
-            listOf(
-                rootProjectPath
-                    .resolve("lib")
-                    .resolve("constants")
-                    .resolve("src")
-                    .resolve("main")
-                    .resolve("java")
-                    .resolve("com")
-                    .resolve("varlanv")
-                    .resolve("testkonvence")
-                    .resolve("Constants.java"),
-                rootProjectPath.resolve("gradle.properties"),
-            )
-        )
     }
 }
